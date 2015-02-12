@@ -1,34 +1,54 @@
-exclude-folders
+Brackets File Tree Exclude
 ===============
 
-Brackets extension for excluding folders from the file tree, find in files, and quick open.
+Brackets extension for excluding folders and files from the file tree, find in files, and quick open. This means that the files will be completely invisible to Brackets (and thnakfully not count against the 30,000 file limit). 
 
-To install:
+This is great for cache folders, distribution/build folders and files, and those package manager folders like node_modules and bower_components.
+
+Install
+---------------
 
 1. Launch Brackets
 2. Select _File > Extension Manager..._ or click the Lego icon in the toolbar
-3. Click the "Install from URL..." button
-4. Paste (or enter) `https://github.com/gruehle/exclude-folders` and click "Install"
+3. Search for `Exclude Folders - Updated`
 
-By default, this extension excludes all `node_modules` folders. If you want to exclude additional folders, edit the regular expression on line 41 of `main.js`. For example, if you want to exclude all items that contain the words `node_modules`, `bin`, and `componenets`, use:
+If a manual install is more your thing (or it's missing from the registry):
 
-```js
-    return !name.match(/node_modules|bin|components/);
+1. Click the "Install from URL..." button
+2. Paste (or enter) `https://github.com/JonathanWolfe/exclude-folders.git` and click "Install"
+
+Configure
+---------------
+
+Exclusions are defined globally by default inside the Brackets preferences file (_Debug > Open preferences file_).
+
+Append or edit your configuration options there. (See below for example of defaults)
+
+Or on a per project basis:
+
+Create a `.brackets.json` in project root (it may already exist) and add your settings there.
+
+**Note:**
+
+**Project config completely redefine exclusion rules from global config.**
+
+Configuration defaults
+
+```JSON
+{
+	"jwolfe.exclude-folders.list": [
+		"node_modules",
+        "bower_components",
+        ".git",
+        "dist",
+        "vendor"
+    ]
+}
 ```
 
-Note that this will match these words *anywhere* in the folder *or* file name. For example, if you have a folder named "my-components", it will also be excluded. You can use the `^` and `$` anchors to ensure that the name must be a complete match:
+How it Matches
+---------------
 
+Eventually matching will be done via Minimatch, but for this initial version matching is done via the basic `string.match` javascript method.
 
-```js
-    return !name.match(/^(node_modules|bin|components)$/);
-```
-
-Matching is case sensitive by default. Add `i` to the end to make it case-insensitive:
-
-
-```js
-    return !name.match(/^(node_modules|bin|components)$/i);
-```
-
-
-
+If a search is too generic (e.g. `vendor` is matching your `to_vendor` folder you actually want to see) then add specificity by adding backslashes to the item (e.g. `/vendor/`).

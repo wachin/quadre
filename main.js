@@ -25,23 +25,46 @@
 define(function (require, exports, module) {
 	"use strict";
 
+	var module_id = 'jwolfe.file-tree-exclude',
+		defaults = [
+			'node_modules',
+			'bower_components',
+			'.git',
+			'dist',
+			'vendor'
+		];
+
 	var FileSystem = brackets.getModule("filesystem/FileSystem"),
-		_oldFilter = FileSystem._FileSystem.prototype._indexFilter,
-		regex = "node_modules|bower_components|/.git/|^dist$|^vendor$";
+		PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
+		preferences = PreferencesManager.getExtensionPrefs(module_id);
+
+	if (!preferences.get('list')) {
+		preferences.definePreference('list', 'array', defaults);
+		preferences.set('list', preferences.get('list'));
+	}
+
+	var list = preferences.get('list');
+	var regex = list.join('|');
+	
+	var _oldFilter = FileSystem._FileSystem.prototype._indexFilter;
+
+	// TODO: Get Brackets to import that properly
+	// var minimatch = require("node_modules/minimatch/minimatch");
 
 	FileSystem._FileSystem.prototype._indexFilter = function (path, name) {
 
 		var path_matched = path.match(regex), // A banned result was in the path
 			name_matched = name.match(regex), // A banned result was the name
 			orig_result = _oldFilter.apply(this, arguments), // A default brackets banned result
-			verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
-					// Did Brackets ban it? No? Then did we ban it? No? Then show it.
 
-		console.group();
-		console.log(path, !path_matched);
-		console.log(name, !name_matched);
-		console.log('verdict', verdict ? 'show' : 'hide');
-		console.groupEnd();
+			//Did Brackets ban it? No? Then did we ban it? No? Then show it.
+			verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
+
+			//console.group();
+			//console.log(path, !path_matched);
+			//console.log(name, !name_matched);
+			//console.log('verdict', verdict, verdict ? 'show' : 'hide');
+			//console.groupEnd();
 
 		return verdict;
 	};

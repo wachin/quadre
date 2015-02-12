@@ -1,11 +1,32 @@
 {
-	"name": "jonwolfe.exclude-folders",
-	"title": "Exclude Folders - Updated",
-	"description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is an updated version of Glenn Ruehle's now defunkt plugin.",
-	"version": "0.1.2",
-	"author": "Jon Wolfe <jonathanwolfe5@gmail.com> (https://git.corp.adobe.com/gruehle)",
-	"license": "MIT",
-	"engines": {
-		"brackets": ">=0.34.0"
-	}
+  "name": "jonwolfe.file-tree-exclude",
+  "title": "File Tree Exclude",
+  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is an updated version of Glenn Ruehle's now defunkt plugin.",
+  "version": "0.4.0",
+  "author": "Jon Wolfe <jonathanwolfe5@gmail.com> (https://github.com/JonathanWolfe/)",
+  "license": "MIT",
+  "engines": {
+    "brackets": ">=0.34.0"
+  },
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JonathanWolfe/exclude-folders.git"
+  },
+  "keywords": [
+    "exclude",
+    "folders",
+    "brackets",
+    "hide"
+  ],
+  "bugs": {
+    "url": "https://github.com/JonathanWolfe/exclude-folders/issues"
+  },
+  "homepage": "https://github.com/JonathanWolfe/exclude-folders"
 }
