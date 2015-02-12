@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/JonathanWolfe/exclude-folders.git"
+    "url": "https://github.com/JonathanWolfe/file-tree-exclude.git"
   },
   "keywords": [
     "exclude",
@@ -26,7 +26,7 @@
     "hide"
   ],
   "bugs": {
-    "url": "https://github.com/JonathanWolfe/exclude-folders/issues"
+    "url": "https://github.com/JonathanWolfe/file-tree-exclude/issues"
   },
-  "homepage": "https://github.com/JonathanWolfe/exclude-folders"
+  "homepage": "https://github.com/JonathanWolfe/file-tree-exclude"
 }
