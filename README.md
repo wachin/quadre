@@ -5,6 +5,8 @@ Brackets extension for excluding folders and files from the file tree, find in f
 
 This is great for cache folders, distribution/build folders and files, and those package manager folders like node_modules and bower_components.
 
+This is an updated version of Glenn Ruehle's now defunkt plugin - [exclude-folders](https://github.com/gruehle/exclude-folders).
+
 Install
 ---------------
 
