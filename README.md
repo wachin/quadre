@@ -36,7 +36,7 @@ Configuration defaults
 
 ```JSON
 {
-	"jwolfe.exclude-folders.list": [
+	"jwolfe.file-tree-exclude.list": [
 		"node_modules",
         "bower_components",
         ".git",
