@@ -25,29 +25,24 @@
 define(function (require, exports, module) {
 	"use strict";
 
-	var FileSystem = brackets.getModule("filesystem/FileSystem");
-
-	var _oldFilter = FileSystem._FileSystem.prototype._indexFilter;
-
-	var regex = "node_modules|bower_components|/.git/|^vendor$";
+	var FileSystem = brackets.getModule("filesystem/FileSystem"),
+		_oldFilter = FileSystem._FileSystem.prototype._indexFilter,
+		regex = "node_modules|bower_components|/.git/|^dist$|^vendor$";
 
 	FileSystem._FileSystem.prototype._indexFilter = function (path, name) {
-		// Call old filter
-		var result = _oldFilter.apply(this, arguments);
 
-		if (!result) {
-			return false;
-		}
+		var path_matched = path.match(regex), // A banned result was in the path
+			name_matched = name.match(regex), // A banned result was the name
+			orig_result = _oldFilter.apply(this, arguments), // A default brackets banned result
+			verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
+					// Did Brackets ban it? No? Then did we ban it? No? Then show it.
 
-		var path_matched = path.match(regex);
-		var name_matched = name.match(regex);
+		console.group();
+		console.log(path, !path_matched);
+		console.log(name, !name_matched);
+		console.log('verdict', verdict ? 'show' : 'hide');
+		console.groupEnd();
 
-//		console.group();
-//		console.log(path, !path_matched);
-//		console.log(name, !name_matched);
-//		console.log('verdict', (!path_matched && !name_matched) ? 'show' : 'hide');
-//		console.groupEnd();
-
-		return !path_matched && !name_matched;
+		return verdict;
 	};
 });
