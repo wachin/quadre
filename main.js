@@ -54,7 +54,7 @@ define(function (require, exports, module) {
 	FileSystem._FileSystem.prototype._indexFilter = function (path, name) {
 
 		var path_matched = path.match(regex), // A banned result was in the path
-			name_matched = name.match(regex), // A banned result was the name
+			name_matched = list.indexOf(name) !== -1, // A banned result was the name
 			orig_result = _oldFilter.apply(this, arguments), // A default brackets banned result
 
 			//Did Brackets ban it? No? Then did we ban it? No? Then show it.
