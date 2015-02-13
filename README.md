@@ -38,7 +38,7 @@ Note:
 Configuration defaults
 ---------------
 
-```
+```JSON
 {
 	"jwolfe.file-tree-exclude.list": [
 		"node_modules",
