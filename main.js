@@ -34,7 +34,7 @@ define(function (require, exports, module) {
 			'vendor'
 		];
 
-	var FileSystem = brackets.getModule("filesystem/FileSystem"),
+	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem,
 		PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
 		preferences = PreferencesManager.getExtensionPrefs(module_id);
 
@@ -45,26 +45,28 @@ define(function (require, exports, module) {
 
 	var list = preferences.get('list');
 	var regex = list.join('|');
-	
-	var _oldFilter = FileSystem._FileSystem.prototype._indexFilter;
+
+	var _oldFilter = FileSystem.prototype._indexFilter;
 
 	// TODO: Get Brackets to import that properly
 	// var minimatch = require("node_modules/minimatch/minimatch");
 
-	FileSystem._FileSystem.prototype._indexFilter = function (path, name) {
+	FileSystem.prototype._indexFilter = function (path, name) {
+		
+		path = path.substr(0, path.length - name.length);
 
 		var path_matched = path.match(regex), // A banned result was in the path
 			name_matched = list.indexOf(name) !== -1, // A banned result was the name
-			orig_result = _oldFilter.apply(this, arguments), // A default brackets banned result
+			orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
 
-			//Did Brackets ban it? No? Then did we ban it? No? Then show it.
-			verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
+		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
+		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
-			//console.group();
-			//console.log(path, !path_matched);
-			//console.log(name, !name_matched);
-			//console.log('verdict', verdict, verdict ? 'show' : 'hide');
-			//console.groupEnd();
+		//console.group();
+		//console.log(path, !path_matched);
+		//console.log(name, !name_matched);
+		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
+		//console.groupEnd();
 
 		return verdict;
 	};
