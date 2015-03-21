@@ -44,7 +44,13 @@ define(function (require, exports, module) {
 	}
 
 	var list = preferences.get('list');
+	list.forEach(function (item, index) {
+		list[index] = item.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+	});
+	//console.log('list', list);
+
 	var regex = list.join('|');
+	//console.log('regex', regex);
 
 	var _oldFilter = FileSystem.prototype._indexFilter;
 
@@ -52,7 +58,7 @@ define(function (require, exports, module) {
 	// var minimatch = require("node_modules/minimatch/minimatch");
 
 	FileSystem.prototype._indexFilter = function (path, name) {
-		
+
 		path = path.substr(0, path.length - name.length);
 
 		var path_matched = path.match(regex), // A banned result was in the path
