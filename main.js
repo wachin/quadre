@@ -44,6 +44,10 @@ define(function (require, exports, module) {
 	}
 
 	var list = preferences.get('list');
+	if (list.length === 0) {
+		//console.warn('No paths in global list.');
+		return;
+	}
 	list.forEach(function (item, index) {
 		list[index] = item.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
 	});
