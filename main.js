@@ -81,7 +81,6 @@ define(function (require, exports, module) {
 	}
 
 	AppInit.appReady(function () {
-		console.log('test');
 		FileSystem.prototype._indexFilter = newFilter;
 		ProjectMangager.refreshFileTree();
 	});
