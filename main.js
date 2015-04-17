@@ -55,7 +55,7 @@ define(function (require, exports, module) {
 		}
 
 		list.forEach(function (item, index) {
-			list[index] = item.replace(/[\-\[\]{}()*+?,\\\^$|#\s]/g, "");
+			list[index] = item.replace(/[\[\]{}()*+?,\\\^$|#\s]/g, "");
 		});
 
 		var regex = list.join('|');
