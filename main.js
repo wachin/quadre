@@ -69,13 +69,13 @@ define(function (require, exports, module) {
 		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
 		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
-		console.group();
-		console.log('regex', regex);
-		console.log('list', list);
-		console.log(path, !path_matched);
-		console.log(name, !name_matched);
-		console.log('verdict', verdict, verdict ? 'show' : 'hide');
-		console.groupEnd();
+		//console.group();
+		//console.log('regex', regex);
+		//console.log('list', list);
+		//console.log(path, !path_matched);
+		//console.log(name, !name_matched);
+		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
+		//console.groupEnd();
 
 		return verdict;
 	}
