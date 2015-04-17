@@ -25,8 +25,14 @@
 define(function (require, exports, module) {
 	"use strict";
 
-	var module_id = 'jwolfe.file-tree-exclude',
-		defaults = [
+	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem;
+	var ProjectMangager = brackets.getModule("project/ProjectManager");
+	var AppInit = brackets.getModule("utils/AppInit");
+	var _oldFilter = FileSystem.prototype._indexFilter;
+
+	function newFilter(path, name) {
+		var module_id = 'jwolfe.file-tree-exclude',
+			defaults = [
 			'node_modules',
 			'bower_components',
 			'.git',
@@ -34,30 +40,25 @@ define(function (require, exports, module) {
 			'vendor'
 		];
 
-	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem,
-		PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-		preferences = PreferencesManager.getExtensionPrefs(module_id);
+		var PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
+			preferences = PreferencesManager.getExtensionPrefs(module_id);
 
-	if (!preferences.get('list')) {
-		preferences.definePreference('list', 'array', defaults);
-		preferences.set('list', preferences.get('list'));
-	}
+		if (!preferences.get('list')) {
+			preferences.definePreference('list', 'array', defaults);
+			preferences.set('list', preferences.get('list'));
+		}
 
-	var list = preferences.get('list');
-	list.forEach(function (item, index) {
-		list[index] = item.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
-	});
-	//console.log('list', list);
+		var list = preferences.get('list', preferences.CURRENT_PROJECT);
 
-	var regex = list.join('|');
-	//console.log('regex', regex);
+		if (!list.length) {
+			return;
+		}
 
-	var _oldFilter = FileSystem.prototype._indexFilter;
+		list.forEach(function (item, index) {
+			list[index] = item.replace(/[\-\[\]{}()*+?,\\\^$|#\s]/g, "");
+		});
 
-	// TODO: Get Brackets to import that properly
-	// var minimatch = require("node_modules/minimatch/minimatch");
-
-	FileSystem.prototype._indexFilter = function (path, name) {
+		var regex = list.join('|');
 
 		path = path.substr(0, path.length - name.length);
 
@@ -68,12 +69,20 @@ define(function (require, exports, module) {
 		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
 		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
-		//console.group();
-		//console.log(path, !path_matched);
-		//console.log(name, !name_matched);
-		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
-		//console.groupEnd();
+		console.group();
+		console.log('regex', regex);
+		console.log('list', list);
+		console.log(path, !path_matched);
+		console.log(name, !name_matched);
+		console.log('verdict', verdict, verdict ? 'show' : 'hide');
+		console.groupEnd();
 
 		return verdict;
-	};
+	}
+
+	AppInit.appReady(function () {
+		console.log('test');
+		FileSystem.prototype._indexFilter = newFilter;
+		ProjectMangager.refreshFileTree();
+	});
 });
