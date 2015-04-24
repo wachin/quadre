@@ -33,13 +33,14 @@ define(function (require, exports, module) {
 	function newFilter(path, name) {
 		var module_id = 'jwolfe.file-tree-exclude',
 			defaults = [
-			'node_modules',
-			'bower_components',
-			'.git',
-			'dist',
-			'vendor'
-		];
-
+                'node_modules',
+                'bower_components',
+                '.git',
+                'dist',
+                'vendor'
+            ],
+            projectPath = ProjectMangager.getProjectRoot()._path;
+    
 		var PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
 			preferences = PreferencesManager.getExtensionPrefs(module_id);
 
@@ -58,9 +59,9 @@ define(function (require, exports, module) {
 			list[index] = item.replace(/[\[\]{}()*+?,\\\^$|#\s]/g, "");
 		});
 
-		var regex = list.join('|');
+		var regex = new RegExp( list.join('|') );
 
-		path = path.substr(0, path.length - name.length);
+		path = path.substr(0, path.length - name.length).replace(projectPath, '');
 
 		var path_matched = path.match(regex), // A banned result was in the path
 			name_matched = list.indexOf(name) !== -1, // A banned result was the name
@@ -69,13 +70,14 @@ define(function (require, exports, module) {
 		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
 		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
-		//console.group();
-		//console.log('regex', regex);
-		//console.log('list', list);
-		//console.log(path, !path_matched);
-		//console.log(name, !name_matched);
-		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
-		//console.groupEnd();
+        //console.group();
+        //console.log('regex', regex);
+        //console.log('list', list);
+        //console.log('projectPath', projectPath);
+        //console.log(path, !path_matched);
+        //console.log(name, !name_matched);
+        //console.log('verdict', verdict, verdict ? 'show' : 'hide');
+        //console.groupEnd();
 
 		return verdict;
 	}
