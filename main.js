@@ -52,7 +52,7 @@ define(function (require, exports, module) {
 		var list = preferences.get('list', preferences.CURRENT_PROJECT);
 
 		if (!list.length) {
-			return;
+			return true;
 		}
 
 		list.forEach(function (item, index) {
