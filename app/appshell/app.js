@@ -381,6 +381,7 @@ app.setMenuTitle = function (commandId, title, callback) {
 
 app.setZoomLevel = function (zoomLevel, callback) {
     // TODO: implement
+    // BTW: who needs this function?
     callback(new Error("app.setZoomLevel not implemented" + zoomLevel));
 };
 

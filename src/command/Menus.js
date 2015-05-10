@@ -48,6 +48,7 @@ define(function (require, exports, module) {
      * @enum {string}
      */
     var AppMenuBar = {
+        APP_MENU        : "app-menu",
         FILE_MENU       : "file-menu",
         EDIT_MENU       : "edit-menu",
         FIND_MENU       : "find-menu",

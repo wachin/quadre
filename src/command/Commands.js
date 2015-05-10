@@ -29,11 +29,16 @@ define(function (require, exports, module) {
     "use strict";
     
     var DeprecationWarning = require("utils/DeprecationWarning");
-    
+
     /**
      * List of constants for global command IDs.
      */
-    
+
+    // APPMENU
+    exports.APPMENU_HIDE                = "appmenu.hide";
+    exports.APPMENU_HIDE_OTHERS         = "appmenu.hideOthers";
+    exports.APPMENU_SHOW_ALL            = "appmenu.showAll";
+
     // FILE
     exports.FILE_NEW_UNTITLED           = "file.newDoc";                // DocumentCommandHandlers.js   handleFileNew()
     exports.FILE_NEW                    = "file.newFile";               // DocumentCommandHandlers.js   handleFileNewInProject()

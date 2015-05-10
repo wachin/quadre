@@ -37,10 +37,26 @@ define(function (require, exports, module) {
         Strings         = require("strings");
     
     AppInit.htmlReady(function () {
+        var menu;
+
+        // prepare the OSX app menu
+        // App title needs to be changed in Info.plist
+        if (brackets.platform === "mac") {
+            menu = Menus.addMenu(Strings.APP_NAME, Menus.AppMenuBar.APP_MENU);
+            menu.addMenuItem(Commands.HELP_ABOUT);
+            menu.addMenuDivider();
+//            menu.addMenuItem(Commands.Services);
+            menu.addMenuDivider();
+//            menu.addMenuItem(Commands.APPMENU_HIDE);
+//            menu.addMenuItem(Commands.APPMENU_HIDE_OTHERS);
+//            menu.addMenuItem(Commands.APPMENU_SHOW_ALL);
+//            menu.addMenuDivider();
+            menu.addMenuItem(Commands.FILE_QUIT);
+        }
+
         /*
          * File menu
          */
-        var menu;
         menu = Menus.addMenu(Strings.FILE_MENU, Menus.AppMenuBar.FILE_MENU);
         menu.addMenuItem(Commands.FILE_NEW_UNTITLED);
         menu.addMenuItem(Commands.FILE_OPEN);
