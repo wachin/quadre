@@ -4,12 +4,12 @@
 
 var _ = require("lodash");
 var assert = require("assert");
+var shell = require("shell");
 var utils = require("../utils");
 
 var remote = require("remote");
 var electronApp = remote.require("app");
 var Menu = remote.require("menu");
-var shell = remote.require("shell");
 var shellState = remote.require("./shell-state");
 
 var menuTemplate = [];
@@ -307,8 +307,13 @@ app.openLiveBrowser = function (url, enableRemoteDebugging, callback) {
 };
 
 app.openURLInDefaultBrowser = function (url, callback) {
-    shell.openExternal(url);
-    callback(app.NO_ERROR);
+    assert(url && typeof url === "string", "url must be a string");
+    process.nextTick(function () {
+        shell.openExternal(url);
+        if (callback) {
+            callback(app.NO_ERROR);
+        }
+    });
 };
 
 app.quit = function () {
