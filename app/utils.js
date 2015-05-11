@@ -19,7 +19,16 @@ function convertWindowsPathToUnixPath(path) {
     return path;
 }
 
+function convertBracketsPathToWindowsPath(path) {
+    if (process.platform === "win32") {
+        path = path.replace(/\//g, "\\");
+    }
+
+    return path;
+}
+
 module.exports = {
     errToString: errToString,
-    convertWindowsPathToUnixPath: convertWindowsPathToUnixPath
+    convertWindowsPathToUnixPath: convertWindowsPathToUnixPath,
+    convertBracketsPathToWindowsPath: convertBracketsPathToWindowsPath
 };

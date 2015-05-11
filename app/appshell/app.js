@@ -389,10 +389,10 @@ app.showDeveloperTools = function () {
 
 app.showExtensionsFolder = function (appURL, callback) {
     // TODO: it seems that both arguments aren't needed anymore
-    shell.showItemInFolder(app.getApplicationSupportDirectory() + "/extensions");
+    shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(app.getApplicationSupportDirectory() + "/extensions"));
 };
 
 app.showOSFolder = function (path, callback) {
     // TODO: get rid of callback? This call is not throwing any error.
-    shell.showItemInFolder(path);
+    shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
 };
