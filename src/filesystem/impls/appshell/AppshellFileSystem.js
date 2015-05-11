@@ -178,6 +178,7 @@ define(function (require, exports, module) {
             case "EEXIST":
                 return FileSystemError.ALREADY_EXISTS;
             case "ENOENT":
+            case "ENOTDIR":
                 return FileSystemError.NOT_FOUND;
             case "ENOSPC":
                 return FileSystemError.OUT_OF_SPACE;

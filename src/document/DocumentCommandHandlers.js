@@ -1622,7 +1622,7 @@ define(function (require, exports, module) {
                     href = href.substr(0, fragment);
                 }
 
-                window.location.href = href;
+                remote.require("./index").restart(href);
             });
         }).fail(function () {
             _isReloading = false;

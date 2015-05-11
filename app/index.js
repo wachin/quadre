@@ -22,10 +22,10 @@ var APP_NAME = "Brackets-Electron";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
-var win = null;
+var wins = [];
 
 // fetch window position values from the window and save them to config file
-function _saveWindowPosition(sync) {
+function _saveWindowPosition(sync, win) {
     var size = win.getSize();
     var pos = win.getPosition();
     shellConfig.set("window.posX", pos[0]);
@@ -40,7 +40,7 @@ function _saveWindowPosition(sync) {
     }
 }
 var saveWindowPositionSync = _.partial(_saveWindowPosition, true);
-var saveWindowPosition = _.debounce(_saveWindowPosition, 100);
+var saveWindowPosition = _.debounce(_.partial(_saveWindowPosition, false), 100);
 
 // Quit when all windows are closed.
 app.on("window-all-closed", function () {
@@ -59,9 +59,31 @@ SocketServer.start(function (err, port) {
     }
 });
 
-// This method will be called when Electron has done everything
-// initialization and ready for creating browser windows.
-app.on("ready", function () {
+function openBracketsWindow(queryObj) {
+    queryObj = queryObj || {};
+
+    // compose path to brackets' index file
+    var indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html");
+
+    // build a query for brackets' window
+    var queryString = "";
+    if (_.isObject(queryObj) && !_.isEmpty(queryObj)) {
+        queryString = "?" + _.map(queryObj, function (value, key) {
+            return key + "=" + encodeURIComponent(value);
+        }).join("&");
+    } else if (_.isString(queryObj)) {
+        var io1 = queryObj.indexOf("?");
+        var io2 = queryObj.indexOf("#");
+        if (io1 !== -1) {
+            queryString = queryObj.substring(io1);
+        } else if (io2 !== -1) {
+            queryString = queryObj.substring(io2);
+        } else {
+            queryString = "";
+        }
+    }
+
+    var indexUrl = indexPath + queryString;
 
     var winOptions = {
         preload: require.resolve("./preload"),
@@ -74,37 +96,22 @@ app.on("ready", function () {
     };
 
     // create the browser window
-    win = new BrowserWindow(winOptions);
-
-    // build a query for brackets' window
-    var queryParams = {};
-    var query = "";
-    if (Object.keys(queryParams).length > 0) { // check if queryParams is empty
-        query = "?" + _.map(queryParams, function (value, key) {
-            return key + "=" + encodeURIComponent(value);
-        }).join("&");
-    }
-
-    // compose path to brackets' index file
-    var indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html") + query;
+    var win = new BrowserWindow(winOptions);
+    wins.push(win);
 
     // load the index.html of the app
-    win.loadUrl(indexPath);
+    win.loadUrl(indexUrl);
     if (shellConfig.get("window.maximized")) {
         win.maximize();
     }
-    
-    // emitted before the window is closed
-    win.on("close", function () {
-        saveWindowPositionSync();
-    });
 
     // emitted when the window is closed
     win.on("closed", function () {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
-        win = null;
+        var io = wins.indexOf(win);
+        if (io !== -1) { wins.splice(io, 1); }
     });
 
     /* TODO: doesn't work for some reason
@@ -115,14 +122,29 @@ app.on("ready", function () {
     */
 
     // this is used to remember the size from the last time
+    // emitted before the window is closed
+    win.on("close", function () {
+        saveWindowPositionSync(win);
+    });
     win.on("maximize", function () {
-        saveWindowPosition();
+        saveWindowPosition(win);
     });
     win.on("unmaximize", function () {
-        saveWindowPosition();
+        saveWindowPosition(win);
     });
     ipc.on("resize", function () {
-        saveWindowPosition();
+        saveWindowPosition(win);
     });
+}
 
+// This method will be called when Electron has done everything
+// initialization and ready for creating browser windows.
+app.on("ready", function () {
+    openBracketsWindow();
 });
+
+exports.restart = function (query) {
+    var oldWin = wins.shift();
+    oldWin.close();
+    openBracketsWindow(query);
+};
