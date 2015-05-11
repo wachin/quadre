@@ -5,6 +5,7 @@
 "use strict";
 
 var _ = require("lodash");
+var appInfo = require("../package.json");
 var path = require("path");
 var app = require("app"); // Electron module to control application life
 var BrowserWindow = require("browser-window"); // Electron to create native browser window
@@ -17,8 +18,6 @@ var shellState = require("./shell-state");
 // Report crashes to electron server
 // TODO: doesn't work
 // require("crash-reporter").start();
-
-var APP_NAME = "Brackets-Electron";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
@@ -87,7 +86,7 @@ function openBracketsWindow(queryObj) {
 
     var winOptions = {
         preload: require.resolve("./preload"),
-        title: APP_NAME,
+        title: appInfo.productName,
         icon: path.resolve(__dirname, "res", "appicon.png"),
         x: shellConfig.get("window.posX"),
         y: shellConfig.get("window.posY"),
@@ -113,13 +112,6 @@ function openBracketsWindow(queryObj) {
         var io = wins.indexOf(win);
         if (io !== -1) { wins.splice(io, 1); }
     });
-
-    /* TODO: doesn't work for some reason
-    win.on("page-title-updated", function (event) {
-        win.setTitle(win.getTitle().replace(/Brackets/, APP_NAME));
-        event.preventDefault();
-    });
-    */
 
     // this is used to remember the size from the last time
     // emitted before the window is closed

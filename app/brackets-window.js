@@ -1,5 +1,3 @@
-#!/usr/bin/env electron
-
 /*jshint globalstrict:true, node:true*/
 
 "use strict";
