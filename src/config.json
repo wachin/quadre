@@ -1,7 +1,7 @@
 {
     "config": {
-        "app_title": "Brackets",
-        "app_name_about": "Brackets",
+        "app_title": "Bracketron",
+        "app_name_about": "Bracketron",
         "about_icon": "styles/images/brackets_icon.svg",
         "update_info_url": "http://s3.amazonaws.com/files.brackets.io/updates/stable/",
         "how_to_use_url": "https://github.com/adobe/brackets/wiki/How-to-Use-Brackets",
@@ -22,8 +22,8 @@
         "build_timestamp": "",
         "healthDataServerURL": "https://health.brackets.io/healthDataLog"
     },
-    "name": "Brackets",
-    "productName": "Brackets-Electron-dev",
+    "name": "Bracketron",
+    "productName": "Bracketron",
     "version": "1.4.0-0",
     "apiVersion": "1.4.0",
     "homepage": "http://brackets.io",

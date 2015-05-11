@@ -221,7 +221,6 @@ app.dragWindow = function () {
 };
 
 app.getApplicationSupportDirectory = function () {
-    // TODO: once stable, change "productName" to Brackets in package.json
     return utils.convertWindowsPathToUnixPath(electronApp.getPath("userData"));
 };
 
