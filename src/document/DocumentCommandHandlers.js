@@ -1408,24 +1408,22 @@ define(function (require, exports, module) {
      * It's emitted before the beforeunload and unload event of DOM
      * For some Electron reason, we also need the onbeforeunload handler
      */
-    window.onbeforeunload = function () {
-        if (window.isSpecRunner) { return true; }
-        return _windowGoingAway;
-    };
-    browserWindow.on("close", function (event) {
-        if (window.isSpecRunner) { return true; }
-
-        if (!_windowGoingAway) {
-            // stop the event for now
-            event.preventDefault();
-            // call _handleWindowGoingAway and then actually close the window
-            _handleWindowGoingAway(event, function () {
-                browserWindow.close();
-            });
-        }
-
-        return _windowGoingAway;
-    });
+    if (!window.isSpecRunner) {
+        window.onbeforeunload = function () {
+            return _windowGoingAway;
+        };
+        browserWindow.on("close", function (event) {
+            if (!_windowGoingAway) {
+                // stop the event for now
+                event.preventDefault();
+                // call _handleWindowGoingAway and then actually close the window
+                _handleWindowGoingAway(event, function () {
+                    browserWindow.close();
+                });
+            }
+            return _windowGoingAway;
+        });
+    }
 
     /**
      * Confirms any unsaved changes, then closes the window
