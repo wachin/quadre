@@ -89,6 +89,7 @@ function _findMenuItemById(id, where) {
 }
 
 function _addToPosition(obj, target, position, relativeId) {
+    var retVal = app.NO_ERROR;
     if (position === "first") {
         target.unshift(obj);
     } else if (position === "last") {
@@ -100,6 +101,7 @@ function _addToPosition(obj, target, position, relativeId) {
             // NOTE: original behaviour - if relativeId wasn't found
             // menu should be put to the end of the list
             console.warn("menu item with id: " + relativeId + " was not found, adding entry to the end of the list");
+            retVal = app.ERR_NOT_FOUND;
             idx = target.length;
         }
         if (position === "firstInSection") {
@@ -121,6 +123,7 @@ function _addToPosition(obj, target, position, relativeId) {
     } else {
         throw new Error("position not implemented in _addToPosition: " + position);
     }
+    return retVal;
 }
 
 function _fixBracketsKeyboardShortcut(shortcut) {
@@ -164,8 +167,8 @@ app.addMenu = function (title, id, position, relativeId, callback) {
     if (!position) {
         position = "last";
     }
-    _addToPosition(newObj, menuTemplate, position, relativeId);
-    _refreshMenu(callback.bind(null, app.NO_ERROR));
+    var err = _addToPosition(newObj, menuTemplate, position, relativeId);
+    _refreshMenu(callback.bind(null, err));
 };
 
 app.addMenuItem = function (parentId, title, id, key, displayStr, position, relativeId, callback) {
@@ -208,8 +211,8 @@ app.addMenuItem = function (parentId, title, id, key, displayStr, position, rela
     if (!position) {
         position = "last";
     }
-    _addToPosition(newObj, parentObj.submenu, position, relativeId);
-    _refreshMenu(callback.bind(null, app.NO_ERROR));
+    var err = _addToPosition(newObj, parentObj.submenu, position, relativeId);
+    _refreshMenu(callback.bind(null, err));
 };
 
 app.closeLiveBrowser = function (callback) {
