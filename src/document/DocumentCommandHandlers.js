@@ -63,6 +63,12 @@ define(function (require, exports, module) {
      */
 
     /**
+     * Instance of the App and BrowserWindow object provided by Electron
+     */
+    var remote = window.electron.node.require("remote");
+    var browserWindow = remote.getCurrentWindow();
+
+    /**
      * Container for label shown above editor; must be an inline element
      * @type {jQueryObject}
      */
@@ -1398,20 +1404,33 @@ define(function (require, exports, module) {
     }
 
     /**
+     * Emitted when the window is going to be closed.
+     * It's emitted before the beforeunload and unload event of DOM
+     * For some Electron reason, we also need the onbeforeunload handler
+     */
+    window.onbeforeunload = function () {
+        return _windowGoingAway;
+    };
+    browserWindow.on("close", function (event) {
+        if (!_windowGoingAway) {
+            // stop the event for now
+            event.preventDefault();
+            // call _handleWindowGoingAway and then actually close the window
+            _handleWindowGoingAway(event, function () {
+                browserWindow.close();
+            });
+        }
+        return _windowGoingAway;
+    });
+
+    /**
      * Confirms any unsaved changes, then closes the window
      * @param {Object} command data
      */
     function handleFileCloseWindow(commandData) {
-        return _handleWindowGoingAway(
-            commandData,
-            function () {
-                window.close();
-            },
-            function () {
-                // if fail, tell the app to abort any pending quit operation.
-                brackets.app.abortQuit();
-            }
-        );
+        return _handleWindowGoingAway(commandData, function () {
+            window.close();
+        });
     }
 
     /** Show a textfield to rename whatever is currently selected in the sidebar (or current doc if nothing else selected) */
@@ -1429,16 +1448,9 @@ define(function (require, exports, module) {
 
     /** Closes the window, then quits the app */
     function handleFileQuit(commandData) {
-        return _handleWindowGoingAway(
-            commandData,
-            function () {
-                brackets.app.quit();
-            },
-            function () {
-                // if fail, don't exit: user canceled (or asked us to save changes first, but we failed to do so)
-                brackets.app.abortQuit();
-            }
-        );
+        return _handleWindowGoingAway(commandData, function () {
+            brackets.app.quit();
+        });
     }
 
 

@@ -147,11 +147,6 @@ function _fixBracketsKeyboardShortcut(shortcut) {
     return shortcut;
 }
 
-app.abortQuit = function () {
-    // TODO: implement
-    throw new Error("app.abortQuit not implemented");
-};
-
 app.addMenu = function (title, id, position, relativeId, callback) {
     assert(title && typeof title === "string", "title must be a string");
     assert(id && typeof id === "string", "id must be a string");
