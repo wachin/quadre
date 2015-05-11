@@ -153,17 +153,14 @@ app.addMenu = function (title, id, position, relativeId, callback) {
     assert(!position || position && typeof position === "string", "position must be a string");
     assert(!relativeId || relativeId && typeof relativeId === "string", "relativeId must be a string");
     assert(typeof callback === "function", "callback must be a function");
-
-    var newObj = {
-        id: id,
-        label: title
-    };
-
-    if (!position) {
-        position = "last";
-    }
-    var err = _addToPosition(newObj, menuTemplate, position, relativeId);
-    _refreshMenu(callback.bind(null, err));
+    process.nextTick(function () {
+        var newObj = {
+            id: id,
+            label: title
+        };
+        var err = _addToPosition(newObj, menuTemplate, position || "last", relativeId);
+        _refreshMenu(callback.bind(null, err));
+    });
 };
 
 app.addMenuItem = function (parentId, title, id, key, displayStr, position, relativeId, callback) {
@@ -175,44 +172,44 @@ app.addMenuItem = function (parentId, title, id, key, displayStr, position, rela
     assert(!position || position && typeof position === "string", "position must be a string");
     assert(!relativeId || relativeId && typeof relativeId === "string", "relativeId must be a string");
     assert(typeof callback === "function", "callback must be a function");
+    process.nextTick(function () {
+        key = _fixBracketsKeyboardShortcut(key);
 
-    key = _fixBracketsKeyboardShortcut(key);
+        var isSeparator = title === "---",
+            newObj = {
+            type: isSeparator ? "separator" : "normal",
+            id: id,
+            label: title,
+            click: function () {
+                window.brackets.shellAPI.executeCommand(id, true);
+            }
+        };
 
-    var isSeparator = title === "---",
-        newObj = {
-        type: isSeparator ? "separator" : "normal",
-        id: id,
-        label: title,
-        click: function () {
-            window.brackets.shellAPI.executeCommand(id, true);
+        if (key) {
+            newObj.accelerator = key;
         }
-    };
 
-    if (key) {
-        newObj.accelerator = key;
-    }
+        var parentObj = _findMenuItemById(parentId);
+        if (!parentObj) {
+            return process.nextTick(function () {
+                callback(app.ERR_NOT_FOUND);
+            });
+        }
 
-    var parentObj = _findMenuItemById(parentId);
-    if (!parentObj) {
-        return process.nextTick(function () {
-            callback(app.ERR_NOT_FOUND);
-        });
-    }
+        if (!parentObj.submenu) {
+            parentObj.submenu = [];
+        }
 
-    if (!parentObj.submenu) {
-        parentObj.submenu = [];
-    }
-
-    if (!position) {
-        position = "last";
-    }
-    var err = _addToPosition(newObj, parentObj.submenu, position, relativeId);
-    _refreshMenu(callback.bind(null, err));
+        var err = _addToPosition(newObj, parentObj.submenu, position || "last", relativeId);
+        _refreshMenu(callback.bind(null, err));
+    });
 };
 
 app.closeLiveBrowser = function (callback) {
-    // TODO: implement
-    callback(new Error("app.closeLiveBrowser not implemented"));
+    process.nextTick(function () {
+        // TODO: implement
+        callback(new Error("app.closeLiveBrowser not implemented"));
+    });
 };
 
 app.dragWindow = function () {
@@ -225,8 +222,10 @@ app.getApplicationSupportDirectory = function () {
 };
 
 app.getDroppedFiles = function (callback) {
-    // TODO: implement
-    callback(new Error("app.getDroppedFiles not implemented"));
+    process.nextTick(function () {
+        // TODO: implement
+        callback(new Error("app.getDroppedFiles not implemented"));
+    });
 };
 
 // return the number of milliseconds that have elapsed since the application was launched
@@ -237,6 +236,7 @@ app.getElapsedMilliseconds = function () {
 };
 
 app.getMenuItemState = function (commandId, callback) {
+    assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var obj = _findMenuItemById(commandId);
         if (!obj) {
@@ -255,6 +255,7 @@ app.getMenuPosition = function (commandId, callback) {
 };
 
 app.getMenuTitle = function (commandId, callback) {
+    assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var obj = _findMenuItemById(commandId);
         if (!obj) {
@@ -265,14 +266,18 @@ app.getMenuTitle = function (commandId, callback) {
 };
 
 app.getNodeState = function (callback) {
-    var errorCode = app[shellState.get("socketServer.state")];
-    var port = shellState.get("socketServer.port");
-    callback(errorCode, port);
+    process.nextTick(function () {
+        var errorCode = app[shellState.get("socketServer.state")];
+        var port = shellState.get("socketServer.port");
+        callback(errorCode, port);
+    });
 };
 
 app.getPendingFilesToOpen = function (callback) {
-    // TODO: implement
-    callback(new Error("app.getPendingFilesToOpen not implemented"), []);
+    process.nextTick(function () {
+        // TODO: implement
+        callback(new Error("app.getPendingFilesToOpen not implemented"), []);
+    });
 };
 
 app.getRemoteDebuggingPort = function () {
@@ -288,19 +293,18 @@ app.getUserDocumentsDirectory = function () {
     return app.getUserHomeDirectory();
 };
 
-app.getZoomLevel = function (callback) {
-    // TODO: implement
-    callback(new Error("app.getZoomLevel not implemented"));
-};
-
 app.installCommandLine = function (callback) {
-    // TODO: implement
-    callback(new Error("app.installCommandLine not implemented"));
+    process.nextTick(function () {
+        // TODO: implement
+        callback(new Error("app.installCommandLine not implemented"));
+    });
 };
 
 app.openLiveBrowser = function (url, enableRemoteDebugging, callback) {
-    // TODO: implement
-    callback(new Error("app.openLiveBrowser not implemented" + url));
+    process.nextTick(function () {
+        // TODO: implement
+        callback(new Error("app.openLiveBrowser not implemented" + url));
+    });
 };
 
 app.openURLInDefaultBrowser = function (url, callback) {
@@ -319,25 +323,33 @@ app.quit = function () {
 
 app.removeMenu = function (commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
-    var deleted = _deleteMenuItemById(commandId);
-    _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+    process.nextTick(function () {
+        var deleted = _deleteMenuItemById(commandId);
+        _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+    });
 };
 
 app.removeMenuItem = function (commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
-    var deleted = _deleteMenuItemById(commandId);
-    _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+    process.nextTick(function () {
+        var deleted = _deleteMenuItemById(commandId);
+        _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+    });
 };
 
 app.setMenuItemShortcut = function (commandId, shortcut, displayStr, callback) {
-    shortcut = _fixBracketsKeyboardShortcut(shortcut);
-    var obj = _findMenuItemById(commandId);
-    if (shortcut) {
-        obj.accelerator = shortcut;
-    } else {
-        delete obj.accelerator;
-    }
-    _refreshMenu(callback.bind(null, app.NO_ERROR));
+    assert(commandId && typeof commandId === "string", "commandId must be a string");
+    assert(shortcut && typeof shortcut === "string", "shortcut must be a string");
+    process.nextTick(function () {
+        shortcut = _fixBracketsKeyboardShortcut(shortcut);
+        var obj = _findMenuItemById(commandId);
+        if (shortcut) {
+            obj.accelerator = shortcut;
+        } else {
+            delete obj.accelerator;
+        }
+        _refreshMenu(callback.bind(null, app.NO_ERROR));
+    });
 };
 
 app.setMenuItemState = function (commandId, enabled, checked, callback) {
@@ -356,7 +368,6 @@ app.setMenuItemState = function (commandId, enabled, checked, callback) {
             // TODO: Change addMenuItem to set the type (checkbox, radio, ... submenu)
             obj.type = "checkbox";
         }
-
         _refreshMenu(callback.bind(null, app.NO_ERROR));
     });
 };
@@ -369,17 +380,9 @@ app.setMenuTitle = function (commandId, title, callback) {
         if (!obj) {
             return callback(app.ERR_NOT_FOUND);
         }
-
         obj.label = title;
-
         _refreshMenu(callback.bind(null, app.NO_ERROR));
     });
-};
-
-app.setZoomLevel = function (zoomLevel, callback) {
-    // TODO: implement
-    // BTW: who needs this function?
-    callback(new Error("app.setZoomLevel not implemented" + zoomLevel));
 };
 
 app.showDeveloperTools = function () {
@@ -387,12 +390,18 @@ app.showDeveloperTools = function () {
     win.openDevTools({detach: true});
 };
 
+// TODO: it seems that both arguments aren't needed anymore
 app.showExtensionsFolder = function (appURL, callback) {
-    // TODO: it seems that both arguments aren't needed anymore
-    shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(app.getApplicationSupportDirectory() + "/extensions"));
+    process.nextTick(function () {
+        shell.showItemInFolder(app.getApplicationSupportDirectory() + "/extensions");
+        if (callback) { callback(app.NO_ERROR); }
+    });
 };
 
+// TODO: get rid of callback? This call is not throwing any error.
 app.showOSFolder = function (path, callback) {
-    // TODO: get rid of callback? This call is not throwing any error.
-    shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
+    process.nextTick(function () {
+        shell.showItemInFolder(path);
+        if (callback) { callback(app.NO_ERROR); }
+    });
 };

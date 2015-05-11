@@ -1409,9 +1409,12 @@ define(function (require, exports, module) {
      * For some Electron reason, we also need the onbeforeunload handler
      */
     window.onbeforeunload = function () {
+        if (window.isSpecRunner) { return true; }
         return _windowGoingAway;
     };
     browserWindow.on("close", function (event) {
+        if (window.isSpecRunner) { return true; }
+
         if (!_windowGoingAway) {
             // stop the event for now
             event.preventDefault();
@@ -1420,6 +1423,7 @@ define(function (require, exports, module) {
                 browserWindow.close();
             });
         }
+
         return _windowGoingAway;
     });
 

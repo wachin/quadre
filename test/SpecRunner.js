@@ -41,6 +41,8 @@ require.config({
 define(function (require, exports, module) {
     'use strict';
 
+    window.isSpecRunner = true;
+
     // Utility dependencies
     var AppInit                 = require("utils/AppInit"),
         SpecRunnerUtils         = require("spec/SpecRunnerUtils"),
