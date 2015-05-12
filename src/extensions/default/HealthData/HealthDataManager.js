@@ -61,6 +61,7 @@ define(function (require, exports, module) {
 
         oneTimeHealthData.uuid = userUuid;
         oneTimeHealthData.snapshotTime = Date.now();
+        oneTimeHealthData.productName = brackets.metadata.productName;
         oneTimeHealthData.os = brackets.platform;
         oneTimeHealthData.userAgent = navigator.userAgent;
         oneTimeHealthData.osLanguage = brackets.app.language;
