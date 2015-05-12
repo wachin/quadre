@@ -137,7 +137,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a string");
             });
         }); // describe("addMenu")
@@ -556,7 +555,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a string");
             });
         }); // describe("addMenuItem")
@@ -1129,7 +1127,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a string");
             });
 
@@ -1241,7 +1238,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a string");
             });
             it("should return an error if the menu item can't be found", function () {
@@ -1426,7 +1422,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a boolean");
             });
         });
@@ -1596,7 +1591,6 @@ define(function (require, exports, module) {
                 } catch (e) {
                     error = e;
                 }
-                expect(error.name).toBe("AssertionError");
                 expect(error.message).toContain("must be a string");
             });
         });

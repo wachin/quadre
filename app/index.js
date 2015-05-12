@@ -135,6 +135,10 @@ app.on("ready", function () {
     openBracketsWindow();
 });
 
+exports.getMainWindow = function () {
+    return wins[0];
+};
+
 exports.restart = function (query) {
     var oldWin = wins.shift();
     oldWin.close();

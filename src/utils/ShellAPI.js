@@ -76,5 +76,10 @@ define(function (require, exports, module) {
         appReady = true;
     });
     
+    var ipc = window.electron.node.require("ipc");
+    ipc.on("executeCommand", function (commandId) {
+        executeCommand(commandId, true);
+    });
+
     exports.executeCommand = executeCommand;
 });
