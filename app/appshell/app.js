@@ -13,7 +13,7 @@ var shellState = remote.require("./shell-state");
 var REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
 
 var app = module.exports = {
-    NO_ERROR: 0,
+    NO_ERROR: null,
     ERR_NOT_FOUND: "NOTFOUND",
     // TODO: cleanup unused below
     ERR_CL_TOOLS_CANCELLED: 12,

@@ -10,7 +10,7 @@ var Menu = require("menu");
 var menuTemplate = [];
 
 var app = module.exports = {
-    NO_ERROR: 0,
+    NO_ERROR: null,
     ERR_NOT_FOUND: "NOTFOUND"
 };
 
