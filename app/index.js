@@ -127,6 +127,8 @@ function openBracketsWindow(queryObj) {
     ipc.on("resize", function () {
         saveWindowPosition(win);
     });
+
+    return win;
 }
 
 // This method will be called when Electron has done everything
@@ -135,12 +137,15 @@ app.on("ready", function () {
     openBracketsWindow();
 });
 
+exports.openBracketsWindow = openBracketsWindow;
+
 exports.getMainWindow = function () {
     return wins[0];
 };
 
 exports.restart = function (query) {
-    var oldWin = wins.shift();
-    oldWin.close();
+    while (wins.length > 0) {
+        wins.shift().close();
+    }
     openBracketsWindow(query);
 };
