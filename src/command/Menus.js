@@ -134,7 +134,7 @@ define(function (require, exports, module) {
      * Error Codes from Brackets Shell
      * @enum {number}
      */
-    var NO_ERROR           = 0,
+    var NO_ERROR           = brackets.app.NO_ERROR,
         ERR_UNKNOWN        = 1,
         ERR_INVALID_PARAMS = 2,
         ERR_NOT_FOUND      = 3;
