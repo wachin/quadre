@@ -609,7 +609,10 @@
     .container,
     .navbar-static-top .container,
     .navbar-fixed-top .container,
-    .navbar-fixed-bottom .container { .span(@gridColumns); }
+    .navbar-fixed-bottom .container {
+        // .span(@gridColumns);
+        width: (@gridColumnWidth * @gridColumns) + (@gridGutterWidth * (@gridColumns - 1));
+    }
 
     // generate .spanX and .offsetX
     .spanX (@gridColumns);
