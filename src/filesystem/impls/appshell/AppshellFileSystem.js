@@ -22,7 +22,7 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, appshell, window */
+/*global define, appshell, node, window */
 
 define(function (require, exports, module) {
     "use strict";
@@ -120,9 +120,8 @@ define(function (require, exports, module) {
 
     var _bracketsPath   = FileUtils.getNativeBracketsDirectoryPath();
     var _modulePath     = FileUtils.getNativeModuleDirectoryPath(module);
-    var childProcess = window.electron.node.require("child_process");
     var workerPath = [_bracketsPath, _modulePath, "node/FileWatcherWorker.js"].join("/");
-    var worker = childProcess.fork(workerPath);
+    var worker = node.require("child_process").fork(workerPath);
     var workerCounter = 0;
     var workerCallbacks = {};
     var workerSend = function (msg, data, callback) {

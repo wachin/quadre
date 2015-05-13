@@ -3,9 +3,6 @@
 
     // expose electron renderer process modules, uncomment those required
     window.electron = {
-        node: {
-            process: window.process
-        },
         ipc: require("ipc"),
         remote: require("remote")
         // webFrame: require("web-frame"),
@@ -22,8 +19,11 @@
     };
 
     // move injected node variables, do not move "process" as that'd break node.require
+    window.node = {
+        process: window.process
+    };
     ["require", "module", "__filename", "__dirname"].forEach(function (name) {
-        window.electron.node[name] = window[name];
+        window.node[name] = window[name];
         delete window[name];
     });
 
@@ -32,7 +32,7 @@
 
     // inject appshell implementation into the browser window
     try { // TODO: remove try-catch when issue fixed - https://github.com/atom/electron/issues/1566
-        window.appshell = window.brackets = window.electron.node.require("../app/appshell");
+        window.appshell = window.brackets = window.node.require("../app/appshell");
     } catch (e) {
         console.log(e.stack);
         throw e;

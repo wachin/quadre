@@ -23,7 +23,7 @@
 
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, regexp: true */
-/*global define, $, brackets, window, WebSocket */
+/*global define, $, brackets, electron, window, WebSocket */
 
 define(function (require, exports, module) {
     "use strict";
@@ -65,8 +65,7 @@ define(function (require, exports, module) {
     /**
      * Instance of the App and BrowserWindow object provided by Electron
      */
-    var remote = window.electron.node.require("remote");
-    var browserWindow = remote.getCurrentWindow();
+    var browserWindow = electron.remote.getCurrentWindow();
 
     /**
      * Container for label shown above editor; must be an inline element
@@ -1624,7 +1623,7 @@ define(function (require, exports, module) {
                     href = href.substr(0, fragment);
                 }
 
-                remote.require("./index").restart(href);
+                electron.remote.require("./index").restart(href);
             });
         }).fail(function () {
             _isReloading = false;
