@@ -9,6 +9,7 @@ var utils = require("../utils");
 var remote = require("remote");
 var electronApp = remote.require("app");
 var shellState = remote.require("./shell-state");
+var ipc        = require("ipc")
 
 var REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
 
@@ -98,8 +99,18 @@ app.installCommandLine = function (callback) {
 
 app.openLiveBrowser = function (url, enableRemoteDebugging, callback) {
     process.nextTick(function () {
-        // TODO: implement
-        callback(new Error("app.openLiveBrowser not implemented" + url));
+        
+        if (brackets.platform === "mac") {
+             ipc.on('liveBrowserOpenResult', function(arg) {                
+                callback(arg);
+            });
+            
+            //var debugProfilePath = StringUtils.format("--user-data-dir={0}/live-dev-profile", app.getApplicationSupportDirectory());
+            ipc.send('openLiveBrowser', url, enableRemoteDebugging, app.getApplicationSupportDirectory());
+        } else {
+            // TODO: implement
+            callback(new Error("app.openLiveBrowser not implemented" + url));
+        }
     });
 };
 

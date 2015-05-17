@@ -15,6 +15,17 @@ var utils = require("./utils");
 var shellConfig = require("./shell-config");
 var shellState = require("./shell-state");
 
+// Live browser modules
+var live_preview_browser;
+var ipc                  = require('ipc');
+
+// Live browser preview implemented only on mac.
+// TODO: Port this to Windows and Linux as well.
+if (process.platform === "darwin") {
+    live_preview_browser = require("live-browser-preview");
+}
+
+
 // Report crashes to electron server
 // TODO: doesn't work
 // require("crash-reporter").start();
@@ -135,6 +146,19 @@ function openBracketsWindow(queryObj) {
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
     openBracketsWindow();
+});
+
+ipc.on('openLiveBrowser', function(event, arg, enableRemoteDebugging, appSupportDir) {
+    if (live_preview_browser) {
+        var retVal = live_preview_browser(arg, enableRemoteDebugging, appSupportDir);
+        if (retVal === 0) {
+            event.sender.send('liveBrowserOpenResult');
+        } else {
+            event.sender.send('liveBrowserOpenResult', retVal);
+        }
+    } else {
+        event.sender.send('liveBrowserOpenResult', "Not yet Implemented!");
+    }
 });
 
 exports.openBracketsWindow = openBracketsWindow;
