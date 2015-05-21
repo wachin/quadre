@@ -54,7 +54,7 @@ app.getExtensionsFolder = function () {
 // TODO: it seems that both arguments aren't needed anymore
 app.showExtensionsFolder = function (appURL, callback) {
     process.nextTick(function () {
-        shell.showItemInFolder(app.getExtensionsFolder());
+        shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(app.getExtensionsFolder()));
         if (callback) { callback(app.NO_ERROR); }
     });
 };
@@ -137,7 +137,7 @@ app.showDeveloperTools = function () {
 // TODO: get rid of callback? This call is not throwing any error.
 app.showOSFolder = function (path, callback) {
     process.nextTick(function () {
-        shell.showItemInFolder(path);
+        shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
         if (callback) { callback(app.NO_ERROR); }
     });
 };
