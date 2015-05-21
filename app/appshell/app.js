@@ -47,6 +47,18 @@ app.getApplicationSupportDirectory = function () {
     return utils.convertWindowsPathToUnixPath(electronApp.getPath("userData"));
 };
 
+app.getExtensionsFolder = function () {
+    return app.getApplicationSupportDirectory() + "/extensions";
+};
+
+// TODO: it seems that both arguments aren't needed anymore
+app.showExtensionsFolder = function (appURL, callback) {
+    process.nextTick(function () {
+        shell.showItemInFolder(app.getExtensionsFolder());
+        if (callback) { callback(app.NO_ERROR); }
+    });
+};
+
 app.getDroppedFiles = function (callback) {
     process.nextTick(function () {
         // TODO: implement
@@ -120,14 +132,6 @@ app.quit = function () {
 app.showDeveloperTools = function () {
     var win = remote.getCurrentWindow();
     win.openDevTools({detach: true});
-};
-
-// TODO: it seems that both arguments aren't needed anymore
-app.showExtensionsFolder = function (appURL, callback) {
-    process.nextTick(function () {
-        shell.showItemInFolder(app.getApplicationSupportDirectory() + "/extensions");
-        if (callback) { callback(app.NO_ERROR); }
-    });
 };
 
 // TODO: get rid of callback? This call is not throwing any error.
