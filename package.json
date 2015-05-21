@@ -69,7 +69,7 @@
         "postinstall": "grunt install",
         "test": "grunt cla-check-pull test",
         "start": "electron .",
-        "bundle-mac": "bundle.sh darwin x64 0.26.0",
+        "bundle-mac": "./bundle.sh darwin x64 0.26.0",
         "bundle-win": "bundle.sh win32 x64 0.26.0",
         "bundle-linux": "bundle.sh linux x64 0.26.0"
     },
