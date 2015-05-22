@@ -14,7 +14,7 @@
     "undef"         : true,
     "strict"        : true,
     "unused"        : "vars",
-    "quotmark"      : "double",
+    "quotmark"      : false,
     
     "asi"           : false,
     "boss"          : false,

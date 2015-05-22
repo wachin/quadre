@@ -8,6 +8,7 @@ Thumbs.db
 /npm-debug.log
 
 # ignore compiled files
+/.grunt/
 /dist
 /src/.index.html
 /src/styles/brackets.min.css
