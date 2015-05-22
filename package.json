@@ -30,7 +30,7 @@
         "pathwatcher": "4.4.0"
     },
     "devDependencies": {
-        "electron-packager": "4.1.0",
+        "electron-packager": "4.1.1",
         "electron-prebuilt": "0.26.0",
         "electron-rebuild": "0.1.4",
         "grunt": "0.4.5",

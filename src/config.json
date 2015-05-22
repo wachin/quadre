@@ -53,7 +53,7 @@
         "pathwatcher": "4.4.0"
     },
     "devDependencies": {
-        "electron-packager": "4.1.0",
+        "electron-packager": "4.1.1",
         "electron-prebuilt": "0.26.0",
         "electron-rebuild": "0.1.4",
         "grunt": "0.4.5",
@@ -92,7 +92,7 @@
         "postinstall": "grunt install",
         "test": "grunt cla-check-pull test",
         "start": "electron .",
-        "bundle-mac": "bundle.sh darwin x64 0.26.0",
+        "bundle-mac": "./bundle.sh darwin x64 0.26.0",
         "bundle-win": "bundle.sh win32 x64 0.26.0",
         "bundle-linux": "bundle.sh linux x64 0.26.0"
     },
