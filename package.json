@@ -30,7 +30,7 @@
         "pathwatcher": "4.4.0"
     },
     "devDependencies": {
-        "electron-packager": "4.1.1",
+        "electron-packager": "https://github.com/zaggino/electron-packager.git",
         "electron-prebuilt": "0.26.0",
         "electron-rebuild": "0.1.4",
         "grunt": "0.4.5",
@@ -47,7 +47,7 @@
         "grunt-contrib-uglify": "0.9.1",
         "grunt-contrib-watch": "0.6.1",
         "grunt-targethtml": "0.2.6",
-        "grunt-usemin": "3.0.0",
+        "grunt-usemin": "0.1.11",
         "jshint": "2.7.0",
         "load-grunt-tasks": "3.1.0",
         "q": "1.4.1",
