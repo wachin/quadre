@@ -21,9 +21,9 @@ var ipc                  = require('ipc');
 
 // Live browser preview implemented only on mac.
 // TODO: Port this to Windows and Linux as well.
-if (process.platform === "darwin") {
+//if (process.platform === "darwin") {
     live_preview_browser = require("live-browser-preview");
-}
+//}
 
 
 // Report crashes to electron server
