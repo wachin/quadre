@@ -9,7 +9,6 @@ var appInfo = require("../package.json");
 var path = require("path");
 var app = require("app"); // Electron module to control application life
 var BrowserWindow = require("browser-window"); // Electron to create native browser window
-var ipc = require("ipc"); // Electron ipc module
 var SocketServer = require("./socket-server"); // Implementation of Brackets' shell server
 var utils = require("./utils");
 var shellConfig = require("./shell-config");
@@ -124,7 +123,10 @@ function openBracketsWindow(queryObj) {
     win.on("unmaximize", function () {
         saveWindowPosition(win);
     });
-    ipc.on("resize", function () {
+    win.on("resize", function () {
+        saveWindowPosition(win);
+    });
+    win.on("move", function () {
         saveWindowPosition(win);
     });
 
