@@ -34,8 +34,17 @@ var app = module.exports = {
 
 app.closeLiveBrowser = function (callback) {
     process.nextTick(function () {
-        // TODO: implement
-        callback(new Error("app.closeLiveBrowser not implemented"));
+        if (brackets.platform === "mac" || brackets.platform === "win") {
+             ipc.on('liveBrowserCloseResult', function(arg) {                
+                callback(arg);
+            });
+            
+            ipc.send('closeLiveBrowser');
+        } else {
+            // TODO: implement
+            callback(new Error("app.closeLiveBrowser not implemented"));
+        }
+        
     });
 };
 
@@ -100,7 +109,7 @@ app.installCommandLine = function (callback) {
 app.openLiveBrowser = function (url, enableRemoteDebugging, callback) {
     process.nextTick(function () {
         
-        if (brackets.platform === "mac") {
+        if (brackets.platform === "mac" || brackets.platform === "win") {
              ipc.on('liveBrowserOpenResult', function(arg) {                
                 callback(arg);
             });

@@ -150,7 +150,7 @@ app.on("ready", function () {
 
 ipc.on('openLiveBrowser', function(event, arg, enableRemoteDebugging, appSupportDir) {
     if (live_preview_browser) {
-        var retVal = live_preview_browser(arg, enableRemoteDebugging, appSupportDir);
+        var retVal = live_preview_browser.openLiveBrowser(arg, enableRemoteDebugging, appSupportDir);
         if (retVal === 0) {
             event.sender.send('liveBrowserOpenResult');
         } else {
@@ -160,6 +160,17 @@ ipc.on('openLiveBrowser', function(event, arg, enableRemoteDebugging, appSupport
         event.sender.send('liveBrowserOpenResult', "Not yet Implemented!");
     }
 });
+
+ipc.on('closeLiveBrowser', function(event) {
+    if (live_preview_browser) {
+        var retVal = live_preview_browser.closeLiveBrowser( function (retVal) {
+            event.sender.send('liveBrowserCloseResult', retVal);
+        });
+    } else {
+        event.sender.send('liveBrowserCloseResult', "Not yet Implemented!");
+    }
+});
+
 
 exports.openBracketsWindow = openBracketsWindow;
 
