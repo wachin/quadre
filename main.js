@@ -59,28 +59,32 @@ define(function (require, exports, module) {
 			return true;
 		}
 
-		path = path.substr(0, path.length - name.length).replace(projectPath, '');
-        
-        var path_matched, name_matched;
+		// Make path relative to project
+		var relative_path = path.replace(projectPath, '');
+		var name_is_file = name.indexOf('.') !== -1;
 
-        list.some(function(pattern){
-            path_matched = minimatch(path, pattern, minimatch_options); // A banned result was in the path
-            name_matched = minimatch(name, pattern, minimatch_options); // A banned result was the name
-            return path_matched || name_matched;
-        });
-        
-        var orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
+		var path_matched = multimatch(relative_path, list); // A banned result was in the path
+		var name_matched = name_is_file ? multimatch(name, list) : []; // A banned result was in the name
+		var orig_filter = _oldFilter.apply(this, arguments); // A default Brackets exclusion
 
-		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
-		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
+		// prep verdict
+		var verdict;
 
-        //console.group();
-        //console.log('list', list);
-        //console.log('projectPath', projectPath);
-        //console.log(path ? path : '[project_root]', !path_matched);
-        //console.log(name, !name_matched);
-        //console.log('verdict', verdict, verdict ? 'show' : 'hide');
-        //console.groupEnd();
+		if (path_matched.length || name_matched.length) {
+			verdict = false; // we banned it
+		} else {
+			verdict = orig_filter; // otherwise let Brackets default list check
+		}
+
+		// Debug info
+		console.group();
+		console.log('list', list);
+		console.log('projectPath', projectPath);
+		console.log(path ? path : '[project_root]', path_matched);
+		console.log(name, name_matched, name_is_file);
+		console.log('orig filter', orig_filter);
+		console.log('verdict', verdict, verdict ? 'show' : 'hide');
+		console.groupEnd();
 
 		return verdict;
 	}
