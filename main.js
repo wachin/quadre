@@ -29,14 +29,11 @@ define(function (require, exports, module) {
 	var ProjectMangager = brackets.getModule("project/ProjectManager");
 	var AppInit = brackets.getModule("utils/AppInit");
 	var _oldFilter = FileSystem.prototype._indexFilter;
-    
-    var minimatch = require("includes/minimatch");
-    var minimatch_options = {
-        dot: true,
-        matchBase: true,
-        nocomment: true
-    };
-    
+
+	// Load up Minimatch
+	var multimatch = require("includes/multimatch");
+
+	// Define the new filter
 	function newFilter(path, name) {
 		var module_id = 'jwolfe.file-tree-exclude',
 			defaults = [
