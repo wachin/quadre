@@ -84,14 +84,14 @@ define(function (require, exports, module) {
 		}
 
 		// Debug info
-		console.group();
-		console.log('list', list);
-		console.log('projectPath', projectPath);
-		console.log(path ? path : '[project_root]', path_matched);
-		console.log(name, name_matched, name_is_file);
-		console.log('orig filter', orig_filter);
-		console.log('verdict', verdict, verdict ? 'show' : 'hide');
-		console.groupEnd();
+		//console.group();
+		//console.log('list', list);
+		//console.log('projectPath', projectPath);
+		//console.log(path ? path : '[project_root]', path_matched);
+		//console.log(name, name_matched, name_is_file);
+		//console.log('orig filter', orig_filter);
+		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
+		//console.groupEnd();
 
 		// Tell Brackets if it should ignore this file
 		return verdict;
