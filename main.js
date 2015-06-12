@@ -25,8 +25,10 @@
 define(function (require, exports, module) {
 	"use strict";
 
+	// Get our Brackets modules
 	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem;
 	var ProjectMangager = brackets.getModule("project/ProjectManager");
+	var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 	var AppInit = brackets.getModule("utils/AppInit");
 	var _oldFilter = FileSystem.prototype._indexFilter;
 
@@ -35,6 +37,8 @@ define(function (require, exports, module) {
 
 	// Define the new filter
 	function newFilter(path, name) {
+
+		// Set some parameters
 		var module_id = 'jwolfe.file-tree-exclude',
 			defaults = [
                 'node_modules',
@@ -43,18 +47,21 @@ define(function (require, exports, module) {
                 'dist',
                 'vendor'
             ],
-            projectPath = ProjectMangager.getProjectRoot()._path;
-    
-		var PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-			preferences = PreferencesManager.getExtensionPrefs(module_id);
+			projectPath = ProjectMangager.getProjectRoot()._path;
 
+		// Get the preferences for this extension
+		var preferences = PreferencesManager.getExtensionPrefs(module_id);
+
+		// If there aren't any preferences, assign the default values
 		if (!preferences.get('list')) {
 			preferences.definePreference('list', 'array', defaults);
 			preferences.set('list', preferences.get('list'));
 		}
 
+		// Get the current preferences starting with project and working up
 		var list = preferences.get('list', preferences.CURRENT_PROJECT);
 
+		// No exclusions? Quit early.
 		if (!list.length) {
 			return true;
 		}
@@ -86,9 +93,11 @@ define(function (require, exports, module) {
 		console.log('verdict', verdict, verdict ? 'show' : 'hide');
 		console.groupEnd();
 
+		// Tell Brackets if it should ignore this file
 		return verdict;
 	}
 
+	// Use the custom filter when Brackets is done loading
 	AppInit.appReady(function () {
 		FileSystem.prototype._indexFilter = newFilter;
 		ProjectMangager.refreshFileTree();
