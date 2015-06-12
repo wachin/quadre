@@ -52,7 +52,4 @@ Configuration defaults
 
 How it Matches
 ---------------
-
-Eventually matching will be done via Minimatch, but for this initial version matching is done via the basic `string.match` js method for folders and for files it just checks the list for a matching file name using `array.indexof`.
-
-If a search is too generic (e.g. `vendor` is matching your `to_vendor` folder you actually want to see) then add specificity by adding backslashes to the item (e.g. `/vendor/`).
+Matches are done via the default matching system in Brackets along with [Minimatch](https://github.com/isaacs/minimatch) with the `dot` and `matchBase` options.
