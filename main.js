@@ -29,7 +29,14 @@ define(function (require, exports, module) {
 	var ProjectMangager = brackets.getModule("project/ProjectManager");
 	var AppInit = brackets.getModule("utils/AppInit");
 	var _oldFilter = FileSystem.prototype._indexFilter;
-
+    
+    var minimatch = require("includes/minimatch");
+    var minimatch_options = {
+        dot: true,
+        matchBase: true,
+        nocomment: true
+    };
+    
 	function newFilter(path, name) {
 		var module_id = 'jwolfe.file-tree-exclude',
 			defaults = [
@@ -55,26 +62,25 @@ define(function (require, exports, module) {
 			return true;
 		}
 
-		list.forEach(function (item, index) {
-			list[index] = item.replace(/[\[\]{}()*+?,\\\^$|#\s]/g, "");
-		});
-
-		var regex = new RegExp( list.join('|') );
-
 		path = path.substr(0, path.length - name.length).replace(projectPath, '');
+        
+        var path_matched, name_matched;
 
-		var path_matched = path.match(regex), // A banned result was in the path
-			name_matched = list.indexOf(name) !== -1, // A banned result was the name
-			orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
+        list.some(function(pattern){
+            path_matched = minimatch(path, pattern, minimatch_options); // A banned result was in the path
+            name_matched = minimatch(name, pattern, minimatch_options); // A banned result was the name
+            return path_matched || name_matched;
+        });
+        
+        var orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
 
 		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
 		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
         //console.group();
-        //console.log('regex', regex);
         //console.log('list', list);
         //console.log('projectPath', projectPath);
-        //console.log(path, !path_matched);
+        //console.log(path ? path : '[project_root]', !path_matched);
         //console.log(name, !name_matched);
         //console.log('verdict', verdict, verdict ? 'show' : 'hide');
         //console.groupEnd();
