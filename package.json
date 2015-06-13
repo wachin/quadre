@@ -2,7 +2,7 @@
   "name": "jonwolfe.file-tree-exclude",
   "title": "File Tree Exclude",
   "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is an updated version of Glenn Ruehle's now defunkt plugin.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": "Jon Wolfe <jonathanwolfe5@gmail.com> (https://github.com/JonathanWolfe/)",
   "license": "MIT",
   "engines": {
