@@ -25,20 +25,19 @@
 define(function (require, exports, module) {
 	"use strict";
 
-	// Get our Brackets modules
 	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem;
 	var ProjectMangager = brackets.getModule("project/ProjectManager");
-	var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 	var AppInit = brackets.getModule("utils/AppInit");
 	var _oldFilter = FileSystem.prototype._indexFilter;
-
-	// Load up Minimatch
-	var multimatch = require("includes/multimatch");
-
-	// Define the new filter
+    
+    var minimatch = require("includes/minimatch");
+    var minimatch_options = {
+        dot: true,
+        matchBase: true,
+        nocomment: true
+    };
+    
 	function newFilter(path, name) {
-
-		// Set some parameters
 		var module_id = 'jwolfe.file-tree-exclude',
 			defaults = [
                 'node_modules',
@@ -47,57 +46,48 @@ define(function (require, exports, module) {
                 'dist',
                 'vendor'
             ],
-			projectPath = ProjectMangager.getProjectRoot()._path;
+            projectPath = ProjectMangager.getProjectRoot()._path;
+    
+		var PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
+			preferences = PreferencesManager.getExtensionPrefs(module_id);
 
-		// Get the preferences for this extension
-		var preferences = PreferencesManager.getExtensionPrefs(module_id);
-
-		// If there aren't any preferences, assign the default values
 		if (!preferences.get('list')) {
 			preferences.definePreference('list', 'array', defaults);
 			preferences.set('list', preferences.get('list'));
 		}
 
-		// Get the current preferences starting with project and working up
 		var list = preferences.get('list', preferences.CURRENT_PROJECT);
 
-		// No exclusions? Quit early.
 		if (!list.length) {
 			return true;
 		}
 
-		// Make path relative to project
-		var relative_path = path.replace(projectPath, '');
-		var name_is_file = name.indexOf('.') !== -1;
+		path = path.substr(0, path.length - name.length).replace(projectPath, '');
+        
+        var path_matched, name_matched;
 
-		var path_matched = multimatch(relative_path, list); // A banned result was in the path
-		var name_matched = name_is_file ? multimatch(name, list) : []; // A banned result was in the name
-		var orig_filter = _oldFilter.apply(this, arguments); // A default Brackets exclusion
+        list.some(function(pattern){
+            path_matched = minimatch(path, pattern, minimatch_options); // A banned result was in the path
+            name_matched = minimatch(name, pattern, minimatch_options); // A banned result was the name
+            return path_matched || name_matched;
+        });
+        
+        var orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
 
-		// prep verdict
-		var verdict;
+		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
+		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
 
-		if (path_matched.length || name_matched.length) {
-			verdict = false; // we banned it
-		} else {
-			verdict = orig_filter; // otherwise let Brackets default list check
-		}
+        //console.group();
+        //console.log('list', list);
+        //console.log('projectPath', projectPath);
+        //console.log(path ? path : '[project_root]', !path_matched);
+        //console.log(name, !name_matched);
+        //console.log('verdict', verdict, verdict ? 'show' : 'hide');
+        //console.groupEnd();
 
-		// Debug info
-		//console.group();
-		//console.log('list', list);
-		//console.log('projectPath', projectPath);
-		//console.log(path ? path : '[project_root]', path_matched);
-		//console.log(name, name_matched, name_is_file);
-		//console.log('orig filter', orig_filter);
-		//console.log('verdict', verdict, verdict ? 'show' : 'hide');
-		//console.groupEnd();
-
-		// Tell Brackets if it should ignore this file
 		return verdict;
 	}
 
-	// Use the custom filter when Brackets is done loading
 	AppInit.appReady(function () {
 		FileSystem.prototype._indexFilter = newFilter;
 		ProjectMangager.refreshFileTree();
