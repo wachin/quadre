@@ -23,7 +23,8 @@
         "strip-bom": "1.0.0",
         "trash": "1.4.1",
         "watch": "0.16.0",
-        "ws": "https://github.com/websockets/ws.git"
+        "ws": "https://github.com/websockets/ws.git",
+        "live-browser-preview": "https://github.com/nethip/live-browser-preview.git"
     },
     "optionalDependencies": {
         "fsevents": "0.3.6",
