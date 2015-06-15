@@ -23,7 +23,6 @@ function convertBracketsPathToWindowsPath(path) {
     if (process.platform === "win32") {
         path = path.replace(/\//g, "\\");
     }
-
     return path;
 }
 

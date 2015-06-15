@@ -8,6 +8,7 @@ Thumbs.db
 /npm-debug.log
 
 # ignore compiled files
+/.grunt/
 /dist
 /src/.index.html
 /src/styles/brackets.min.css
@@ -34,3 +35,7 @@ Thumbs.db
 
 # Files that can be automatically downloaded that we don't want to ship with our builds
 /src/extensibility/node/node_modules/request/tests/
+
+# Build packages
+/Bracketron-win32/
+/Bracketron.app/

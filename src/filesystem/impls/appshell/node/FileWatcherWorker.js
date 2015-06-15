@@ -16,11 +16,18 @@ var watch = require("watch");
 var fsevents = null;
 
 if (process.platform === "darwin") {
-    fsevents = require("fsevents");
+    try {
+        fsevents = require("fsevents");
+    } catch (err) {
+
+    }
 } else if (process.platform === "win32") {
-    // https://github.com/adobe/brackets/wiki/Working-with-fsevents_win.node
-    // TODO: build this automatically for electron
-    // fsevents = require("fsevents_win/fsevents_win");
+    try {
+        // https://github.com/adobe/brackets/wiki/Working-with-fsevents_win.node
+        fsevents = require("fsevents_win/fsevents_win");
+    } catch (err) {
+
+    }
 }
 
 var _watcherMap = {};

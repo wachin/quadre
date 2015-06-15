@@ -13,11 +13,6 @@
         // shell: require("shell")
     };
 
-    // notify shell about resizes
-    window.onresize = function () {
-        window.electron.ipc.send("resize");
-    };
-
     // move injected node variables, do not move "process" as that'd break node.require
     window.node = {
         process: window.process
