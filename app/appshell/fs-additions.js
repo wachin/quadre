@@ -127,7 +127,11 @@ fsAdditions.showOpenDialog = function (allowMultipleSelection, chooseDirectory, 
         filters: fileTypes,
         properties: properties
     }, function (paths) {
-        callback(null, paths.map(utils.convertWindowsPathToUnixPath));
+        if (paths) {
+            callback(null, paths.map(utils.convertWindowsPathToUnixPath));
+        } else {
+            callback(null, "");
+        }
     });
 };
 
