@@ -46,15 +46,17 @@
         "strip-bom": "1.0.0",
         "trash": "1.4.1",
         "watch": "0.16.0",
-        "ws": "0.7.2"
+        "ws": "0.7.2",
+        "live-browser-preview": "https://github.com/nethip/live-browser-preview.git"
     },
     "optionalDependencies": {
         "fsevents": "0.3.6",
         "pathwatcher": "4.4.0"
     },
     "devDependencies": {
+        "is-property": "1.0.2",
         "electron-packager": "https://github.com/zaggino/electron-packager.git",
-        "electron-prebuilt": "0.27.2",
+        "electron-prebuilt": "0.28.1",
         "electron-rebuild": "0.2.1",
         "grunt": "0.4.5",
         "grunt-cleanempty": "1.0.3",

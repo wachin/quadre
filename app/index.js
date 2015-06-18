@@ -20,8 +20,9 @@ var ipc                  = require('ipc');
 
 // Live browser preview implemented only on mac.
 // TODO: Port this to Windows and Linux as well.
-if (process.platform === "darwin") {
+if (process.platform === "darwin" || process.platform === "win32") {
     live_preview_browser = require("live-browser-preview");
+    //runas = require("../node_modules/pathwatcher/node_modules/runas");
 }
 
 
