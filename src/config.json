@@ -3,7 +3,7 @@
         "app_title": "Bracketron",
         "app_name_about": "Bracketron",
         "about_icon": "styles/images/brackets_icon.svg",
-        "update_info_url": "http://s3.amazonaws.com/files.brackets.io/updates/stable/",
+        "update_info_url": "https://getupdates.brackets.io/getupdates/",
         "how_to_use_url": "https://github.com/adobe/brackets/wiki/How-to-Use-Brackets",
         "support_url": "https://github.com/adobe/brackets/wiki/Troubleshooting",
         "suggest_feature_url": "https://github.com/adobe/brackets/wiki/Suggest-a-Feature",
@@ -24,8 +24,8 @@
     },
     "name": "Bracketron",
     "productName": "Bracketron",
-    "version": "1.4.0-0",
-    "apiVersion": "1.4.0",
+    "version": "1.5.0-0",
+    "apiVersion": "1.5.0",
     "homepage": "http://brackets.io",
     "issues": {
         "url": "http://github.com/adobe/brackets/issues"
@@ -37,7 +37,7 @@
         "SHA": ""
     },
     "dependencies": {
-        "bluebird": "2.9.33",
+        "bluebird": "2.9.34",
         "fs-extra": "0.22.1",
         "isbinaryfile": "2.0.4",
         "lodash": "3.10.0",
@@ -54,8 +54,8 @@
     },
     "devDependencies": {
         "electron-packager": "https://github.com/zaggino/electron-packager.git",
-        "electron-prebuilt": "0.29.2",
-        "electron-rebuild": "0.2.3",
+        "electron-prebuilt": "0.30.1",
+        "electron-rebuild": "0.2.5",
         "grunt": "0.4.5",
         "grunt-cleanempty": "1.0.3",
         "grunt-cli": "0.1.13",
@@ -74,7 +74,7 @@
         "jshint": "2.8.0",
         "load-grunt-tasks": "3.2.0",
         "q": "1.4.1",
-        "semver": "5.0.0",
+        "semver": "5.0.1",
         "xmldoc": "0.3.1"
     },
     "bin": {
