@@ -25,71 +25,78 @@
 define(function (require, exports, module) {
 	"use strict";
 
-	var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem;
+	// Get our Brackets modules
 	var ProjectMangager = brackets.getModule("project/ProjectManager");
+	var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 	var AppInit = brackets.getModule("utils/AppInit");
-	var _oldFilter = FileSystem.prototype._indexFilter;
-    
-    var minimatch = require("includes/minimatch");
-    var minimatch_options = {
-        dot: true,
-        matchBase: true,
-        nocomment: true
-    };
-    
-	function newFilter(path, name) {
-		var module_id = 'jwolfe.file-tree-exclude',
-			defaults = [
+
+	// Load up Multimatch
+	var multimatch = require("includes/multimatch");
+
+	// Preference Stuff
+	var module_id = 'jwolfe.file-tree-exclude',
+		defaults = [
                 'node_modules',
                 'bower_components',
                 '.git',
                 'dist',
                 'vendor'
-            ],
-            projectPath = ProjectMangager.getProjectRoot()._path;
-    
-		var PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
-			preferences = PreferencesManager.getExtensionPrefs(module_id);
+            ];
 
-		if (!preferences.get('list')) {
-			preferences.definePreference('list', 'array', defaults);
-			preferences.set('list', preferences.get('list'));
-		}
+	// Get the preferences for this extension
+	var preferences = PreferencesManager.getExtensionPrefs(module_id);
 
-		var list = preferences.get('list', preferences.CURRENT_PROJECT);
-
-		if (!list.length) {
-			return true;
-		}
-
-		path = path.substr(0, path.length - name.length).replace(projectPath, '');
-        
-        var path_matched, name_matched;
-
-        list.some(function(pattern){
-            path_matched = minimatch(path, pattern, minimatch_options); // A banned result was in the path
-            name_matched = minimatch(name, pattern, minimatch_options); // A banned result was the name
-            return path_matched || name_matched;
-        });
-        
-        var orig_result = _oldFilter.apply(this, arguments); // A default brackets banned result
-
-		//Did Brackets ban it? No? Then did we ban it? No? Then show it.
-		var verdict = (orig_result) ? (!path_matched && !name_matched) : orig_result;
-
-        //console.group();
-        //console.log('list', list);
-        //console.log('projectPath', projectPath);
-        //console.log(path ? path : '[project_root]', !path_matched);
-        //console.log(name, !name_matched);
-        //console.log('verdict', verdict, verdict ? 'show' : 'hide');
-        //console.groupEnd();
-
-		return verdict;
+	// If there aren't any preferences, assign the default values
+	if (!preferences.get('list')) {
+		preferences.definePreference('list', 'array', defaults);
+		preferences.set('list', preferences.get('list'));
 	}
 
+	// Define the new filter
+	function filter_files(list, file) {
+
+		var projectRoot = ProjectMangager.getProjectRoot();
+		var projectPath = projectRoot.fullPath;
+
+		// prep show - default to showing the file
+		var show = true;
+
+		// No exclusions? Quit early.
+		if (!list.length) {
+			return show;
+		}
+
+		// Make path relative to project
+		var relative_path = file.fullPath.replace(projectPath, '');
+		var matched = multimatch(relative_path, list); // A banned result was in the path
+
+		if (matched.length) {
+			show = false; // we banned it
+		}
+
+		// Debug info
+		console.group();
+		console.log('projectPath', projectPath);
+		console.log(relative_path ? relative_path : '[project_root]', matched);
+		console.log('show', show ? 'show' : 'hide');
+		console.groupEnd();
+
+		return show;
+	}
+
+	// Use the custom filter when Brackets is done loading
 	AppInit.appReady(function () {
-		FileSystem.prototype._indexFilter = newFilter;
+		ProjectMangager.getAllFiles().then(function (files) {
+			var list = preferences.get('list', preferences.CURRENT_PROJECT);
+
+			console.log('list', list);
+			console.log('files', files);
+
+			files.forEach(function (file) {
+				filter_files(list, file);
+			});
+		});
+
 		ProjectMangager.refreshFileTree();
 	});
 });
