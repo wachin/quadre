@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-	"use strict";
-    
+    "use strict";
+
     var isArray = Array.isArray || function (xs) {
         return Object.prototype.toString.call(xs) === '[object Array]';
     };
