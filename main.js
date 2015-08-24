@@ -26,15 +26,17 @@ define(function (require, exports, module) {
     'use strict';
 
     // Get our Brackets modules
-    var FileSystem = brackets.getModule("filesystem/FileSystem")._FileSystem;
+    var FileSystem = brackets.getModule('filesystem/FileSystem')._FileSystem;
     var ProjectMangager = brackets.getModule('project/ProjectManager');
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
     var AppInit = brackets.getModule('utils/AppInit');
     var _oldFilter = FileSystem.prototype._indexFilter;
     var _newFilter = [];
 
-    // Load up Multimatch
-    var multimatch = require('includes/multimatch');
+    // Load up our Modules
+    var extendFilter = require('includes/extend-filter');
+    var matched = require('includes/matched');
+    var flatten = require('includes/flatten');
 
     // Preference Stuff
     var module_id = 'jwolfe.file-tree-exclude',
@@ -66,16 +68,21 @@ define(function (require, exports, module) {
             return false;
         }
 
+        // Extend the list with wildcards
+        list = extendFilter(list);
+
         // Make path relative to project
         var relative_path = file.fullPath.replace(projectPath, '');
-        var matched = multimatch(relative_path, list); // A banned result was in the path
+        var result = matched(relative_path, list); // A banned result was in the path
 
-        if (matched.length) {
+        if (result) {
             _newFilter.push(file.fullPath);
         }
 
         // Debug info
         // console.group(relative_path ? relative_path : '[project_root]')
+        // console.log('extendFilter', extendFilter(list));
+        // console.log('matched', matched(file, extendFilter(list)));
         // console.log('file', file);
         // console.log('matched', matched);
         // console.log('verdict', matched.length ? 'hide' : 'show');
@@ -91,14 +98,24 @@ define(function (require, exports, module) {
 
     // Use the custom filter when Brackets is done loading
     AppInit.appReady(function () {
+        // Get all files in an array
         ProjectMangager.getAllFiles().then(function (files) {
+            // Grab our preferences
             var list = preferences.get('list', preferences.CURRENT_PROJECT);
 
+            // Loop over the files and see if we need to filter them
             files.forEach(function (file) {
                 filter_files(list, file);
             });
 
+            // Apply a fix for Bracket's dumb filesystem handling
+            _newFilter = flatten(_newFilter);
+            // console.log('flatten', flatten(_newFilter));
+
+            // Our filter is now the file filter
             FileSystem.prototype._indexFilter = new_filter;
+
+            // Refresh the project to re-check the file filter
             ProjectMangager.refreshFileTree();
         });
     });
