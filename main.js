@@ -63,14 +63,6 @@ define(function (require, exports, module) {
         var projectRoot = ProjectMangager.getProjectRoot();
         var projectPath = projectRoot.fullPath;
 
-        // No exclusions? Quit early.
-        if (!list.length) {
-            return false;
-        }
-
-        // Extend the list with wildcards
-        list = extendFilter(list);
-
         // Make path relative to project
         var relative_path = file.fullPath.replace(projectPath, '');
         var result = matched(relative_path, list); // A banned result was in the path
@@ -78,15 +70,6 @@ define(function (require, exports, module) {
         if (result) {
             _newFilter.push(file.fullPath);
         }
-
-        // Debug info
-        // console.group(relative_path ? relative_path : '[project_root]')
-        // console.log('extendFilter', extendFilter(list));
-        // console.log('matched', matched(file, extendFilter(list)));
-        // console.log('file', file);
-        // console.log('matched', matched);
-        // console.log('verdict', matched.length ? 'hide' : 'show');
-        // console.groupEnd();
 
         return true;
     }
@@ -102,6 +85,14 @@ define(function (require, exports, module) {
         ProjectMangager.getAllFiles().then(function (files) {
             // Grab our preferences
             var list = preferences.get('list', preferences.CURRENT_PROJECT);
+
+            // No exclusions? Quit early.
+            if (!list.length) {
+                return false;
+            }
+
+            // Extend the list with wildcards
+            list = extendFilter(list);
 
             // Loop over the files and see if we need to filter them
             files.forEach(function (file) {
