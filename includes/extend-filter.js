@@ -1,33 +1,33 @@
-define(function (require, exports, module) {
+define( function ( require, exports, module ) {
     "use strict";
-    return exports = module.exports = function extend_filter(list) {
+    return exports = module.exports = function extend_filter( list ) {
         var temp = [];
 
-        list.forEach(function (filter, i) {
+        list.forEach( function ( filter, i ) {
             var brace;
-            var first = filter.substring(0, 1);
+            var first = filter.substring( 0, 1 );
 
-            switch (first) {
+            switch ( first ) {
             case '/':
                 brace = '**';
                 break;
             case '!':
                 brace = '!**/'
-                filter = filter.substring(1);
+                filter = filter.substring( 1 );
                 break;
             default:
                 brace = '**/'
                 break;
             }
 
-            list[i] = brace + filter;
-            temp.push(list[i] + '/**');
-        });
+            list[ i ] = brace + filter;
+            temp.push( list[ i ] + '/**' );
+        } );
 
-        list = list.concat(temp).sort(function (a, b) {
+        list = list.concat( temp ).sort( function ( a, b ) {
             return a.length - b.length;
-        });
+        } );
 
         return list;
     };
-});
+} );
