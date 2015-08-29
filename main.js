@@ -31,7 +31,8 @@ define( function ( require, exports, module ) {
     var PreferencesManager = brackets.getModule( 'preferences/PreferencesManager' );
     var AppInit = brackets.getModule( 'utils/AppInit' );
     var _oldFilter = FileSystem.prototype._indexFilter;
-    var _newFilter = [];
+    var _matched_files = [];
+    var _unmatched_files = [];
 
     // Load up our Modules
     var extendFilter = require( 'includes/extend-filter' );
@@ -59,7 +60,7 @@ define( function ( require, exports, module ) {
 
     // Our new filter
     function new_filter( path, name ) {
-        var not_in_our_filter = _newFilter.indexOf( path ) === -1;
+        var not_in_our_filter = _matched_files.indexOf( path ) === -1;
         return not_in_our_filter ? _oldFilter.apply( this, arguments ) : not_in_our_filter;
     }
 
@@ -89,13 +90,16 @@ define( function ( require, exports, module ) {
                 var result = matched( relative_path, list ); // A banned result was in the path
 
                 if ( result ) {
-                    _newFilter.push( file.fullPath );
+                    _matched_files.push( file.fullPath );
+                } else {
+                    _unmatched_files.push( file.fullPath );
                 }
             } );
 
             // Apply a fix for Bracket's dumb filesystem handling
-            _newFilter = flatten( _newFilter );
-            // console.log('flatten', flatten(_newFilter));
+            _matched_files = flatten( _matched_files, _unmatched_files );
+            console.log( 'flattened', _matched_files );
+            console.log( '_unmatched_files', _unmatched_files );
 
             // Our filter is now the file filter
             FileSystem.prototype._indexFilter = new_filter;

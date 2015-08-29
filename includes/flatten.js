@@ -1,20 +1,36 @@
-define(function (require, exports, module) {
+define( function ( require, exports, module ) {
     "use strict";
-    return exports = module.exports = function flatten(list) {
-        list.forEach(function (item, index) {
-            for (var i = 0; i < list.length; i += 1) {
 
-                var checking = list[i] !== null ? list[i].substring(0, item.length) : '';
+    return exports = module.exports = function flatten( list, to_keep ) {
+        var temp = [];
+        list.forEach( function ( item ) {
+            var parent = item.substring( 0, item.lastIndexOf( '/' ) );
+            if ( temp.indexOf( parent ) === -1 ) {
+                temp.push( parent );
+            }
+        } );
+        list = list.concat( temp );
 
-                if (checking === item && index !== i) {
-                    list[index] = null;
+        list.forEach( function ( item, index ) {
+            for ( var i = 0; i < to_keep.length; i += 1 ) {
+
+                if ( item === null ) {
+                    continue;
+                }
+
+                var checking = to_keep[ i ].substring( 0, item.length );
+
+                if ( checking + '/' === item + '/' ) {
+                    list[ index ] = null;
                     break;
                 }
             };
-        });
+        } );
 
-        return list.filter(function (item) {
+        console.log( 'temp', list );
+
+        return list.filter( function ( item ) {
             return item !== null;
-        });
+        } );
     };
-});
+} );
