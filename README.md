@@ -52,4 +52,4 @@ Configuration defaults
 
 How it Matches
 ---------------
-Matches are done via the default matching system in Brackets along with [Minimatch](https://github.com/isaacs/minimatch) with the `dot` and `matchBase` options.
+Matches are done via the default matching system in Brackets along with [Minimatch](https://github.com/isaacs/minimatch).

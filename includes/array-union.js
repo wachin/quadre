@@ -1,8 +1,8 @@
-define(function (require, exports, module) {
+define( function ( require, exports, module ) {
 	"use strict";
-	var arrayUniq = require('includes/array-uniq');
+	var arrayUniq = require( 'includes/array-uniq' );
 
 	return exports = module.exports = function () {
-		return arrayUniq([].concat.apply([], arguments));
+		return arrayUniq( [].concat.apply( [], arguments ) );
 	};
-});
+} );
