@@ -27,7 +27,7 @@ define( function ( require, exports, module ) {
 
     // Get our Brackets modules
     var FileSystem = brackets.getModule( 'filesystem/FileSystem' )._FileSystem;
-    var ProjectMangager = brackets.getModule( 'project/ProjectManager' );
+    var ProjectManager = brackets.getModule( 'project/ProjectManager' );
     var PreferencesManager = brackets.getModule( 'preferences/PreferencesManager' );
     var AppInit = brackets.getModule( 'utils/AppInit' );
     var _oldFilter = FileSystem.prototype._indexFilter;
@@ -66,8 +66,27 @@ define( function ( require, exports, module ) {
 
     // Use the custom filter when Brackets is done loading
     AppInit.appReady( function () {
+
+        if ( !Number.MAX_SAFE_INTEGER ) {
+            Number.MAX_SAFE_INTEGER = Math.pow( 2, 53 ) - 1;
+        }
+
+        var allFiles = [];
+        ProjectManager.getProjectRoot().visit( function ( entry ) {
+            allFiles.push( entry );
+            return true;
+        }, {
+            maxEntries: Number.MAX_SAFE_INTEGER
+        }, function ( error ) {
+            if ( !error ) {
+                processFiles( allFiles );
+            } else {
+                console.error( 'More files than JavaScript allows :/' );
+            }
+        } );
+
         // Get all files in an array
-        ProjectMangager.getAllFiles().then( function ( files ) {
+        function processFiles( files ) {
             // Grab our preferences
             var list = preferences.get( 'list', preferences.CURRENT_PROJECT );
 
@@ -80,7 +99,7 @@ define( function ( require, exports, module ) {
             list = extendFilter( list );
 
             // Get the project info
-            var projectRoot = ProjectMangager.getProjectRoot();
+            var projectRoot = ProjectManager.getProjectRoot();
             var projectPath = projectRoot.fullPath;
 
             // Loop over the files and see if we need to filter them
@@ -105,7 +124,7 @@ define( function ( require, exports, module ) {
             FileSystem.prototype._indexFilter = new_filter;
 
             // Refresh the project to re-check the file filter
-            ProjectMangager.refreshFileTree();
-        } );
+            ProjectManager.refreshFileTree();
+        };
     } );
 } );
