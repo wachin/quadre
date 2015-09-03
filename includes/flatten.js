@@ -27,8 +27,6 @@ define( function ( require, exports, module ) {
             };
         } );
 
-        console.log( 'temp', list );
-
         return list.filter( function ( item ) {
             return item !== null;
         } );

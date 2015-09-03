@@ -98,8 +98,8 @@ define( function ( require, exports, module ) {
 
             // Apply a fix for Bracket's dumb filesystem handling
             _matched_files = flatten( _matched_files, _unmatched_files );
-            console.log( 'flattened', _matched_files );
-            console.log( '_unmatched_files', _unmatched_files );
+            // console.log( 'flattened', _matched_files );
+            // console.log( '_unmatched_files', _unmatched_files );
 
             // Our filter is now the file filter
             FileSystem.prototype._indexFilter = new_filter;
