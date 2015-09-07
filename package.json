@@ -1,30 +1,27 @@
 {
-  "name": "zaggino.file-tree-exclude",
-  "title": "File Tree Exclude (fork by zaggino)",
-  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
+  "name": "brackets-file-tree-exclude",
   "version": "1.0.0",
+  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
+  "keywords": [
+    "brackets-extension",
+    "brackets",
+    "exclude",
+    "folders",
+    "hide"
+  ],
+  "homepage": "https://github.com/zaggino/file-tree-exclude",
+  "bugs": "https://github.com/zaggino/file-tree-exclude/issues",
+  "license": "MIT",
   "author": {
     "name": "Martin Zagora",
     "email": "zaggino@gmail.com",
     "url": "https://github.com/zaggino"
   },
-  "license": "MIT",
-  "engines": {
-    "brackets": ">=0.34.0"
-  },
-  "main": "main.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/zaggino/file-tree-exclude.git"
   },
-  "keywords": [
-    "exclude",
-    "folders",
-    "brackets",
-    "hide"
-  ],
-  "bugs": {
-    "url": "https://github.com/zaggino/file-tree-exclude/issues"
-  },
-  "homepage": "https://github.com/zaggino/file-tree-exclude"
+  "engines": {
+    "brackets": ">=1.2.0"
+  }
 }

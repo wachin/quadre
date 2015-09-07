@@ -8,7 +8,7 @@ define(function (require, exports, module) {
   var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
 
   // Constants
-  var MODULE_ID = 'zaggino.file-tree-exclude';
+  var MODULE_ID = 'brackets-file-tree-exclude';
 
   // Default excludes
   var defaultExcludeList = [

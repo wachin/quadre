@@ -40,7 +40,7 @@ Configuration defaults
 
 ```JSON
 {
-	"zaggino.file-tree-exclude.excludeList": [
+	"brackets-file-tree-exclude.excludeList": [
 		"^.git($|/)",
         "^dist($|/)",
         "^bower_components($|/)",
