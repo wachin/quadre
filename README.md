@@ -5,7 +5,7 @@ Brackets extension for excluding folders and files from the file tree, find in f
 
 This is great for cache folders, distribution/build folders and files, and those package manager folders like `node_modules` and `bower_components`.
 
-This is an updated version of Glenn Ruehle's now defunkt plugin - [exclude-folders](https://github.com/gruehle/exclude-folders).
+This is a rewritten version of Jon Wolfe's extension - [file-tree-exclude](https://github.com/JonathanWolfe/file-tree-exclude).
 
 Install
 ---------------
@@ -17,7 +17,7 @@ Install
 If a manual install is more your thing (or it's missing from the registry):
 
 1. Click the "Install from URL..." button
-2. Paste (or enter) `https://github.com/JonathanWolfe/file-tree-exclude.git` and click "Install"
+2. Paste (or enter) `https://github.com/zaggino/file-tree-exclude.git` and click "Install"
 
 Configure
 ---------------
@@ -40,16 +40,15 @@ Configuration defaults
 
 ```JSON
 {
-	"jwolfe.file-tree-exclude.list": [
-		"node_modules",
-        "bower_components",
-        ".git",
-        "dist",
-        "vendor"
+	"zaggino.file-tree-exclude.excludeList": [
+		"^.git($|/)",
+        "^dist($|/)",
+        "^bower_components($|/)",
+        "^node_modules($|/)"
     ]
 }
 ```
 
 How it Matches
 ---------------
-Matches are done via the default matching system in Brackets along with [Minimatch](https://github.com/isaacs/minimatch).
+Matches are done using JavaScript regexp's relatively to current project root.

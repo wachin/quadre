@@ -1,130 +1,65 @@
-/*
- * Copyright (c) 2013 Adobe Systems Incorporated. All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the 'Software'),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+define(function (require, exports, module) {
+  'use strict';
 
-/*global define, brackets */
+  // Get our Brackets modules
+  var _ = brackets.getModule('thirdparty/lodash');
+  var FileSystemImpl = brackets.getModule('filesystem/FileSystem')._FileSystem;
+  var ProjectManager = brackets.getModule('project/ProjectManager');
+  var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
 
-define( function ( require, exports, module ) {
-    'use strict';
+  // Constants
+  var MODULE_ID = 'zaggino.file-tree-exclude';
 
-    // Get our Brackets modules
-    var FileSystem = brackets.getModule( 'filesystem/FileSystem' )._FileSystem;
-    var ProjectManager = brackets.getModule( 'project/ProjectManager' );
-    var PreferencesManager = brackets.getModule( 'preferences/PreferencesManager' );
-    var AppInit = brackets.getModule( 'utils/AppInit' );
-    var _oldFilter = FileSystem.prototype._indexFilter;
-    var _matched_files = [];
-    var _unmatched_files = [];
+  // Default excludes
+  var defaultExcludeList = [
+    '^.git($|/)',
+    '^dist($|/)',
+    '^bower_components($|/)',
+    '^node_modules($|/)'
+  ];
 
-    // Load up our Modules
-    var extendFilter = require( 'includes/extend-filter' );
-    var matched = require( 'includes/matched' );
-    var flatten = require( 'includes/flatten' );
+  // Get the preferences for this extension
+  var preferences = PreferencesManager.getExtensionPrefs(MODULE_ID);
+  preferences.definePreference('excludeList', 'array', defaultExcludeList);
 
-    // Preference Stuff
-    var module_id = 'jwolfe.file-tree-exclude',
-        defaults = [
-            'node_modules',
-            'bower_components',
-            '.git',
-            'dist',
-            'vendor'
-        ];
+  // projectRoot & projectPath
+  var excludeList = null;
+  var projectRoot = null;
+  var projectPath = null;
 
-    // Get the preferences for this extension
-    var preferences = PreferencesManager.getExtensionPrefs( module_id );
+  function fetchVariables() {
+    excludeList = preferences.get('excludeList', preferences.CURRENT_PROJECT);
+    preferences.set('excludeList', excludeList);
+    projectRoot = ProjectManager.getProjectRoot();
+    projectPath = projectRoot.fullPath;
+  }
 
-    // If there aren't any preferences, assign the default values
-    if ( !preferences.get( 'list' ) ) {
-        preferences.definePreference( 'list', 'array', defaults );
-        preferences.set( 'list', preferences.get( 'list' ) );
+  ProjectManager.on('projectOpen', fetchVariables);
+
+  ProjectManager.on('beforeProjectClose', function () {
+    excludeList = null;
+    projectRoot = null;
+    projectPath = null;
+  });
+
+  // Filter itself
+  var _oldFilter = FileSystemImpl.prototype._indexFilter;
+  FileSystemImpl.prototype._indexFilter = function (path, name) {
+
+    if (!excludeList || !projectPath) {
+      fetchVariables();
+      if (!excludeList || !projectPath) {
+        return _oldFilter.apply(this, arguments);
+      }
     }
 
-    // Our new filter
-    function new_filter( path, name ) {
-        var not_in_our_filter = _matched_files.indexOf( path ) === -1;
-        return not_in_our_filter ? _oldFilter.apply( this, arguments ) : not_in_our_filter;
-    }
+    var relativePath = path.slice(projectPath.length);
 
-    // Use the custom filter when Brackets is done loading
-    AppInit.appReady( function () {
+    var excluded = _.any(excludeList, function (toMatch) {
+      return relativePath.match(toMatch) != null;
+    });
 
-        if ( !Number.MAX_SAFE_INTEGER ) {
-            Number.MAX_SAFE_INTEGER = Math.pow( 2, 53 ) - 1;
-        }
+    return excluded ? false : _oldFilter.apply(this, arguments);
+  };
 
-        var allFiles = [];
-        ProjectManager.getProjectRoot().visit( function ( entry ) {
-            allFiles.push( entry );
-            return true;
-        }, {
-            maxEntries: Number.MAX_SAFE_INTEGER
-        }, function ( error ) {
-            if ( !error ) {
-                processFiles( allFiles );
-            } else {
-                console.error( 'More files than JavaScript allows :/' );
-            }
-        } );
-
-        // Get all files in an array
-        function processFiles( files ) {
-            // Grab our preferences
-            var list = preferences.get( 'list', preferences.CURRENT_PROJECT );
-
-            // No exclusions? Quit early.
-            if ( !list.length ) {
-                return false;
-            }
-
-            // Extend the list with wildcards
-            list = extendFilter( list );
-
-            // Get the project info
-            var projectRoot = ProjectManager.getProjectRoot();
-            var projectPath = projectRoot.fullPath;
-
-            // Loop over the files and see if we need to filter them
-            files.forEach( function ( file ) {
-                // Make path relative to project
-                var relative_path = file.fullPath.replace( projectPath, '' );
-                var result = matched( relative_path, list ); // A banned result was in the path
-
-                if ( result ) {
-                    _matched_files.push( file.fullPath );
-                } else {
-                    _unmatched_files.push( file.fullPath );
-                }
-            } );
-
-            // Apply a fix for Bracket's dumb filesystem handling
-            _matched_files = flatten( _matched_files, _unmatched_files );
-            // console.log( 'flattened', _matched_files );
-            // console.log( '_unmatched_files', _unmatched_files );
-
-            // Our filter is now the file filter
-            FileSystem.prototype._indexFilter = new_filter;
-
-            // Refresh the project to re-check the file filter
-            ProjectManager.refreshFileTree();
-        };
-    } );
-} );
+});

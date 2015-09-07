@@ -1,23 +1,21 @@
 {
-  "name": "jonwolfe.file-tree-exclude",
+  "name": "zaggino.file-tree-exclude",
   "title": "File Tree Exclude",
-  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is an updated version of Glenn Ruehle's now defunkt plugin.",
-  "version": "0.8.2",
-  "author": "Jon Wolfe <jonathanwolfe5@gmail.com> (https://github.com/JonathanWolfe/)",
+  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Martin Zagora",
+    "email": "zaggino@gmail.com",
+    "url": "https://github.com/zaggino"
+  },
   "license": "MIT",
   "engines": {
     "brackets": ">=0.34.0"
   },
   "main": "main.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/JonathanWolfe/file-tree-exclude.git"
+    "url": "https://github.com/zaggino/file-tree-exclude.git"
   },
   "keywords": [
     "exclude",
@@ -26,7 +24,7 @@
     "hide"
   ],
   "bugs": {
-    "url": "https://github.com/JonathanWolfe/file-tree-exclude/issues"
+    "url": "https://github.com/zaggino/file-tree-exclude/issues"
   },
-  "homepage": "https://github.com/JonathanWolfe/file-tree-exclude"
+  "homepage": "https://github.com/zaggino/file-tree-exclude"
 }
