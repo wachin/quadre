@@ -1,6 +1,6 @@
 {
   "name": "zaggino.file-tree-exclude",
-  "title": "File Tree Exclude",
+  "title": "File Tree Exclude (fork by zaggino)",
   "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
   "version": "1.0.0",
   "author": {
