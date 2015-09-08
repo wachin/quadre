@@ -1,6 +1,6 @@
 {
   "name": "brackets-file-tree-exclude",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
   "keywords": [
     "brackets-extension",

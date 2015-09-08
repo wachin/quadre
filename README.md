@@ -30,14 +30,17 @@ Create a `.brackets.json` in project root (it may already exist) and add your se
 ```JSON
 {
 	"brackets-file-tree-exclude.excludeList": [
-		"(^|/)\.git($|/)",
-        "(^|/)dist($|/)",
-        "(^|/)bower_components($|/)",
-        "(^|/)node_modules($|/)"
+		"/.git/",
+        "/dist/",
+        "/bower_components/",
+        "/node_modules/"
     ]
 }
 ```
 
 ## How it Matches
 
-Matches are done using JavaScript regexp's relatively to the current project root. Don't forget to escape special characters like dots.
+Strings are escaped to regexp's and matched against relative path of the file in the tree.
+To exclude a directory called `node_modules` use `/node_modules/`.
+Using `/dist` will exclude all directories and files starting with `dist`.
+Using `.min.js/` will exclude all files (and directories) ending with `.min.js`.

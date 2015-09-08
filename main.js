@@ -11,10 +11,10 @@ define(function (require, exports, module) {
 
   // Default excludes
   var defaultExcludeList = [
-    '(^|/)\.git($|/)',
-    '(^|/)dist($|/)',
-    '(^|/)bower_components($|/)',
-    '(^|/)node_modules($|/)'
+    '/.git/',
+    '/dist/',
+    '/bower_components/',
+    '/node_modules/'
   ];
 
   // Get the preferences for this extension
@@ -31,8 +31,20 @@ define(function (require, exports, module) {
     preferences.set('excludeList', defaultExcludeList);
   }
 
+  function toRegexp(str) {
+    if (typeof str !== 'string') { str = str.toString(); }
+    // https://github.com/sindresorhus/escape-string-regexp/blob/master/index.js
+    str = str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+    // if starts with slash, make it possible start of the string too
+    if (str[0] === '/') { str = '(^|/)' + str.slice(1); }
+    // if ends with slash, make it possible end of the string too
+    if (str.slice(-1) === '/') { str = str.slice(0, -1) + '(/|$)'; }
+    return str;
+  }
+
   function fetchVariables() {
     excludeList = preferences.get('excludeList', preferences.CURRENT_PROJECT);
+    excludeList = excludeList.map(toRegexp);
     var projectRoot = ProjectManager.getProjectRoot();
     projectPath = projectRoot ? projectRoot.fullPath : null;
   }
