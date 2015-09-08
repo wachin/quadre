@@ -1,7 +1,7 @@
 {
   "name": "brackets-file-tree-exclude",
   "version": "1.0.3",
-  "description": "Excludes folders from the Brackets file system to avoid the 30,000 file limit. This is my rewrite of Jon Wolfe's extension of the same name.",
+  "description": "Excludes folders from the Brackets file system to avoid performance problems.",
   "keywords": [
     "brackets-extension",
     "brackets",
@@ -9,8 +9,8 @@
     "folders",
     "hide"
   ],
-  "homepage": "https://github.com/zaggino/file-tree-exclude",
-  "bugs": "https://github.com/zaggino/file-tree-exclude/issues",
+  "homepage": "https://github.com/zaggino/brackets-file-tree-exclude",
+  "bugs": "https://github.com/zaggino/brackets-file-tree-exclude/issues",
   "license": "MIT",
   "author": {
     "name": "Martin Zagora",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaggino/file-tree-exclude.git"
+    "url": "https://github.com/zaggino/brackets-file-tree-exclude.git"
   },
   "engines": {
     "brackets": ">=1.2.0"

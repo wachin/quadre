@@ -1,11 +1,15 @@
 # Brackets File Tree Exclude
 
 Brackets extension for excluding folders and files from the file tree, find in files, and quick open.
-This means that the files will be completely invisible to Brackets (and thankfully not count against the 30,000 file limit). 
+
+This means that the files will be completely invisible to Brackets what will greatly improve overall performance of the editor.
 
 This is great for cache folders, distribution/build folders and files, and package manager folders like `node_modules` and `bower_components`.
 
-This is a rewrite of Jon Wolfe's extension - [file-tree-exclude](https://github.com/JonathanWolfe/file-tree-exclude).
+## Based on works of:
+
+[JonathanWolfe/file-tree-exclude](https://github.com/JonathanWolfe/file-tree-exclude)
+[gruehle/exclude-folders](https://github.com/gruehle/exclude-folders)
 
 ## How to install
 
