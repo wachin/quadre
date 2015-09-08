@@ -6,41 +6,45 @@ define(function (require, exports, module) {
   var FileSystemImpl = brackets.getModule('filesystem/FileSystem')._FileSystem;
   var ProjectManager = brackets.getModule('project/ProjectManager');
   var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
-
-  // Constants
-  var MODULE_ID = 'brackets-file-tree-exclude';
+  var PackageJson = JSON.parse(require('text!./package.json'));
+  var StateManager = PreferencesManager.stateManager;
 
   // Default excludes
   var defaultExcludeList = [
-    '^.git($|/)',
-    '^dist($|/)',
-    '^bower_components($|/)',
-    '^node_modules($|/)'
+    '(^|/)\.git($|/)',
+    '(^|/)dist($|/)',
+    '(^|/)bower_components($|/)',
+    '(^|/)node_modules($|/)'
   ];
 
   // Get the preferences for this extension
-  var preferences = PreferencesManager.getExtensionPrefs(MODULE_ID);
+  var preferences = PreferencesManager.getExtensionPrefs(PackageJson.name);
   preferences.definePreference('excludeList', 'array', defaultExcludeList);
 
   // projectRoot & projectPath
   var excludeList = null;
-  var projectRoot = null;
   var projectPath = null;
+
+  // Check if the extension has been updated
+  if (PackageJson.version !== StateManager.get(PackageJson.name + '.version')) {
+    StateManager.set(PackageJson.name + '.version', PackageJson.version);
+    preferences.set('excludeList', defaultExcludeList);
+  }
 
   function fetchVariables() {
     excludeList = preferences.get('excludeList', preferences.CURRENT_PROJECT);
-    preferences.set('excludeList', excludeList);
-    projectRoot = ProjectManager.getProjectRoot();
-    projectPath = projectRoot.fullPath;
+    var projectRoot = ProjectManager.getProjectRoot();
+    projectPath = projectRoot ? projectRoot.fullPath : null;
   }
 
-  ProjectManager.on('projectOpen', fetchVariables);
-
-  ProjectManager.on('beforeProjectClose', function () {
+  function clearVariables() {
     excludeList = null;
-    projectRoot = null;
     projectPath = null;
-  });
+  }
+
+  // attach events
+  ProjectManager.on('projectOpen', fetchVariables);
+  ProjectManager.on('beforeProjectClose', clearVariables);
 
   // Filter itself
   var _oldFilter = FileSystemImpl.prototype._indexFilter;

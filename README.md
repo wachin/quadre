@@ -41,10 +41,10 @@ Configuration defaults
 ```JSON
 {
 	"brackets-file-tree-exclude.excludeList": [
-		"^.git($|/)",
-        "^dist($|/)",
-        "^bower_components($|/)",
-        "^node_modules($|/)"
+		"(^|/)\.git($|/)",
+        "(^|/)dist($|/)",
+        "(^|/)bower_components($|/)",
+        "(^|/)node_modules($|/)"
     ]
 }
 ```
