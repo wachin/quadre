@@ -3,7 +3,10 @@ define(function (require, exports, module) {
 
   // Get our Brackets modules
   var _ = brackets.getModule('thirdparty/lodash');
-  var FileSystemImpl = brackets.getModule('filesystem/FileSystem')._FileSystem;
+  var Commands = brackets.getModule('command/Commands');
+  var CommandManager = brackets.getModule('command/CommandManager');
+  var FileSystem = brackets.getModule('filesystem/FileSystem');
+  var FileSystemImpl = FileSystem._FileSystem;
   var ProjectManager = brackets.getModule('project/ProjectManager');
   var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
   var PackageJson = JSON.parse(require('text!./package.json'));
@@ -42,21 +45,29 @@ define(function (require, exports, module) {
     return str;
   }
 
-  function fetchVariables() {
-    excludeList = preferences.get('excludeList', preferences.CURRENT_PROJECT);
-    excludeList = excludeList.map(toRegexp);
+  function fetchVariables(forceRefresh) {
     var projectRoot = ProjectManager.getProjectRoot();
     projectPath = projectRoot ? projectRoot.fullPath : null;
+    excludeList = preferences.get('excludeList', projectPath);
+    excludeList = excludeList.map(toRegexp);
+
+    if (forceRefresh === true) {
+      CommandManager.execute(Commands.FILE_REFRESH);
+    }
   }
 
   function clearVariables() {
-    excludeList = null;
     projectPath = null;
   }
 
   // attach events
-  ProjectManager.on('projectOpen', fetchVariables);
-  ProjectManager.on('beforeProjectClose', clearVariables);
+  ProjectManager.on('projectOpen', function () { fetchVariables(true); });
+  ProjectManager.on('projectRefresh', function () { fetchVariables(true); });
+  ProjectManager.on('beforeProjectClose', function () { clearVariables(); });
+  FileSystem.on('change', function (event, entry, added, removed) {
+    // entry === null when manual refresh is done
+    if (entry === null) { fetchVariables(false); }
+  });
 
   // Filter itself
   var _oldFilter = FileSystemImpl.prototype._indexFilter;
