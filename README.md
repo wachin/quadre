@@ -1,26 +1,17 @@
-Brackets File Tree Exclude
-===============
+# Brackets File Tree Exclude
 
-Brackets extension for excluding folders and files from the file tree, find in files, and quick open. This means that the files will be completely invisible to Brackets (and thnakfully not count against the 30,000 file limit). 
+Brackets extension for excluding folders and files from the file tree, find in files, and quick open.
+This means that the files will be completely invisible to Brackets (and thankfully not count against the 30,000 file limit). 
 
-This is great for cache folders, distribution/build folders and files, and those package manager folders like `node_modules` and `bower_components`.
+This is great for cache folders, distribution/build folders and files, and package manager folders like `node_modules` and `bower_components`.
 
-This is a rewritten version of Jon Wolfe's extension - [file-tree-exclude](https://github.com/JonathanWolfe/file-tree-exclude).
+This is a rewrite of Jon Wolfe's extension - [file-tree-exclude](https://github.com/JonathanWolfe/file-tree-exclude).
 
-Install
----------------
+## How to install
 
-1. Launch Brackets
-2. Select _File > Extension Manager..._ or click the Lego icon in the toolbar
-3. Search for `File Tree Exclude`
+Use [brackets-npm-registry](https://github.com/zaggino/brackets-npm-registry)
 
-If a manual install is more your thing (or it's missing from the registry):
-
-1. Click the "Install from URL..." button
-2. Paste (or enter) `https://github.com/zaggino/file-tree-exclude.git` and click "Install"
-
-Configure
----------------
+## Configure
 
 Exclusions are defined globally by default inside the Brackets preferences file (_Debug > Open preferences file_).
 
@@ -30,13 +21,11 @@ Append or edit your configuration options there. (See below for example of defau
 
 Create a `.brackets.json` in project root (it may already exist) and add your settings there.
 
-Note:
----------------
+## Note
 
 **Project config completely redefine exclusion rules from global config.**
 
-Configuration defaults
----------------
+## Configuration defaults
 
 ```JSON
 {
@@ -49,6 +38,6 @@ Configuration defaults
 }
 ```
 
-How it Matches
----------------
-Matches are done using JavaScript regexp's relatively to current project root.
+## How it Matches
+
+Matches are done using JavaScript regexp's relatively to the current project root. Don't forget to escape special characters like dots.
