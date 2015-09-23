@@ -257,11 +257,6 @@ module.exports = function (grunt) {
             }
         },
         jshint: {
-            all: [
-                '<%= meta.grunt %>',
-                '<%= meta.src %>',
-                '<%= meta.test %>'
-            ],
             grunt:  '<%= meta.grunt %>',
             src:    '<%= meta.src %>',
             test:   '<%= meta.test %>',
@@ -282,7 +277,7 @@ module.exports = function (grunt) {
     grunt.registerTask('install', ['write-config', 'less']);
 
     // task: test
-    grunt.registerTask('test', ['jshint:all']);
+    grunt.registerTask('test', ['jshint', 'nls-check']);
 
     // task: set-release
     // Update version number in package.json and rewrite src/config.json
