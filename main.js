@@ -66,7 +66,11 @@ define(function (require, exports, module) {
   ProjectManager.on('beforeProjectClose', function () { clearVariables(); });
   FileSystem.on('change', function (event, entry, added, removed) {
     // entry === null when manual refresh is done
-    if (entry === null) { fetchVariables(false); }
+    if (entry == null) {
+      fetchVariables(false);
+    } else if (entry.name === '.brackets.json') {
+      fetchVariables(true);
+    }
   });
 
   // Filter itself
