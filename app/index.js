@@ -7,16 +7,18 @@
 var _ = require("lodash");
 var appInfo = require("../package.json");
 var path = require("path");
-var app = require("app"); // Electron module to control application life
-var BrowserWindow = require("browser-window"); // Electron to create native browser window
 var SocketServer = require("./socket-server"); // Implementation of Brackets' shell server
 var utils = require("./utils");
 var shellConfig = require("./shell-config");
 var shellState = require("./shell-state");
 
+var electron = require("electron");
+var app = electron.app; // Electron module to control application life
+var BrowserWindow = electron.BrowserWindow; // Electron to create native browser window
+
 // Report crashes to electron server
 // TODO: doesn't work
-// require("crash-reporter").start();
+// electron.crashReporter.start();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.

@@ -6,7 +6,8 @@ var assert = require("assert");
 var shell = require("shell");
 var utils = require("../utils");
 
-var remote = require("remote");
+var electron = require("electron");
+var remote = electron.remote;
 var electronApp = remote.require("app");
 var shellState = remote.require("./shell-state");
 

@@ -4,11 +4,13 @@
 
 var _ = require("lodash");
 _.mixin(require("lodash-deep"));
-var app = require("app");
 var fs = require("fs-extra");
 var path = require("path");
 var utils = require("./utils");
 var os = require("os");
+
+var electron = require("electron");
+var app = electron.app;
 
 var CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
 var config;

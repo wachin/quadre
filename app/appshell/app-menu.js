@@ -5,7 +5,9 @@
 var _ = require("lodash");
 var main = require("../index");
 var assert = require("assert");
-var Menu = require("menu");
+
+var electron = require("electron");
+var Menu = electron.Menu;
 
 var menuTemplate = [];
 
