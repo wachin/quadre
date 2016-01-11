@@ -3,7 +3,9 @@
 "use strict";
 
 var _ = require("lodash");
-var remote = require("remote");
+var electron = require("electron");
+
+var remote = electron.remote;
 var app = _.extend({}, require("./app"), remote.require("./appshell/app-menu"));
 var fs = _.extend({}, require("fs-extra"), require("./fs-additions"));
 

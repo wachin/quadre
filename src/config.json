@@ -49,13 +49,13 @@
         "ws": "0.8.0"
     },
     "optionalDependencies": {
-        "fsevents": "1.0.0",
-        "pathwatcher": "6.2.5"
+        "fsevents": "1.0.6",
+        "pathwatcher": "6.3.1"
     },
     "devDependencies": {
-        "electron-packager": "https://github.com/zaggino/electron-packager.git",
-        "electron-prebuilt": "0.33.1",
-        "electron-rebuild": "1.0.0",
+        "electron-packager": "5.2.0",
+        "electron-prebuilt": "0.36.3",
+        "electron-rebuild": "1.1.1",
         "grunt": "0.4.5",
         "grunt-cleanempty": "1.0.3",
         "grunt-cli": "0.1.13",
@@ -86,9 +86,9 @@
         "postinstall": "grunt install",
         "test": "grunt cla-check-pull test",
         "start": "electron .",
-        "bundle-mac": "./bundle.sh darwin x64 0.26.0",
-        "bundle-win": "bundle.sh win32 x64 0.26.0",
-        "bundle-linux": "bundle.sh linux x64 0.26.0"
+        "bundle-mac": "./bundle.sh darwin x64 0.36.3",
+        "bundle-win": "bundle.sh win32 x64 0.36.3",
+        "bundle-linux": "bundle.sh linux x64 0.36.3"
     },
     "licenses": [
         {

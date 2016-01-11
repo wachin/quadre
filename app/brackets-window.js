@@ -6,8 +6,11 @@
 // see https://github.com/atom/electron/blob/master/docs/api/window-open.md
 
 var assert = require("assert");
-var BrowserWindow = require("browser-window");
 var URL = require("url");
+
+var electron = require("electron");
+var BrowserWindow = electron.BrowserWindow;
+
 var windows = {};
 
 function resolveUrl(url) {
