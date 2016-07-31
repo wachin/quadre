@@ -1,6 +1,7 @@
 {
   "name": "brackets-file-tree-exclude",
   "version": "1.0.4",
+  "title": "File tree exclude",
   "description": "Excludes folders from the Brackets file system to avoid performance problems.",
   "keywords": [
     "brackets-extension",
