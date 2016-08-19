@@ -265,47 +265,6 @@ module.exports = function (grunt) {
                 tasks: ['eslint:test']
             }
         },
-        /* FIXME (jasonsanjose): how to handle extension tests */
-        jasmine : {
-            src : 'undefined.js', /* trick the default runner to run without importing src files */
-            options : {
-                junit : {
-                    path: 'test/results',
-                    consolidate: true
-                },
-                specs : '<%= meta.specs %>',
-                /* Keep in sync with test/SpecRunner.html dependencies */
-                vendor : [
-                    'test/polyfills.js', /* For reference to why this polyfill is needed see Issue #7951. The need for this should go away once the version of phantomjs gets upgraded to 2.0 */
-                    'src/thirdparty/jquery-2.1.3.min.js',
-                    'src/thirdparty/CodeMirror/lib/codemirror.js',
-                    'src/thirdparty/CodeMirror/lib/util/dialog.js',
-                    'src/thirdparty/CodeMirror/lib/util/searchcursor.js',
-                    'src/thirdparty/CodeMirror/addon/edit/closetag.js',
-                    'src/thirdparty/CodeMirror/addon/selection/active-line.js',
-                    'src/thirdparty/less-2.5.1.min.js'
-                ],
-                helpers : [
-                    'test/spec/PhantomHelper.js'
-                ],
-                template : require('grunt-template-jasmine-requirejs'),
-                templateOptions: {
-                    requireConfig : {
-                        baseUrl: 'src',
-                        paths: {
-                            'test' : '../test',
-                            'perf' : '../test/perf',
-                            'spec' : '../test/spec',
-                            'text' : 'thirdparty/text/text',
-                            'i18n' : 'thirdparty/i18n/i18n'
-                        }
-                    }
-                }
-            }
-        },
-        'jasmine_node': {
-            projectRoot: 'src/extensibility/node/spec/'
-        },
         eslint: {
             grunt:  '<%= meta.grunt %>',
             src:    '<%= meta.src %>',
@@ -326,8 +285,7 @@ module.exports = function (grunt) {
     grunt.registerTask('install', ['write-config', 'less']);
 
     // task: test
-    grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
-//    grunt.registerTask('test', ['eslint', 'jasmine', 'jasmine_node', 'nls-check']);
+    grunt.registerTask('test', ['eslint', 'nls-check']);
 
     // task: set-release
     // Update version number in package.json and rewrite src/config.json
@@ -336,7 +294,6 @@ module.exports = function (grunt) {
     // task: build
     grunt.registerTask('build', [
         'eslint:src',
-        'jasmine',
         'clean',
         'less',
         'targethtml',
