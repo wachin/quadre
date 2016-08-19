@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (c) 2012 - present Adobe Systems Incorporated. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,9 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define */
 
 /*
  * __CodeHintManager Overview:__
@@ -265,7 +262,7 @@ define(function (require, exports, module) {
     PreferencesManager.on("change", "showCodeHints", function () {
         codeHintsEnabled = PreferencesManager.get("showCodeHints");
     });
-    
+
     /**
      * Comparator to sort providers from high to low priority
      */
@@ -358,7 +355,7 @@ define(function (require, exports, module) {
      */
     function _getProvidersForLanguageId(languageId) {
         var providers = hintProviders[languageId] || hintProviders.all;
-        
+
         // Exclude providers that are explicitly disabled in the preferences.
         // All code hint providers that do not have their constructor
         // names listed in the preferences are enabled by default.
@@ -477,7 +474,7 @@ define(function (require, exports, module) {
         if (editor.getSelections().length > 1) {
             return;
         }
-        
+
         // Find a suitable provider, if any
         var language = editor.getLanguageForSelection(),
             enabledProviders = _getProvidersForLanguageId(language.getId());
@@ -586,7 +583,7 @@ define(function (require, exports, module) {
             }
         }
     }
-    
+
     /**
      * Handle a selection change event in the editor. If the selection becomes a
      * multiple selection, end our current session.

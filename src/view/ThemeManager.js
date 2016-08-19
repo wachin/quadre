@@ -21,8 +21,8 @@
  *
  */
 
-/*jslint vars: true, plusplus: true, devel: true, regexp: true, nomen: true, indent: 4, maxerr: 50 */
-/*global $, define, less */
+/*jslint regexp: true */
+/*global less */
 
 define(function (require, exports, module) {
     "use strict";
@@ -358,9 +358,9 @@ define(function (require, exports, module) {
         refresh();
     });
 
-    
+
     EventDispatcher.makeEventDispatcher(exports);
-    
+
     exports.refresh         = refresh;
     exports.loadFile        = loadFile;
     exports.loadPackage     = loadPackage;

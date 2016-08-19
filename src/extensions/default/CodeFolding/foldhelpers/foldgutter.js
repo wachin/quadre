@@ -2,8 +2,7 @@
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 // Based on http://codemirror.net/addon/fold/foldgutter.js
 // Modified by Patrick Oladimeji for Brackets
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets, document, window, $*/
+
 define(function (require, exports, module) {
     "use strict";
     var CodeMirror      = brackets.getModule("thirdparty/CodeMirror/lib/codemirror"),
@@ -28,7 +27,7 @@ define(function (require, exports, module) {
       * @return {HTMLElement} a htmlelement representing the fold marker
       */
     function marker(spec) {
-        var elt = document.createElement("div");
+        var elt = window.document.createElement("div");
         elt.className = spec;
         return elt;
     }
@@ -100,6 +99,7 @@ define(function (require, exports, module) {
                 i = sr.to.line + 1;
             } else {
                 range = cm._lineFolds[i] || (func && func(cm, pos));
+             
                 if (!fade || (fade && $gutter.is(":hover"))) {
                     if (cm.isFolded(i)) {
                         // expand fold if invalid
@@ -357,6 +357,7 @@ define(function (require, exports, module) {
       * @param {!Object} to the ch and line position that designates the end of the region
       */
     function onFold(cm, from, to) {
+        var state = cm.state.foldGutter;
         updateFoldInfo(cm, from.line, from.line + 1);
     }
 
@@ -367,7 +368,10 @@ define(function (require, exports, module) {
       * @param {!{line:number, ch:number}} to the ch and line position that designates the end of the region
       */
     function onUnFold(cm, from, to) {
-        updateFoldInfo(cm, from.line, from.line + 1);
+        var state = cm.state.foldGutter;
+        var vp = cm.getViewport();
+        delete cm._lineFolds[from.line];
+        updateFoldInfo(cm, from.line, to.line || vp.to);
     }
 
     /**

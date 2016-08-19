@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (c) 2015 - present Adobe Systems Incorporated. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,9 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define */
 
 define({
 
@@ -380,6 +377,9 @@ define({
     "VIEW_MENU"                           : "Näytä",
     "CMD_HIDE_SIDEBAR"                    : "Piilota sivupalkki",
     "CMD_SHOW_SIDEBAR"                    : "Näytä sivupalkki",
+    "CMD_TOGGLE_SIDEBAR"                  : "Näytä tai piilota sivupalkki",
+    "CMD_TOGGLE_PANELS"                   : "Näytä tai piilota paneelit",
+    "CMD_TOGGLE_PURE_CODE"                : "Ei häiriötekijöitä",
     "CMD_INCREASE_FONT_SIZE"              : "Suurenna tekstikokoa",
     "CMD_DECREASE_FONT_SIZE"              : "Pienennä tekstikokoa",
     "CMD_RESTORE_FONT_SIZE"               : "Palauta tekstikoko",
@@ -437,17 +437,17 @@ define({
     "RELEASE_BUILD"                        : "koontiversio",
     "DEVELOPMENT_BUILD"                    : "kehityskoontiversio",
     "RELOAD_FROM_DISK"                     : "Lataa uudelleen levyltä",
-    "KEEP_CHANGES_IN_EDITOR"               : "Pidä muutokset muokkaimessa",
+    "KEEP_CHANGES_IN_EDITOR"               : "Pidä muutokset editorissa",
     "CLOSE_DONT_SAVE"                      : "Sulje (Älä tallenna)",
     "RELAUNCH_CHROME"                      : "Käynnistä Chrome uudelleen",
     "ABOUT"                                : "Tietoja",
     "CLOSE"                                : "Sulje",
     "ABOUT_TEXT_LINE1"                     : "Julkaisu {VERSION_MAJOR}.{VERSION_MINOR}, {BUILD_TYPE} {VERSION}",
     "ABOUT_TEXT_BUILD_TIMESTAMP"           : "koontiversion aikaleima: ",
-    "ABOUT_TEXT_LINE3"                     : "Kolmannen osapuolen ohjelmistoihin liittyvät ilmoitukset ja ehdot sijaitsevat osoitteessa <a href='{ADOBE_THIRD_PARTY}'>{ADOBE_THIRD_PARTY}</a> ja yhdistetään viitteisiin tässä.",
+    "ABOUT_TEXT_LINE3"                     : "Kolmannen osapuolen ohjelmistoja koskevat ilmoitukset ja ehdot sijaitsevat osoitteessa <a href='{ADOBE_THIRD_PARTY}'>{ADOBE_THIRD_PARTY}</a>, ja tässä ne esitetään viittauksena.",
     "ABOUT_TEXT_LINE4"                     : "Dokumentaatio ja lähdekoodi osoitteessa <a href='https://github.com/adobe/brackets/'>https://github.com/adobe/brackets/</a>",
     "ABOUT_TEXT_LINE5"                     : "He tekivät tämän \u2764:lla ja JavaScriptillä:",
-    "ABOUT_TEXT_LINE6"                     : "Monet ihmiset (mutta meillä on ongelmia ladata näitä tietoja nyt).",
+    "ABOUT_TEXT_LINE6"                     : "Monet ihmiset (mutta meillä on juuri nyt vaikeuksia ladata näitä tietoja).",
     "ABOUT_TEXT_WEB_PLATFORM_DOCS"         : "Web Platform \u2011dokumentit ja graafinen Web Platform \u2011logo on lisensoitu Creative Commons Attribution \u2011lisenssillä, <a href='{WEB_PLATFORM_DOCS_LICENSE}'>CC-BY 3.0 Unported</a>.",
     "UPDATE_NOTIFICATION_TOOLTIP"          : "Uusi {APP_NAME}-versio on saatavilla! Saat lisätietoja napsauttamalla tästä.",
     "UPDATE_AVAILABLE_TITLE"               : "Päivitys saatavilla",
@@ -461,7 +461,10 @@ define({
     "BASEURL_ERROR_HASH_DISALLOWED"        : "URL-osoite ei voi sisältää ristikkomerkkejä, kuten ”{0}”.",
     "BASEURL_ERROR_INVALID_CHAR"           : "Erikoismerkkkien, kuten ’{0}’, täytyy olla %-koodattu.",
     "BASEURL_ERROR_UNKNOWN_ERROR"          : "Tuntematon virhe URL-osoitteen jäsentämisessä",
+
+    // Strings for Pane.js
     "EMPTY_VIEW_HEADER"                    : "<em>Avaa tiedosto tämän ruudun ollessa valittuna</em>",
+    "FLIPVIEW_BTN_TOOLTIP"                 : "Heitä tämä näkymä {0} paneeliin",
 
     // Strings for themes-settings.html and themes-general.html
     "CURRENT_THEME"                        : "Nykyinen teema",
@@ -685,6 +688,7 @@ define({
     "DESCRIPTION_ATTR_HINTS"                         : "Näytä tai piilota HTML-attribuuttien vihjeet",
     "DESCRIPTION_CSS_PROP_HINTS"                     : "Näytä tai piilota CSS/LESS/SCSS-ominaisuuksien vihjeet",
     "DESCRIPTION_JS_HINTS"                           : "Näytä tai piilota JavaScript-koodin vihjeet",
+    "DESCRIPTION_JS_HINTS_TYPE_DETAILS"              : "Näytä tai piilota datatyyppien yksityiskohdat JavaScript-koodin vihjeissä",
     "DESCRIPTION_PREF_HINTS"                         : "Näytä tai piilota asetusten koodin vihjeet",
     "DESCRIPTION_SPECIAL_CHAR_HINTS"                 : "Näytä tai piilota HTML-entiteettien vihjeet",
     "DESCRIPTION_SVG_HINTS"                          : "Näytä tai piilota SVG-koodin vihjeet",
@@ -767,8 +771,11 @@ define({
     "DESCRIPTION_FONT_SMOOTHING"                     : "Vain Mac: ota käyttöön alipikselien reunapehmennys valinnalla ”subpixel-antialiased” tai harmaansävyinen reunapehmennys valinnalla ”antialiased”",
     "DESCRIPTION_OPEN_PREFS_IN_SPLIT_VIEW"           : "false: poista asetustiedoston avaaminen käytöstä jaetussa näkymässä",
     "DESCRIPTION_OPEN_USER_PREFS_IN_SECOND_PANE"     : "false: avaa käyttäjän asetustiedosto vasemmassa tai ylemmässä ruudussa",
+    "DESCRIPTION_MERGE_PANES_WHEN_LAST_FILE_CLOSED"  : "true: yhdistä ruudut sen jälkeen, kun ruudun viimeinen tiedosto on suljettu ruudun yläosassa olevalla sulkupaikkeella",
+    "DESCRIPTION_SHOW_PANE_HEADER_BUTTONS"           : "Valitse, milloin sulku- ja flip view \u2011painikkeet näkyvät paneelin yläosassa",
     "DEFAULT_PREFERENCES_JSON_HEADER_COMMENT"        : "/*\n * Tämä on vain luku -tiedosto {APP_NAME}in tukemista\n * asetuksista.\n * Käytä tätä apuna, kun muutat asetustiedostoasi\n * ”brackets.json”, joka on avattu toiseen ruutuun.\n * Lisätietoa siitä, kuinka käyttää asetuksia {APP_NAME}issa,\n * löydät verkkosivulta osoitteessa https://github.com/adobe/brackets/wiki/How-to-Use-Brackets#preferences\n */",
-    "DEFAULT_PREFERENCES_JSON_DEFAULT"               : "Oletus"
+    "DEFAULT_PREFERENCES_JSON_DEFAULT"               : "Oletus",
+    "DESCRIPTION_PURE_CODING_SURFACE"                : "true: ota vain koodi \u2011näkymä käyttöön ja piilota muut {APP_NAME}in käyttöliittymäelementit"
 });
 
-/* Last translated for 1eba0ae1cb21e73752c8359132b972ec7e5997ab */
+/* Last translated for fcd2e98ef35c110e00aebfbb6d3c3816e5156552 */
