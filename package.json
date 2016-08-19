@@ -22,6 +22,7 @@
     "portscanner": "1.0.0",
     "strip-bom": "2.0.0",
     "trash": "2.0.0",
+    "typescript": "2.0.0",
     "watch": "0.16.0",
     "ws": "0.8.0"
   },
@@ -52,6 +53,7 @@
     "load-grunt-tasks": "3.5.0",
     "q": "1.4.1",
     "semver": "5.0.3",
+    "tslint": "3.14.0",
     "xmldoc": "0.3.2"
   },
   "bin": {
@@ -61,7 +63,8 @@
   "scripts": {
     "install": "pre-rebuild.sh && electron-rebuild",
     "postinstall": "grunt install",
-    "test": "grunt test",
+    "dev": "tsc --watch",
+    "test": "tsc && tslint -c tslint.json --project tsconfig.json",
     "start": "electron .",
     "bundle-mac": "bundle.sh darwin x64 0.36.3",
     "bundle-win": "bundle.sh win32 x64 0.36.3",
