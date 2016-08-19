@@ -1,5 +1,5 @@
-var electron = require("electron");
-var t;
+import * as electron from "electron";
+let t;
 
 try {
     t = {
@@ -9,13 +9,13 @@ try {
         module: module,
         __filename: __filename,
         __dirname: __dirname,
-        appshell: require("../app/appshell/index")
+        appshell: require("./appshell/index")
     };
 } catch (err) {
-    electron.ipcRenderer.send('log', err.stack);
+    electron.ipcRenderer.send("log", err.stack);
 }
 
-process.once('loaded', function () {
+process.once("loaded", function () {
     // expose electron renderer process modules
     global.electron = t.electron;
     // expose node stuff under node global wrapper because of requirejs

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "sourceMap": false,
+    "sourceMap": true,
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -10,11 +10,12 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "noImplicitReturns": true,
-    "pretty": false,
+    "noUnusedLocals": true,
     "removeComments": true,
     "strictNullChecks": false
   },
-  "exclude": [
-    "node_modules"
+  "include": [
+    "electron-app/**/*"
   ]
 }
+

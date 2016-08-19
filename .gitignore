@@ -40,5 +40,5 @@ Thumbs.db
 /src/extensibility/node/node_modules/request/tests/
 
 # Build packages
-/Bracketron-win32/
-/Bracketron.app/
+/Brackets-Electron-win32/
+/Brackets-Electron.app/

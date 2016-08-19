@@ -30,6 +30,10 @@
         "javascript": {
             "linting.prefer": ["ESLint"],
             "linting.usePreferredOnly": true
+        },
+        "typescript": {
+            "linting.prefer": ["TypeScript"],
+            "linting.usePreferredOnly": true
         }
     },
     "path": {

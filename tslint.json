@@ -2,12 +2,9 @@
   "extends": "tslint:latest",
   "rules": {
     "interface-name": false,
-    "member-access": false,
-    "no-console": false,
-    "no-var-requires": false,
+    "no-namespace": false,    
     "object-literal-sort-keys": false,
-    "quotemark": [true, "single"],
-    "trailing-comma": [true, "never"],
-    "variable-name": false
+    "quotemark": [true, "double"],
+    "trailing-comma": [true, "never"]
   }
 }
