@@ -16,6 +16,10 @@ var electron = require("electron");
 var app = electron.app; // Electron module to control application life
 var BrowserWindow = electron.BrowserWindow; // Electron to create native browser window
 
+electron.ipcMain.on('log', function (event, message) {
+    console.log('ipc-log:', message);
+});
+
 // Report crashes to electron server
 // TODO: doesn't work
 // electron.crashReporter.start();
@@ -86,13 +90,16 @@ function openBracketsWindow(queryObj) {
     var indexUrl = indexPath + queryString;
 
     var winOptions = {
-        preload: require.resolve("./preload"),
         title: appInfo.productName,
         icon: path.resolve(__dirname, "res", "appicon.png"),
         x: shellConfig.get("window.posX"),
         y: shellConfig.get("window.posY"),
         width: shellConfig.get("window.width"),
-        height: shellConfig.get("window.height")
+        height: shellConfig.get("window.height"),
+        webPreferences: {
+            nodeIntegration: false,
+            preload: path.resolve(__dirname, "preload.js")
+        }
     };
 
     // create the browser window

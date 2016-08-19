@@ -1,24 +1,34 @@
-(function () {
-    "use strict";
+var electron = require("electron");
+var t;
 
-    // expose electron renderer process modules
-    window.electron = require("electron");
-
-    // TODO: found the reason why ipcRenderer/ipcMain aren't enough...
-    window.electron.ipc = require("ipc");
-
-    // move injected node variables, do not move "process" as that'd break node.require
-    window.node = {
-        process: window.process
+try {
+    t = {
+        electron: electron,
+        process: process,
+        require: require,
+        module: module,
+        __filename: __filename,
+        __dirname: __dirname,
+        appshell: require("../app/appshell/index")
     };
-    ["require", "module", "__filename", "__dirname"].forEach(function (name) {
-        window.node[name] = window[name];
-        delete window[name];
-    });
+} catch (err) {
+    electron.ipcRenderer.send('log', err.stack);
+}
 
+process.once('loaded', function () {
+    // expose electron renderer process modules
+    global.electron = t.electron;
+    // expose node stuff under node global wrapper because of requirejs
+    global.node = {
+        process: t.process,
+        require: t.require,
+        module: t.module,
+        __filename: t.__filename,
+        __dirname: t.__dirname
+    };
     // this is to fix requirejs text plugin
-    window.process.versions["node-webkit"] = true;
-
+    global.process = t.process;
+    global.process.versions["node-webkit"] = true;
     // inject appshell implementation into the browser window
-    window.appshell = window.brackets = window.node.require("../app/appshell");
-}());
+    global.appshell = global.brackets = t.appshell;
+});

@@ -62,7 +62,7 @@
     "install": "pre-rebuild.sh && electron-rebuild",
     "postinstall": "grunt install",
     "test": "grunt test",
-    "start": "electron",
+    "start": "electron .",
     "bundle-mac": "bundle.sh darwin x64 0.36.3",
     "bundle-win": "bundle.sh win32 x64 0.36.3",
     "bundle-linux": "bundle.sh linux x64 0.36.3"

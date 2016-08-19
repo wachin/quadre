@@ -7,8 +7,9 @@ var isbinaryfile = require("isbinaryfile");
 var stripBom = require("strip-bom");
 var trash = require("trash");
 var utils = require("../utils");
-var remote = require("remote");
-var dialog = remote.require("dialog");
+var electron = require("electron");
+var remote = electron.remote;
+var dialog = remote.dialog;
 
 /*
     additions to native fs provided by node

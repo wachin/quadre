@@ -2,14 +2,13 @@
 
 "use strict";
 
-var assert = require("assert");
-var shell = require("shell");
-var utils = require("../utils");
-
 var electron = require("electron");
+var assert = require("assert");
+var shell = electron.shell;
+var utils = require("../utils");
 var remote = electron.remote;
-var electronApp = remote.require("app");
-var shellState = remote.require("./shell-state");
+var electronApp = electron.remote.app;
+var shellState = electron.remote.require("./shell-state");
 
 var REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
 
