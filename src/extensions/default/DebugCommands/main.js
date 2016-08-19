@@ -106,7 +106,7 @@ define(function (require, exports, module) {
         var queryString = spec ? "?spec=" + spec : "";
         var url = [window.location.href, "../test/SpecRunner.html" + queryString];
         if (BracketsWindow.isOpen(TEST_WINDOW_ID)) {
-            BracketsWindow.loadUrl(url, TEST_WINDOW_ID);
+            BracketsWindow.loadURL(url, TEST_WINDOW_ID);
         } else {
             BracketsWindow.open(url, TEST_WINDOW_ID, {
                 width: $(window).width(),

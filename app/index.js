@@ -100,7 +100,7 @@ function openBracketsWindow(queryObj) {
     wins.push(win);
 
     // load the index.html of the app
-    win.loadUrl(indexUrl);
+    win.loadURL(indexUrl);
     if (shellConfig.get("window.maximized")) {
         win.maximize();
     }

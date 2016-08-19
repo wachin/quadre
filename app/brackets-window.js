@@ -38,7 +38,7 @@ function open(url, id, options) {
     win.on("closed", function() {
         windows[id] = null;
     });
-    win.loadUrl(resolveUrl(url));
+    win.loadURL(resolveUrl(url));
     windows[id] = win;
     // do not send complex objects across remote when not required
     return id;
@@ -48,14 +48,14 @@ function isOpen(id) {
     return windows[id] != null;
 }
 
-function loadUrl(url, id) {
+function loadURL(url, id) {
     assert(id, "id is required parameter");
     assert(windows[id], "window " + id + " is not open");
-    windows[id].loadUrl(resolveUrl(url));
+    windows[id].loadURL(resolveUrl(url));
 }
 
 module.exports = {
     open: open,
     isOpen: isOpen,
-    loadUrl: loadUrl
+    loadURL: loadURL
 };
