@@ -24,6 +24,7 @@ try {
 } catch (err) {
     if (err.code === "ENOENT") {
         config = fs.readJsonSync(path.resolve(__dirname, "default-shell-config.json"));
+        fs.ensureDirSync(path.dirname(CONFIG_PATH));
         fs.writeJsonSync(CONFIG_PATH, config);
     } else if (err.name === "SyntaxError") {
         throw new Error("File is not a valid json: " + CONFIG_PATH);
