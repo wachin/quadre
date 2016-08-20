@@ -2,6 +2,7 @@
 // see https://github.com/atom/electron/blob/master/docs/api/window-open.md
 
 import * as assert from "assert";
+import * as path from "path";
 import * as URL from "url";
 import { BrowserWindow } from "electron";
 

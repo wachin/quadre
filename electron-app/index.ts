@@ -68,7 +68,7 @@ export function openBracketsWindow(query: Object | string = {}) {
     // build a query for brackets' window
     let queryString = "";
     if (_.isObject(query) && !_.isEmpty(query)) {
-        const queryObj = query as Object;
+        const queryObj = query as _.Dictionary<string>;
         queryString = "?" + _.map(queryObj, function (value, key) {
             return key + "=" + encodeURIComponent(value);
         }).join("&");
@@ -90,10 +90,10 @@ export function openBracketsWindow(query: Object | string = {}) {
     const winOptions = {
         title: appInfo.productName,
         icon: path.resolve(__dirname, "res", "appicon.png"),
-        x: shellConfig.get("window.posX"),
-        y: shellConfig.get("window.posY"),
-        width: shellConfig.get("window.width"),
-        height: shellConfig.get("window.height"),
+        x: shellConfig.getNumber("window.posX"),
+        y: shellConfig.getNumber("window.posY"),
+        width: shellConfig.getNumber("window.width"),
+        height: shellConfig.getNumber("window.height"),
         webPreferences: {
             nodeIntegration: false,
             preload: path.resolve(__dirname, "preload.js")

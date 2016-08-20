@@ -1,20 +1,12 @@
-/*jshint globalstrict:true, node:true*/
-
-"use strict";
-
-var _ = require("lodash");
-var main = require("../index");
-var assert = require("assert");
-
-var electron = require("electron");
-var Menu = electron.Menu;
+import * as _ from "lodash";
+import * as assert from "assert";
+import { Menu } from "electron";
+import * as main from "../index";
 
 var menuTemplate = [];
 
-var app = module.exports = {
-    NO_ERROR: null,
-    ERR_NOT_FOUND: "NOTFOUND"
-};
+export const NO_ERROR = null;
+export const ERR_NOT_FOUND = "NOTFOUND";
 
 var __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
@@ -69,7 +61,14 @@ function _findMenuItemById(id, where) {
     return results.length > 0 ? results[0] : null;
 }
 
-function _addToPosition(obj, target, position, relativeId) {
+interface MenuItem {
+    id: string;
+    label: string;
+    type?: string;
+    click?: () => any;
+}
+
+function _addToPosition(obj: MenuItem, target, position, relativeId) {
     if (!target.push) {
         console.log("_addToPosition");
         console.log(target);
@@ -91,13 +90,13 @@ function _addToPosition(obj, target, position, relativeId) {
             idx = target.length;
         }
         if (position === "firstInSection") {
-            idxSection = _.findLastIndex(target, function (obj, i) {
+            idxSection = _.findLastIndex(target, function (obj: MenuItem, i) {
                 return i < idx && obj.type === "separator";
             });
             idx = idxSection + 1;
         }
         if (position === "lastInSection") {
-            idxSection = _.findIndex(target, function (obj, i) {
+            idxSection = _.findIndex(target, function (obj: MenuItem, i) {
                 return i >= idx && obj.type === "separator";
             });
             idx = idxSection === -1 ? target.length : idxSection;
@@ -133,7 +132,7 @@ function _fixBracketsKeyboardShortcut(shortcut) {
     return shortcut;
 }
 
-app.addMenu = function (title, id, position, relativeId, callback) {
+export function addMenu(title, id, position, relativeId, callback) {
     assert(title && typeof title === "string", "title must be a string");
     assert(id && typeof id === "string", "id must be a string");
     assert(!position || position && typeof position === "string", "position must be a string");
@@ -149,7 +148,7 @@ app.addMenu = function (title, id, position, relativeId, callback) {
     });
 };
 
-app.addMenuItem = function (parentId, title, id, key, displayStr, position, relativeId, callback) {
+export function addMenuItem(parentId, title, id, key, displayStr, position, relativeId, callback) {
     assert(parentId && typeof parentId === "string", "parentId must be a string");
     assert(title && typeof title === "string", "title must be a string");
     assert(id && typeof id === "string", "id must be a string");
@@ -191,7 +190,7 @@ app.addMenuItem = function (parentId, title, id, key, displayStr, position, rela
     });
 };
 
-app.getMenuItemState = function (commandId, callback) {
+export function getMenuItemState(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var obj = _findMenuItemById(commandId);
@@ -202,7 +201,7 @@ app.getMenuItemState = function (commandId, callback) {
     });
 };
 
-app.getMenuPosition = function (commandId, callback) {
+export function getMenuPosition(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var res = _findMenuItemPosition(commandId);
@@ -210,7 +209,7 @@ app.getMenuPosition = function (commandId, callback) {
     });
 };
 
-app.getMenuTitle = function (commandId, callback) {
+export function getMenuTitle(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var obj = _findMenuItemById(commandId);
@@ -221,7 +220,7 @@ app.getMenuTitle = function (commandId, callback) {
     });
 };
 
-app.removeMenu = function (commandId, callback) {
+export function removeMenu(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var deleted = _deleteMenuItemById(commandId);
@@ -229,7 +228,7 @@ app.removeMenu = function (commandId, callback) {
     });
 };
 
-app.removeMenuItem = function (commandId, callback) {
+export function removeMenuItem(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         var deleted = _deleteMenuItemById(commandId);
@@ -237,7 +236,7 @@ app.removeMenuItem = function (commandId, callback) {
     });
 };
 
-app.setMenuItemShortcut = function (commandId, shortcut, displayStr, callback) {
+export function setMenuItemShortcut(commandId, shortcut, displayStr, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(shortcut && typeof shortcut === "string", "shortcut must be a string");
     process.nextTick(function () {
@@ -252,7 +251,7 @@ app.setMenuItemShortcut = function (commandId, shortcut, displayStr, callback) {
     });
 };
 
-app.setMenuItemState = function (commandId, enabled, checked, callback) {
+export function setMenuItemState(commandId, enabled, checked, callback) {
     assert(typeof enabled === "boolean", "enabled must be a boolean");
     assert(typeof checked === "boolean", "checked must be a boolean");
     process.nextTick(function () {
@@ -272,7 +271,7 @@ app.setMenuItemState = function (commandId, enabled, checked, callback) {
     });
 };
 
-app.setMenuTitle = function (commandId, title, callback) {
+export function setMenuTitle(commandId, title, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(title && typeof title === "string", "title must be a string");
     process.nextTick(function () {

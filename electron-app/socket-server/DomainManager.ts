@@ -26,8 +26,7 @@
 (function () {
     "use strict";
 
-    var util              = require("util"),
-        ConnectionManager = require("./ConnectionManager");
+    var ConnectionManager = require("./ConnectionManager");
 
     /**
      * @constructor
@@ -240,12 +239,8 @@
      *    should be absolute.
      * @return {boolean} Whether loading succeded. (Failure will throw an exception).
      */
-    function loadDomainModulesFromPaths(paths) {
-        var pathArray = paths;
-        if (!util.isArray(paths)) {
-            pathArray = [paths];
-        }
-        pathArray.forEach(function (path) {
+    function loadDomainModulesFromPaths(paths: string[]): boolean {
+        paths.forEach(function (path) {
             var m = require(path);
             if (m && m.init && _initializedDomainModules.indexOf(m) < 0) {
                 m.init(self);

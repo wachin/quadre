@@ -34,8 +34,16 @@ export function saveSync() {
     fs.writeJsonSync(CONFIG_PATH, config);
 }
 
-export function get(key) {
+export function get(key: string): any {
     return _.get(config, key);
+}
+
+export function getNumber(key: string): number {
+    const result = get(key);
+    if (typeof result !== "number") {
+        throw new Error(`getNumber -> not-a-number: ${result}`);
+    }
+    return result;
 }
 
 export function set(key, value) {

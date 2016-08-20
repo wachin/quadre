@@ -1,43 +1,36 @@
-/*jshint globalstrict:true, node:true*/
-
-"use strict";
-
-var fs = require("fs-extra");
-var isbinaryfile = require("isbinaryfile");
-var stripBom = require("strip-bom");
-var trash = require("trash");
-var utils = require("../utils");
-var electron = require("electron");
-var remote = electron.remote;
-var dialog = remote.dialog;
+import * as fs from "fs-extra";
+import * as utils from "../utils";
+import { remote } from "electron";
+const { dialog } = remote;
+const isbinaryfile = require("isbinaryfile");
+const stripBom = require("strip-bom");
+const trash = require("trash");
 
 /*
     additions to native fs provided by node
     to support functionality required by brackets
 */
 
-var fsAdditions = module.exports = {};
-
-fsAdditions.isBinaryFile = function (filename, callback) {
+export function isBinaryFile(filename, callback) {
     isbinaryfile(filename, callback);
 };
 
-fsAdditions.isBinaryFileSync = function (filename) {
+export function isBinaryFileSync(filename) {
     return isbinaryfile(filename);
 };
 
-fsAdditions.isEncodingSupported = function (encoding) {
+export function isEncodingSupported(encoding) {
     return ["ascii", "utf-8", "utf8"].indexOf(encoding.toLowerCase()) !== -1;
 };
 
-fsAdditions.isNetworkDrive = function (path, callback) {
+export function isNetworkDrive(path, callback) {
     // TODO: implement
     process.nextTick(function () {
         callback(null, false);
     });
 };
 
-fsAdditions.moveToTrash = function (path, callback) {
+export function moveToTrash(path, callback) {
     fs.stat(path, function (err) {
         if (err) {
             return callback(err);
@@ -47,13 +40,13 @@ fsAdditions.moveToTrash = function (path, callback) {
     });
 };
 
-fsAdditions.readTextFile = function (filename, encoding, callback) {
+export function readTextFile(filename, encoding, callback) {
     if (typeof encoding === "function") {
         callback = encoding;
         encoding = "utf-8";
     } else if (typeof encoding !== "string") {
         throw new TypeError("encoding must be a string");
-    } else if (!fsAdditions.isEncodingSupported(encoding)) {
+    } else if (!isEncodingSupported(encoding)) {
         throw new TypeError("encoding is not supported: " + encoding);
     }
     // isbinaryfile check first because it checks first 1000 bytes of a file
@@ -87,7 +80,7 @@ fsAdditions.readTextFile = function (filename, encoding, callback) {
     });
 };
 
-fsAdditions.remove = function (path, callback) {
+export function remove(path, callback) {
     fs.stat(path, function (err, stats) {
         if (err) {
             return callback(err);
@@ -96,7 +89,7 @@ fsAdditions.remove = function (path, callback) {
     });
 };
 
-fsAdditions.rename = function (oldPath, newPath, callback) {
+export function rename(oldPath, newPath, callback) {
     fs.stat(newPath, function (err, stats) {
         if (err && err.code === "ENOENT") {
             return fs.rename(oldPath, newPath, callback);
@@ -110,7 +103,7 @@ fsAdditions.rename = function (oldPath, newPath, callback) {
     });
 };
 
-fsAdditions.showOpenDialog = function (allowMultipleSelection, chooseDirectory, title, initialPath, fileTypes, callback) {
+export function showOpenDialog(allowMultipleSelection, chooseDirectory, title, initialPath, fileTypes, callback) {
     var properties = [];
     if (chooseDirectory) {
         properties.push("openDirectory");
@@ -132,7 +125,7 @@ fsAdditions.showOpenDialog = function (allowMultipleSelection, chooseDirectory, 
     });
 };
 
-fsAdditions.showSaveDialog = function (title, initialPath, proposedNewFilename, callback) {
+export function showSaveDialog(title, initialPath, proposedNewFilename, callback) {
     // TODO: Implement proposedNewFilename
     // TODO: I don't think defaultPath works right now - we should test that
     // Also, it doesn't return an error code on failure any more (and doesn't pass one to the callback as well)
@@ -143,5 +136,3 @@ fsAdditions.showSaveDialog = function (title, initialPath, proposedNewFilename, 
         callback(null, utils.convertWindowsPathToUnixPath(path));
     });
 };
-
-module.exports = fsAdditions;
