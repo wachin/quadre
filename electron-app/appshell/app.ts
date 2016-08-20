@@ -2,6 +2,7 @@
 
 "use strict";
 
+var path = require("path");
 var electron = require("electron");
 var assert = require("assert");
 var shell = electron.shell;
@@ -48,7 +49,9 @@ app.getApplicationSupportDirectory = function () {
 };
 
 app.getExtensionsFolder = function () {
-    return app.getApplicationSupportDirectory() + "/extensions";
+    return utils.convertWindowsPathToUnixPath(
+        path.resolve(app.getApplicationSupportDirectory(), "..", "Brackets", "extensions");
+    );
 };
 
 // TODO: it seems that both arguments aren't needed anymore
