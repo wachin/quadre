@@ -1,19 +1,15 @@
-var http = require("http");
-var Promise = require("bluebird");
-var WebSocketServer = require("ws").Server;
-var ConnectionManager = require("./ConnectionManager");
-var DomainManager = require("./DomainManager");
-var portscanner = require("portscanner");
+import * as http from "http";
+import * as ConnectionManager from "./connection-manager";
+import * as DomainManager from "./domain-manager";
+import * as Logger from "../logger";
+import { Server } from "ws";
+const log = Logger.get("socket-server");
+const portscanner = require("portscanner");
 
-var DEFAULT_PORT = 8123;
-var httpServer = null;
-var httpPort = null;
-var wsServer = null;
-
-function log(what) {
-    var time = new Date().toTimeString().substring(0,8);
-    console.log(time, "[socket-server]", what);
-}
+const DEFAULT_PORT = 8123;
+let httpServer = null;
+let httpPort = null;
+let wsServer = null;
 
 function initPort() {
     return new Promise(function (resolve, reject) {
@@ -29,20 +25,20 @@ function initPort() {
 
 function initHttp() {
     return new Promise(function (resolve, reject) {
-        var server = http.createServer(function(req, res) {
+        const server = http.createServer(function(req, res) {
             if (req.method === "GET" && req.url.indexOf("/api") === 0) {
                 res.setHeader("Content-Type", "application/json");
                 res.end(JSON.stringify(DomainManager.getDomainDescriptions(), null, 4));
                 return;
             }
-            log("received unhandled http request for " + req.url);
+            log.info("received unhandled http request for " + req.url);
             res.writeHead(404, {
                 "Content-Type": "text/plain"
             });
             res.end("Brackets-Shell Server");
         });
         server.on("error", function (err) {
-            log(err.name + ": " + err.message);
+            log.error(err.name + ": " + err.message);
         });
         server.listen(httpPort, function() {
             httpServer = server;
@@ -52,11 +48,11 @@ function initHttp() {
 }
 
 function initWebsockets() {
-    wsServer = new WebSocketServer({
+    wsServer = new Server({
         server: httpServer
     });
     wsServer.on("error", function (err) {
-        log("wsServer error: " + err);
+        log.error("wsServer error: " + err);
     });
     wsServer.on("connection", ConnectionManager.createConnection);
 }
@@ -75,7 +71,8 @@ export function start(callback) {
         .then(function () {
             return httpPort;
         })
-        .nodeify(callback);
+        .then(res => callback(null, res))
+        .catch(err => callback(err));
 };
 
 export function stop(callback) {
@@ -83,14 +80,14 @@ export function stop(callback) {
         wsServer.close();
         wsServer = null;
     } else {
-        log("wsServer not running but stop has been called!");
+        log.warn("wsServer not running but stop has been called!");
     }
 
     if (httpServer) {
         httpServer.close();
         httpServer = null;
     } else {
-        log("httpServer not running but stop has been called!");
+        log.warn("httpServer not running but stop has been called!");
     }
 
     ConnectionManager.closeAllConnections();

@@ -48,6 +48,7 @@
     "@types/fs-extra": "0.0.30",
     "@types/lodash": "4.14.32",
     "@types/node": "6.0.36",
+    "@types/ws": "0.0.29",
     "concurrently": "2.2.0",
     "electron-builder": "5.26.0",
     "electron-packager": "7.6.0",

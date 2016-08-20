@@ -1,14 +1,16 @@
+interface MenuItemOptions extends Electron.MenuItemOptions {}
+
 import * as _ from "lodash";
 import * as assert from "assert";
 import { Menu } from "electron";
 import * as main from "../index";
 
-var menuTemplate = [];
+const menuTemplate: MenuItemOptions[] = [];
 
 export const NO_ERROR = null;
 export const ERR_NOT_FOUND = "NOTFOUND";
 
-var __refreshMenu = _.debounce(function () {
+const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
 }, 100);
 
@@ -17,87 +19,69 @@ function _refreshMenu(callback) {
     process.nextTick(callback);
 }
 
-function _findMenuItemPosition(id, where, whereId) {
-    where = where || menuTemplate;
-    whereId = whereId || "";
-
-    var result = _.find(where, {id: id});
+function _findMenuItemPosition(
+    id: string, where: MenuItemOptions[] = menuTemplate, whereId: string = ""
+): [string, number] {
+    const result = _.find(where, {id: id});
     if (result) {
         return [whereId, _.findIndex(where, {id: id})];
     }
-
-    var results = _.compact(where.map(function (menuItem) {
-        return menuItem.submenu ? _findMenuItemPosition(id, menuItem.submenu, menuItem.id) : null;
+    const results = _.compact(where.map(function (menuItem) {
+        return menuItem.submenu ? _findMenuItemPosition(id, menuItem.submenu as MenuItemOptions[], menuItem.id) : null;
     }));
     return results.length > 0 ? results[0] : null;
 }
 
-function _deleteMenuItemById(id, where) {
-    where = where || menuTemplate;
-
-    var result = _.findIndex(where, {id: id});
+function _deleteMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): boolean {
+    const result = _.findIndex(where, {id: id});
     if (result !== -1) {
         where.splice(result, 1);
         return true;
     }
-
-    var deleted = where.map(function (menuItem) {
-        return menuItem.submenu ? _deleteMenuItemById(id, menuItem.submenu) : null;
-    }).filter(function (result) { return result === true; });
+    const deleted = where.map(function (menuItem) {
+        return menuItem.submenu ? _deleteMenuItemById(id, menuItem.submenu as MenuItemOptions[]) : null;
+    }).filter(x => x === true);
     return deleted.length > 0 ? true : false;
 }
 
-function _findMenuItemById(id, where) {
-    where = where || menuTemplate;
-
-    var result = _.find(where, {id: id});
+function _findMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): MenuItemOptions {
+    const result = _.find(where, {id: id});
     if (result) {
         return result;
     }
-
-    var results = _.compact(where.map(function (menuItem) {
-        return menuItem.submenu ? _findMenuItemById(id, menuItem.submenu) : null;
+    const results = _.compact(where.map(function (menuItem) {
+        return menuItem.submenu ? _findMenuItemById(id, menuItem.submenu as MenuItemOptions[]) : null;
     }));
     return results.length > 0 ? results[0] : null;
 }
 
-interface MenuItem {
-    id: string;
-    label: string;
-    type?: string;
-    click?: () => any;
-}
-
-function _addToPosition(obj: MenuItem, target, position, relativeId) {
-    if (!target.push) {
-        console.log("_addToPosition");
-        console.log(target);
-    }
-
-    var retVal = app.NO_ERROR;
+function _addToPosition(obj: MenuItemOptions, target: MenuItemOptions[], position, relativeId) {
+    let retVal = NO_ERROR;
     if (position === "first") {
         target.unshift(obj);
     } else if (position === "last") {
         target.push(obj);
-    } else if (position === "before" || position === "after" || position === "firstInSection" || position === "lastInSection") {
-        var idx = _.findIndex(target, {id: relativeId});
-        var idxSection;
+    } else if (
+        position === "before" || position === "after" || position === "firstInSection" || position === "lastInSection"
+    ) {
+        let idx = _.findIndex(target, {id: relativeId});
+        let idxSection;
         if (idx === -1) {
             // NOTE: original behaviour - if relativeId wasn't found
             // menu should be put to the end of the list
             console.warn("menu item with id: " + relativeId + " was not found, adding entry to the end of the list");
-            retVal = app.ERR_NOT_FOUND;
+            retVal = ERR_NOT_FOUND;
             idx = target.length;
         }
         if (position === "firstInSection") {
-            idxSection = _.findLastIndex(target, function (obj: MenuItem, i) {
-                return i < idx && obj.type === "separator";
+            idxSection = _.findLastIndex(target, (o: MenuItemOptions, i) => {
+                return i < idx && o.type === "separator";
             });
             idx = idxSection + 1;
         }
         if (position === "lastInSection") {
-            idxSection = _.findIndex(target, function (obj: MenuItem, i) {
-                return i >= idx && obj.type === "separator";
+            idxSection = _.findIndex(target, (o: MenuItemOptions, i) => {
+                return i >= idx && o.type === "separator";
             });
             idx = idxSection === -1 ? target.length : idxSection;
         }
@@ -139,11 +123,11 @@ export function addMenu(title, id, position, relativeId, callback) {
     assert(!relativeId || relativeId && typeof relativeId === "string", "relativeId must be a string");
     assert(typeof callback === "function", "callback must be a function");
     process.nextTick(function () {
-        var newObj = {
+        const newObj = {
             id: id,
             label: title
         };
-        var err = _addToPosition(newObj, menuTemplate, position || "last", relativeId);
+        const err = _addToPosition(newObj, menuTemplate, position || "last", relativeId);
         _refreshMenu(callback.bind(null, err));
     });
 };
@@ -160,8 +144,8 @@ export function addMenuItem(parentId, title, id, key, displayStr, position, rela
     process.nextTick(function () {
         key = _fixBracketsKeyboardShortcut(key);
 
-        var isSeparator = title === "---",
-            newObj = {
+        const isSeparator = title === "---";
+        const newObj: MenuItemOptions = {
             type: isSeparator ? "separator" : "normal",
             id: id,
             label: title,
@@ -174,10 +158,10 @@ export function addMenuItem(parentId, title, id, key, displayStr, position, rela
             newObj.accelerator = key;
         }
 
-        var parentObj = _findMenuItemById(parentId);
+        const parentObj = _findMenuItemById(parentId);
         if (!parentObj) {
             return process.nextTick(function () {
-                callback(app.ERR_NOT_FOUND);
+                callback(ERR_NOT_FOUND);
             });
         }
 
@@ -185,7 +169,7 @@ export function addMenuItem(parentId, title, id, key, displayStr, position, rela
             parentObj.submenu = [];
         }
 
-        var err = _addToPosition(newObj, parentObj.submenu, position || "last", relativeId);
+        const err = _addToPosition(newObj, parentObj.submenu as MenuItemOptions[], position || "last", relativeId);
         _refreshMenu(callback.bind(null, err));
     });
 };
@@ -193,46 +177,46 @@ export function addMenuItem(parentId, title, id, key, displayStr, position, rela
 export function getMenuItemState(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
-        var obj = _findMenuItemById(commandId);
+        const obj = _findMenuItemById(commandId);
         if (!obj) {
-            return callback(app.ERR_NOT_FOUND);
+            return callback(ERR_NOT_FOUND);
         }
-        callback(app.NO_ERROR, obj.enabled === true, obj.checked === true);
+        callback(NO_ERROR, obj.enabled === true, obj.checked === true);
     });
 };
 
 export function getMenuPosition(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
-        var res = _findMenuItemPosition(commandId);
-        callback(app.NO_ERROR, res[0], res[1]);
+        const res = _findMenuItemPosition(commandId);
+        callback(NO_ERROR, res[0], res[1]);
     });
 };
 
 export function getMenuTitle(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
-        var obj = _findMenuItemById(commandId);
+        const obj = _findMenuItemById(commandId);
         if (!obj) {
-            return callback(app.ERR_NOT_FOUND);
+            return callback(ERR_NOT_FOUND);
         }
-        callback(app.NO_ERROR, obj.label);
+        callback(NO_ERROR, obj.label);
     });
 };
 
 export function removeMenu(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
-        var deleted = _deleteMenuItemById(commandId);
-        _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+        const deleted = _deleteMenuItemById(commandId);
+        _refreshMenu(callback.bind(null, deleted ? NO_ERROR : ERR_NOT_FOUND));
     });
 };
 
 export function removeMenuItem(commandId, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
-        var deleted = _deleteMenuItemById(commandId);
-        _refreshMenu(callback.bind(null, deleted ? app.NO_ERROR : app.ERR_NOT_FOUND));
+        const deleted = _deleteMenuItemById(commandId);
+        _refreshMenu(callback.bind(null, deleted ? NO_ERROR : ERR_NOT_FOUND));
     });
 };
 
@@ -241,13 +225,13 @@ export function setMenuItemShortcut(commandId, shortcut, displayStr, callback) {
     assert(shortcut && typeof shortcut === "string", "shortcut must be a string");
     process.nextTick(function () {
         shortcut = _fixBracketsKeyboardShortcut(shortcut);
-        var obj = _findMenuItemById(commandId);
+        const obj = _findMenuItemById(commandId);
         if (shortcut) {
             obj.accelerator = shortcut;
         } else {
             delete obj.accelerator;
         }
-        _refreshMenu(callback.bind(null, app.NO_ERROR));
+        _refreshMenu(callback.bind(null, NO_ERROR));
     });
 };
 
@@ -255,9 +239,9 @@ export function setMenuItemState(commandId, enabled, checked, callback) {
     assert(typeof enabled === "boolean", "enabled must be a boolean");
     assert(typeof checked === "boolean", "checked must be a boolean");
     process.nextTick(function () {
-        var obj = _findMenuItemById(commandId);
+        const obj = _findMenuItemById(commandId);
         if (!obj) {
-            return callback(app.ERR_NOT_FOUND);
+            return callback(ERR_NOT_FOUND);
         }
 
         obj.enabled = enabled;
@@ -267,7 +251,7 @@ export function setMenuItemState(commandId, enabled, checked, callback) {
             // TODO: Change addMenuItem to set the type (checkbox, radio, ... submenu)
             obj.type = "checkbox";
         }
-        _refreshMenu(callback.bind(null, app.NO_ERROR));
+        _refreshMenu(callback.bind(null, NO_ERROR));
     });
 };
 
@@ -275,11 +259,11 @@ export function setMenuTitle(commandId, title, callback) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(title && typeof title === "string", "title must be a string");
     process.nextTick(function () {
-        var obj = _findMenuItemById(commandId);
+        const obj = _findMenuItemById(commandId);
         if (!obj) {
-            return callback(app.ERR_NOT_FOUND);
+            return callback(ERR_NOT_FOUND);
         }
         obj.label = title;
-        _refreshMenu(callback.bind(null, app.NO_ERROR));
+        _refreshMenu(callback.bind(null, NO_ERROR));
     });
 };
