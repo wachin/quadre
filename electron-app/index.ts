@@ -22,10 +22,10 @@ ipcMain.on("log", function (event, ...args) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
-const wins = [];
+const wins: Electron.BrowserWindow[] = [];
 
 // fetch window position values from the window and save them to config file
-function _saveWindowPosition(sync, win) {
+function _saveWindowPosition(sync: boolean, win: Electron.BrowserWindow) {
     const size = win.getSize();
     const pos = win.getPosition();
     shellConfig.set("window.posX", pos[0]);
@@ -49,7 +49,7 @@ app.on("window-all-closed", function () {
 
 // Start the socket server used by Brackets'
 const socketServerLog = logger.get("socket-server");
-SocketServer.start(function (err, port) {
+SocketServer.start(function (err: Error, port: number) {
     if (err) {
         shellState.set("socketServer.state", "ERR_NODE_FAILED");
         socketServerLog.error("failed to start: " + utils.errToString(err));
@@ -60,7 +60,7 @@ SocketServer.start(function (err, port) {
     }
 });
 
-export function openBracketsWindow(query: Object | string = {}) {
+export function openBracketsWindow(query: {} | string = {}) {
 
     // compose path to brackets' index file
     const indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html");
@@ -150,7 +150,7 @@ export function getMainWindow() {
     return wins[0];
 };
 
-export function restart(query) {
+export function restart(query: {} | string) {
     while (wins.length > 0) {
         wins.shift().close();
     }

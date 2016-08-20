@@ -6,19 +6,19 @@ import * as path from "path";
 import * as URL from "url";
 import { BrowserWindow } from "electron";
 
-const windows = {};
+const windows: { [id: string]: Electron.BrowserWindow } = {};
 
-function resolveUrl(url) {
+function resolveUrl(url: string | string[]): string {
     if (Array.isArray(url)) {
         url = URL.resolve.apply(URL, url);
     }
-    if (!url.match(/^[a-zA-Z]+:\/\//)) {
+    if (typeof url === "string" && !url.match(/^[a-zA-Z]+:\/\//)) {
         url = "file://" + url;
     }
-    return url;
+    return url as string;
 }
 
-export function open(url, id, options) {
+export function open(url: string | string[], id: string, options: Electron.BrowserWindowOptions): string {
     assert(id, "id is required parameter");
     // close if exists, do not call .open for refresh
     if (windows[id]) {
@@ -42,11 +42,11 @@ export function open(url, id, options) {
     return id;
 }
 
-export function isOpen(id) {
+export function isOpen(id: string): boolean {
     return windows[id] != null;
 }
 
-export function loadURL(url, id) {
+export function loadURL(url: string | string[], id: string): void {
     assert(id, "id is required parameter");
     assert(windows[id], "window " + id + " is not open");
     windows[id].loadURL(resolveUrl(url));

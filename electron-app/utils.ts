@@ -1,4 +1,4 @@
-export function errToString(err) {
+export function errToString(err: Error): string {
     if (err.stack) {
         return err.stack;
     }
@@ -8,16 +8,10 @@ export function errToString(err) {
     return err.toString();
 }
 
-export function convertWindowsPathToUnixPath(path) {
-    if (process.platform === "win32") {
-        path = path.replace(/\\/g, "/");
-    }
-    return path;
+export function convertWindowsPathToUnixPath(path: string): string {
+    return process.platform === "win32" ? path.replace(/\\/g, "/") : path;
 }
 
-export function convertBracketsPathToWindowsPath(path) {
-    if (process.platform === "win32") {
-        path = path.replace(/\//g, "\\");
-    }
-    return path;
+export function convertBracketsPathToWindowsPath(path: string): string {
+    return process.platform === "win32" ? path.replace(/\//g, "\\") : path;
 }

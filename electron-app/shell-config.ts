@@ -6,7 +6,7 @@ import * as utils from "./utils";
 import { app } from "electron";
 
 const CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
-let config;
+let config: {};
 
 if (!process.env.TMPDIR && !process.env.TMP && !process.env.TEMP) {
     process.env.TMPDIR = process.env.TMP = process.env.TEMP = os.tmpdir();
@@ -46,6 +46,6 @@ export function getNumber(key: string): number {
     return result;
 }
 
-export function set(key, value) {
+export function set(key: string, value: any): any {
     return _.set(config, key, value);
 }

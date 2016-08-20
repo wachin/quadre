@@ -5,7 +5,7 @@ import * as DomainManager from "./domain-manager";
  * @type{Array.<Connection>}
  * Currently active connections
  */
-var _connections = [];
+const _connections = [];
 
 /**
  * @private
@@ -40,7 +40,7 @@ Connection.prototype._ws = null;
  * @private
  * Sends a message over the WebSocket. Called by public sendX commands.
  * @param {string} type Message type. Currently supported types are
-     "event", "commandResponse", "commandError", "error"
+ *                 "event", "commandResponse", "commandError", "error"
  * @param {object} message Message body, must be JSON.stringify-able
  */
 Connection.prototype._send = function (type, message) {
@@ -72,7 +72,7 @@ Connection.prototype._sendBinary = function (message) {
  * @param {string} message Message received by WebSocket
  */
 Connection.prototype._receive = function (message) {
-    var m;
+    let m;
     try {
         m = JSON.parse(message);
     } catch (parseError) {
@@ -101,7 +101,9 @@ Connection.prototype.close = function () {
     if (this._ws) {
         try {
             this._ws.close();
-        } catch (e) { }
+        } catch (err) {
+            // ignore
+        }
     }
     this._connected = false;
     _connections.splice(_connections.indexOf(this), 1);
@@ -127,12 +129,12 @@ Connection.prototype.sendCommandResponse = function (id, response) {
     if (Buffer.isBuffer(response)) {
         // Assume the id is an unsigned 32-bit integer, which is encoded
         // as a four-byte header
-        var header = new Buffer(4);
+        const header = new Buffer(4);
 
         header.writeUInt32LE(id, 0);
 
         // Prepend the header to the message
-        var message = Buffer.concat([header, response], response.length + 4);
+        const message = Buffer.concat([header, response], response.length + 4);
 
         this._sendBinary(message);
     } else {
@@ -181,13 +183,17 @@ export function createConnection(ws) {
  * Closes all connections gracefully. Should be called during shutdown.
  */
 export function closeAllConnections() {
-    var i;
+    let i;
     for (i = 0; i < _connections.length; i++) {
         try {
             _connections[i].close();
-        } catch (err) { }
+        } catch (err) {
+            // ignore
+        }
     }
-    _connections = [];
+    while (_connections.length > 0) {
+        _connections.shift();
+    }
 }
 
 /**

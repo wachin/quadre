@@ -6,28 +6,28 @@ import * as ConnectionManager from "./connection-manager";
  * and execution of all commands and events. It is a singleton, and is passed
  * to a domain in its init() method.
  */
-var self = exports;
+const self = exports;
 
 /**
  * @private
  * @type {object}
  * Map of all the registered domains
  */
-var _domains = {};
+const _domains = {};
 
 /**
  * @private
  * @type {Array.<Module>}
  * Array of all modules we have loaded. Used for avoiding duplicate loading.
  */
-var _initializedDomainModules = [];
+const _initializedDomainModules = [];
 
 /**
  * @private
  * @type {number}
  * Used for generating unique IDs for events.
  */
-var _eventCount = 1;
+let _eventCount = 1;
 
 /**
  * @private
@@ -36,7 +36,7 @@ var _eventCount = 1;
  * Inspector.json. This is a cache that we invalidate every time the
  * API changes.
  */
-var _cachedDomainDescriptions = null;
+let _cachedDomainDescriptions = null;
 
 /**
  * Returns whether a domain with the specified name exists or not.
@@ -84,8 +84,9 @@ export function registerDomain(domainName, version) {
  * @param {?Array.<{name: string, type: string, description:string}>} returns
  *    Used in the API documentation.
  */
-export function registerCommand(domainName, commandName, commandFunction, isAsync,
-    description, parameters, returns) {
+export function registerCommand(
+    domainName, commandName, commandFunction, isAsync, description, parameters, returns
+) {
     // invalidate the cache
     _cachedDomainDescriptions = null;
 
@@ -119,13 +120,14 @@ export function registerCommand(domainName, commandName, commandFunction, isAsyn
  *    the command is asynchronous, will be augmented with a callback function.
  *    (see description in registerCommand documentation)
  */
-export function executeCommand(connection, id, domainName,
-    commandName, parameters) {
+export function executeCommand(
+    connection, id, domainName, commandName, parameters
+) {
     if (_domains[domainName] &&
             _domains[domainName].commands[commandName]) {
-        var command = _domains[domainName].commands[commandName];
+        const command = _domains[domainName].commands[commandName];
         if (command.isAsync) {
-            var callback = function (err, result) {
+            const callback = function (err, result) {
                 if (err) {
                     connection.sendCommandError(id, err);
                 } else {
@@ -213,7 +215,7 @@ export function emitEvent(domainName, eventName, parameters) {
  */
 export function loadDomainModulesFromPaths(paths: string[]): boolean {
     paths.forEach(function (path) {
-        var m = require(path);
+        const m = require(path);
         if (m && m.init && _initializedDomainModules.indexOf(m) < 0) {
             m.init(self);
             _initializedDomainModules.push(m); // don't init more than once
@@ -232,17 +234,17 @@ export function getDomainDescriptions() {
     if (!_cachedDomainDescriptions) {
         _cachedDomainDescriptions = [];
 
-        var domainNames = Object.keys(_domains);
+        const domainNames = Object.keys(_domains);
         domainNames.forEach(function (domainName) {
-            var d = {
+            const d = {
                 domain: domainName,
                 version: _domains[domainName].version,
                 commands: [],
                 events: []
             };
-            var commandNames = Object.keys(_domains[domainName].commands);
+            const commandNames = Object.keys(_domains[domainName].commands);
             commandNames.forEach(function (commandName) {
-                var c = _domains[domainName].commands[commandName];
+                const c = _domains[domainName].commands[commandName];
                 d.commands.push({
                     name: commandName,
                     description: c.description,
@@ -250,7 +252,7 @@ export function getDomainDescriptions() {
                     returns: c.returns
                 });
             });
-            var eventNames = Object.keys(_domains[domainName].events);
+            const eventNames = Object.keys(_domains[domainName].events);
             eventNames.forEach(function (eventName) {
                 d.events.push({
                     name: eventName,

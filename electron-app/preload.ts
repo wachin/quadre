@@ -14,7 +14,7 @@ interface BracketsWindowGlobal extends NodeJS.Global {
 }
 
 import * as electron from "electron";
-let t;
+let t: any;
 
 try {
     t = {
@@ -44,7 +44,7 @@ process.once("loaded", function () {
     };
     // this is to fix requirejs text plugin
     g.process = t.process;
-    g.process.versions["node-webkit"] = true;
+    (g.process.versions as any)["node-webkit"] = true;
     // inject appshell implementation into the browser window
     g.appshell = g.brackets = t.appshell;
 });

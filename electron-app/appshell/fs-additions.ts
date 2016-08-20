@@ -60,9 +60,9 @@ export function readTextFile(filename, encoding, callback) {
             err.code = "ECHARSET";
             return callback(err);
         }
-        fs.readFile(filename, encoding, function (err, content) {
-            if (err) {
-                return callback(err);
+        fs.readFile(filename, encoding, function (err2, content) {
+            if (err2) {
+                return callback(err2);
             }
 
             content = stripBom(content);
@@ -104,7 +104,7 @@ export function rename(oldPath, newPath, callback) {
 };
 
 export function showOpenDialog(allowMultipleSelection, chooseDirectory, title, initialPath, fileTypes, callback) {
-    var properties = [];
+    const properties = [];
     if (chooseDirectory) {
         properties.push("openDirectory");
     } else {

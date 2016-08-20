@@ -2,24 +2,30 @@ import * as http from "http";
 import * as ConnectionManager from "./connection-manager";
 import * as DomainManager from "./domain-manager";
 import * as Logger from "../logger";
-import { Server } from "ws";
+import * as WebSocket from "ws";
+const Server = WebSocket.Server;
 const log = Logger.get("socket-server");
 const portscanner = require("portscanner");
 
 const DEFAULT_PORT = 8123;
-let httpServer = null;
-let httpPort = null;
-let wsServer = null;
+let httpServer: http.Server = null;
+let httpPort: number = null;
+let wsServer: WebSocket.Server = null;
 
 function initPort() {
     return new Promise(function (resolve, reject) {
-        portscanner.findAPortNotInUse(DEFAULT_PORT, DEFAULT_PORT + 1000, "127.0.0.1", function(err, port) {
-            if (err) {
-                return reject(err);
+        portscanner.findAPortNotInUse(
+            DEFAULT_PORT,
+            DEFAULT_PORT + 1000,
+            "127.0.0.1",
+            function(err: Error, port: number) {
+                if (err) {
+                    return reject(err);
+                }
+                httpPort = port;
+                resolve();
             }
-            httpPort = port;
-            resolve();
-        });
+        );
     });
 }
 
@@ -37,7 +43,7 @@ function initHttp() {
             });
             res.end("Brackets-Shell Server");
         });
-        server.on("error", function (err) {
+        server.on("error", function (err: Error) {
             log.error(err.name + ": " + err.message);
         });
         server.listen(httpPort, function() {
@@ -57,7 +63,7 @@ function initWebsockets() {
     wsServer.on("connection", ConnectionManager.createConnection);
 }
 
-export function start(callback) {
+export function start(callback: (err: Error, res?: any) => void) {
     initPort()
         .then(function () {
             return initHttp();
@@ -75,7 +81,7 @@ export function start(callback) {
         .catch(err => callback(err));
 };
 
-export function stop(callback) {
+export function stop(callback: (err: Error, res?: any) => void) {
     if (wsServer) {
         wsServer.close();
         wsServer = null;
