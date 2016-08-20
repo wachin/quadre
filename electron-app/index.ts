@@ -1,23 +1,19 @@
 #!/usr/bin/env electron
 
-/*jshint globalstrict:true, node:true*/
+import { app, BrowserWindow, ipcMain } from "electron";
+import * as _ from "lodash";
+import * as logger from "./logger";
+import * as path from "path";
+import * as utils from "./utils";
+import * as shellConfig from "./shell-config";
+import * as shellState from "./shell-state";
+import * as SocketServer from "./socket-server"; // Implementation of Brackets' shell server
 
-"use strict";
+const appInfo = require("../package.json");
 
-var _ = require("lodash");
-var appInfo = require("../package.json");
-var path = require("path");
-var SocketServer = require("./socket-server"); // Implementation of Brackets' shell server
-var utils = require("./utils");
-var shellConfig = require("./shell-config");
-var shellState = require("./shell-state");
-
-var electron = require("electron");
-var app = electron.app; // Electron module to control application life
-var BrowserWindow = electron.BrowserWindow; // Electron to create native browser window
-
-electron.ipcMain.on('log', function (event, message) {
-    console.log('ipc-log:', message);
+const log = logger.get("ipc-log");
+ipcMain.on("log", function (event, ...args) {
+    log.info(...args);
 });
 
 // Report crashes to electron server
@@ -26,12 +22,12 @@ electron.ipcMain.on('log', function (event, message) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
-var wins = [];
+const wins = [];
 
 // fetch window position values from the window and save them to config file
 function _saveWindowPosition(sync, win) {
-    var size = win.getSize();
-    var pos = win.getPosition();
+    const size = win.getSize();
+    const pos = win.getPosition();
     shellConfig.set("window.posX", pos[0]);
     shellConfig.set("window.posY", pos[1]);
     shellConfig.set("window.width", size[0]);
@@ -43,8 +39,8 @@ function _saveWindowPosition(sync, win) {
         shellConfig.save();
     }
 }
-var saveWindowPositionSync = _.partial(_saveWindowPosition, true);
-var saveWindowPosition = _.debounce(_.partial(_saveWindowPosition, false), 100);
+const saveWindowPositionSync = _.partial(_saveWindowPosition, true);
+const saveWindowPosition = _.debounce(_.partial(_saveWindowPosition, false), 100);
 
 // Quit when all windows are closed.
 app.on("window-all-closed", function () {
@@ -52,44 +48,46 @@ app.on("window-all-closed", function () {
 });
 
 // Start the socket server used by Brackets'
+const socketServerLog = logger.get("socket-server");
 SocketServer.start(function (err, port) {
     if (err) {
         shellState.set("socketServer.state", "ERR_NODE_FAILED");
-        console.log("socket-server failed to start: " + utils.errToString(err));
+        socketServerLog.error("failed to start: " + utils.errToString(err));
     } else {
         shellState.set("socketServer.state", "NO_ERROR");
         shellState.set("socketServer.port", port);
-        console.log("socket-server started on port " + port);
+        socketServerLog.info("started on port " + port);
     }
 });
 
-function openBracketsWindow(queryObj) {
-    queryObj = queryObj || {};
+export function openBracketsWindow(query: Object | string = {}) {
 
     // compose path to brackets' index file
-    var indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html");
+    const indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html");
 
     // build a query for brackets' window
-    var queryString = "";
-    if (_.isObject(queryObj) && !_.isEmpty(queryObj)) {
+    let queryString = "";
+    if (_.isObject(query) && !_.isEmpty(query)) {
+        const queryObj = query as Object;
         queryString = "?" + _.map(queryObj, function (value, key) {
             return key + "=" + encodeURIComponent(value);
         }).join("&");
-    } else if (_.isString(queryObj)) {
-        var io1 = queryObj.indexOf("?");
-        var io2 = queryObj.indexOf("#");
+    } else if (_.isString(query)) {
+        const queryStr = query as string;
+        const io1 = queryStr.indexOf("?");
+        const io2 = queryStr.indexOf("#");
         if (io1 !== -1) {
-            queryString = queryObj.substring(io1);
+            queryString = queryStr.substring(io1);
         } else if (io2 !== -1) {
-            queryString = queryObj.substring(io2);
+            queryString = queryStr.substring(io2);
         } else {
             queryString = "";
         }
     }
 
-    var indexUrl = indexPath + queryString;
+    const indexUrl = indexPath + queryString;
 
-    var winOptions = {
+    const winOptions = {
         title: appInfo.productName,
         icon: path.resolve(__dirname, "res", "appicon.png"),
         x: shellConfig.get("window.posX"),
@@ -103,7 +101,7 @@ function openBracketsWindow(queryObj) {
     };
 
     // create the browser window
-    var win = new BrowserWindow(winOptions);
+    const win = new BrowserWindow(winOptions);
     wins.push(win);
 
     // load the index.html of the app
@@ -117,7 +115,7 @@ function openBracketsWindow(queryObj) {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
-        var io = wins.indexOf(win);
+        const io = wins.indexOf(win);
         if (io !== -1) { wins.splice(io, 1); }
     });
 
@@ -148,13 +146,11 @@ app.on("ready", function () {
     openBracketsWindow();
 });
 
-exports.openBracketsWindow = openBracketsWindow;
-
-exports.getMainWindow = function () {
+export function getMainWindow() {
     return wins[0];
 };
 
-exports.restart = function (query) {
+export function restart(query) {
     while (wins.length > 0) {
         wins.shift().close();
     }

@@ -1,7 +1,3 @@
-/*jshint globalstrict:true, node:true*/
-
-"use strict";
-
 var http = require("http");
 var Promise = require("bluebird");
 var WebSocketServer = require("ws").Server;
@@ -65,7 +61,7 @@ function initWebsockets() {
     wsServer.on("connection", ConnectionManager.createConnection);
 }
 
-exports.start = function (callback) {
+export function start(callback) {
     initPort()
         .then(function () {
             return initHttp();
@@ -82,7 +78,7 @@ exports.start = function (callback) {
         .nodeify(callback);
 };
 
-exports.stop = function (callback) {
+export function stop(callback) {
     if (wsServer) {
         wsServer.close();
         wsServer = null;

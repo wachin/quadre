@@ -1,22 +1,15 @@
-/*jshint globalstrict:true, node:true*/
+import * as _ from "lodash";
+import * as fs from "fs-extra";
+import * as os from "os";
+import * as path from "path";
+import * as utils from "./utils";
+import { app } from "electron";
 
-"use strict";
+const CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
+let config;
 
-var _ = require("lodash");
-_.mixin(require("lodash-deep"));
-var fs = require("fs-extra");
-var path = require("path");
-var utils = require("./utils");
-var os = require("os");
-
-var electron = require("electron");
-var app = electron.app;
-
-var CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
-var config;
-
-if (!process.env["TMPDIR"] && !process.env["TMP"] && !process.env["TEMP"]) {
-    process.env["TMPDIR"] = process.env["TMP"] = process.env["TEMP"] = os.tmpdir();
+if (!process.env.TMPDIR && !process.env.TMP && !process.env.TEMP) {
+    process.env.TMPDIR = process.env.TMP = process.env.TEMP = os.tmpdir();
 }
 
 try {
@@ -33,17 +26,18 @@ try {
     }
 }
 
-function save() {
+export function save() {
     fs.writeJson(CONFIG_PATH, config);
 }
 
-function saveSync() {
+export function saveSync() {
     fs.writeJsonSync(CONFIG_PATH, config);
 }
 
-module.exports = {
-    get: function (key) { return _.deepGet(config, key); },
-    set: function (key, value) { return _.deepSet(config, key, value); },
-    save: save,
-    saveSync: saveSync
-};
+export function get(key) {
+    return _.get(config, key);
+}
+
+export function set(key, value) {
+    return _.set(config, key, value);
+}

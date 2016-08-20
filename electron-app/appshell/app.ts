@@ -1,68 +1,58 @@
-/*jshint globalstrict:true, node:true*/
+import * as assert from "assert";
+import * as path from "path";
+import * as utils from "../utils";
+import { app, remote, shell } from "electron";
 
-"use strict";
+const REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
+const shellState = remote.require("./shell-state");
+const startupTime = process.hrtime();
 
-var path = require("path");
-var electron = require("electron");
-var assert = require("assert");
-var shell = electron.shell;
-var utils = require("../utils");
-var remote = electron.remote;
-var electronApp = electron.remote.app;
-var shellState = electron.remote.require("./shell-state");
+export const NO_ERROR = null;
+export const ERR_NOT_FOUND = "NOTFOUND";
+// TODO: cleanup unused below
+export const ERR_CL_TOOLS_CANCELLED = 12;
+export const ERR_CL_TOOLS_MKDIRFAILED = 14;
+export const ERR_CL_TOOLS_NOTSUPPORTED = 17;
+export const ERR_CL_TOOLS_RMFAILED = 13;
+export const ERR_CL_TOOLS_SERVFAILED = 16;
+export const ERR_CL_TOOLS_SYMLINKFAILED = 15;
+export const ERR_NODE_FAILED = -3;
+export const ERR_NODE_NOT_YET_STARTED = -1;
+export const ERR_NODE_PORT_NOT_YET_SET = -2;
+// TODO: this should be changeable
+export const language = "en";
 
-var REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
-
-var app = module.exports = {
-    NO_ERROR: null,
-    ERR_NOT_FOUND: "NOTFOUND",
-    // TODO: cleanup unused below
-    ERR_CL_TOOLS_CANCELLED: 12,
-    ERR_CL_TOOLS_MKDIRFAILED: 14,
-    ERR_CL_TOOLS_NOTSUPPORTED: 17,
-    ERR_CL_TOOLS_RMFAILED: 13,
-    ERR_CL_TOOLS_SERVFAILED: 16,
-    ERR_CL_TOOLS_SYMLINKFAILED: 15,
-    ERR_NODE_FAILED: -3,
-    ERR_NODE_NOT_YET_STARTED: -1,
-    ERR_NODE_PORT_NOT_YET_SET: -2,
-    // TODO: this should be changeable
-    language: "en",
-    // underscore electron custom props
-    _startup: process.hrtime()
-};
-
-app.closeLiveBrowser = function (callback) {
+export function closeLiveBrowser(callback) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.closeLiveBrowser not implemented"));
     });
 };
 
-app.dragWindow = function () {
+export function dragWindow() {
     // TODO: implement
     throw new Error("app.dragWindow not implemented");
 };
 
-app.getApplicationSupportDirectory = function () {
-    return utils.convertWindowsPathToUnixPath(electronApp.getPath("userData"));
+export function getApplicationSupportDirectory() {
+    return utils.convertWindowsPathToUnixPath(app.getPath("userData"));
 };
 
-app.getExtensionsFolder = function () {
+export function getExtensionsFolder() {
     return utils.convertWindowsPathToUnixPath(
-        path.resolve(app.getApplicationSupportDirectory(), "..", "Brackets", "extensions");
+        path.resolve(getApplicationSupportDirectory(), "..", "Brackets", "extensions")
     );
 };
 
 // TODO: it seems that both arguments aren't needed anymore
-app.showExtensionsFolder = function (appURL, callback) {
+export function showExtensionsFolder(appURL, callback) {
     process.nextTick(function () {
-        shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(app.getExtensionsFolder()));
-        if (callback) { callback(app.NO_ERROR); }
+        shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(getExtensionsFolder()));
+        if (callback) { callback(NO_ERROR); }
     });
 };
 
-app.getDroppedFiles = function (callback) {
+export function getDroppedFiles(callback) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getDroppedFiles not implemented"));
@@ -70,77 +60,77 @@ app.getDroppedFiles = function (callback) {
 };
 
 // return the number of milliseconds that have elapsed since the application was launched
-app.getElapsedMilliseconds = function () {
-    var diff = process.hrtime(app._startup);
+export function getElapsedMilliseconds() {
+    const diff = process.hrtime(startupTime);
     // diff = [ seconds, nanoseconds ]
     return diff[0] * 1000 + diff[1] / 1000000;
 };
 
-app.getNodeState = function (callback) {
+export function getNodeState(callback) {
     process.nextTick(function () {
-        var errorCode = app[shellState.get("socketServer.state")];
-        var port = shellState.get("socketServer.port");
+        const errorCode = exports[shellState.get("socketServer.state")];
+        const port = shellState.get("socketServer.port");
         callback(errorCode, port);
     });
 };
 
-app.getPendingFilesToOpen = function (callback) {
+export function getPendingFilesToOpen(callback) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getPendingFilesToOpen not implemented"), []);
     });
 };
 
-app.getRemoteDebuggingPort = function () {
+export function getRemoteDebuggingPort() {
     return REMOTE_DEBUGGING_PORT;
 };
 
-app.getUserHomeDirectory = function () {
-    return utils.convertWindowsPathToUnixPath(electronApp.getPath("home"));
+export function getUserHomeDirectory() {
+    return utils.convertWindowsPathToUnixPath(app.getPath("home"));
 };
 
-app.getUserDocumentsDirectory = function () {
+export function getUserDocumentsDirectory() {
     console.warn("DEPRECATED: don't use app.getUserDocumentsDirectory(); replaced by app.getUserHomeDirectory()");
-    return app.getUserHomeDirectory();
+    return getUserHomeDirectory();
 };
 
-app.installCommandLine = function (callback) {
+export function installCommandLine(callback) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.installCommandLine not implemented"));
     });
 };
 
-app.openLiveBrowser = function (url, enableRemoteDebugging, callback) {
+export function openLiveBrowser(url, enableRemoteDebugging, callback) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.openLiveBrowser not implemented" + url));
     });
 };
 
-app.openURLInDefaultBrowser = function (url, callback) {
+export function openURLInDefaultBrowser(url, callback) {
     assert(url && typeof url === "string", "url must be a string");
     process.nextTick(function () {
         shell.openExternal(url);
         if (callback) {
-            callback(app.NO_ERROR);
+            callback(NO_ERROR);
         }
     });
 };
 
-app.quit = function () {
-    electronApp.quit();
+export function quit() {
+    app.quit();
 };
 
-app.showDeveloperTools = function () {
-    var win = remote.getCurrentWindow();
-    win.openDevTools({detach: true});
+export function showDeveloperTools() {
+    const win = remote.getCurrentWindow();
+    win.webContents.openDevTools({ mode: "detach" });
 };
 
 // TODO: get rid of callback? This call is not throwing any error.
-app.showOSFolder = function (path, callback) {
+export function showOSFolder(path, callback) {
     process.nextTick(function () {
         shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
-        if (callback) { callback(app.NO_ERROR); }
+        if (callback) { callback(NO_ERROR); }
     });
 };

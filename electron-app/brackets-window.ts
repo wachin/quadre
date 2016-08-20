@@ -1,17 +1,11 @@
-/*jshint globalstrict:true, node:true*/
-
-"use strict";
-
 // this is meant to replace default window.open
 // see https://github.com/atom/electron/blob/master/docs/api/window-open.md
 
-var assert = require("assert");
-var URL = require("url");
+import * as assert from "assert";
+import * as URL from "url";
+import { BrowserWindow } from "electron";
 
-var electron = require("electron");
-var BrowserWindow = electron.BrowserWindow;
-
-var windows = {};
+const windows = {};
 
 function resolveUrl(url) {
     if (Array.isArray(url)) {
@@ -23,17 +17,20 @@ function resolveUrl(url) {
     return url;
 }
 
-function open(url, id, options) {
+export function open(url, id, options) {
     assert(id, "id is required parameter");
     // close if exists, do not call .open for refresh
     if (windows[id]) {
         windows[id].close();
         windows[id] = null;
     }
-    var win = new BrowserWindow({
+    const win = new BrowserWindow({
         width: options.width || 800,
         height: options.height || 600,
-        preload: require.resolve("./preload")
+        webPreferences: {
+            nodeIntegration: false,
+            preload: path.resolve(__dirname, "preload.js")
+        }
     });
     win.on("closed", function() {
         windows[id] = null;
@@ -44,18 +41,12 @@ function open(url, id, options) {
     return id;
 }
 
-function isOpen(id) {
+export function isOpen(id) {
     return windows[id] != null;
 }
 
-function loadURL(url, id) {
+export function loadURL(url, id) {
     assert(id, "id is required parameter");
     assert(windows[id], "window " + id + " is not open");
     windows[id].loadURL(resolveUrl(url));
 }
-
-module.exports = {
-    open: open,
-    isOpen: isOpen,
-    loadURL: loadURL
-};
