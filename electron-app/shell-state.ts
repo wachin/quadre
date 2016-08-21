@@ -8,4 +8,4 @@ export function set(key: string, value: any): any { return _.set(state, key, val
 
 // defaults
 set("socketServer.state", "ERR_NODE_NOT_YET_STARTED");
-set("socketServer.port", null);
+set("socketServer.port", 0);

@@ -7,14 +7,14 @@ import * as main from "../index";
 
 const menuTemplate: MenuItemOptions[] = [];
 
-export const NO_ERROR = null;
+export const NO_ERROR: void = null;
 export const ERR_NOT_FOUND = "NOTFOUND";
 
 const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
 }, 100);
 
-function _refreshMenu(callback) {
+function _refreshMenu(callback: () => void) {
     __refreshMenu();
     process.nextTick(callback);
 }
@@ -55,8 +55,13 @@ function _findMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate):
     return results.length > 0 ? results[0] : null;
 }
 
-function _addToPosition(obj: MenuItemOptions, target: MenuItemOptions[], position, relativeId) {
-    let retVal = NO_ERROR;
+function _addToPosition(
+    obj: MenuItemOptions,
+    target: MenuItemOptions[],
+    position: string,
+    relativeId: string
+): void | string {
+    let retVal: void | string = NO_ERROR;
     if (position === "first") {
         target.unshift(obj);
     } else if (position === "last") {
@@ -65,7 +70,7 @@ function _addToPosition(obj: MenuItemOptions, target: MenuItemOptions[], positio
         position === "before" || position === "after" || position === "firstInSection" || position === "lastInSection"
     ) {
         let idx = _.findIndex(target, {id: relativeId});
-        let idxSection;
+        let idxSection: number;
         if (idx === -1) {
             // NOTE: original behaviour - if relativeId wasn't found
             // menu should be put to the end of the list
@@ -74,13 +79,13 @@ function _addToPosition(obj: MenuItemOptions, target: MenuItemOptions[], positio
             idx = target.length;
         }
         if (position === "firstInSection") {
-            idxSection = _.findLastIndex(target, (o: MenuItemOptions, i) => {
+            idxSection = _.findLastIndex(target, (o: MenuItemOptions, i: number) => {
                 return i < idx && o.type === "separator";
             });
             idx = idxSection + 1;
         }
         if (position === "lastInSection") {
-            idxSection = _.findIndex(target, (o: MenuItemOptions, i) => {
+            idxSection = _.findIndex(target, (o: MenuItemOptions, i: number) => {
                 return i >= idx && o.type === "separator";
             });
             idx = idxSection === -1 ? target.length : idxSection;
@@ -95,7 +100,7 @@ function _addToPosition(obj: MenuItemOptions, target: MenuItemOptions[], positio
     return retVal;
 }
 
-function _fixBracketsKeyboardShortcut(shortcut) {
+function _fixBracketsKeyboardShortcut(shortcut: string): string {
     if (typeof shortcut !== "string" || shortcut.trim() === "") {
         return null;
     }
@@ -116,7 +121,7 @@ function _fixBracketsKeyboardShortcut(shortcut) {
     return shortcut;
 }
 
-export function addMenu(title, id, position, relativeId, callback) {
+export function addMenu(title: string, id: string, position: string, relativeId: string, callback: () => void) {
     assert(title && typeof title === "string", "title must be a string");
     assert(id && typeof id === "string", "id must be a string");
     assert(!position || position && typeof position === "string", "position must be a string");
@@ -132,7 +137,16 @@ export function addMenu(title, id, position, relativeId, callback) {
     });
 };
 
-export function addMenuItem(parentId, title, id, key, displayStr, position, relativeId, callback) {
+export function addMenuItem(
+    parentId: string,
+    title: string,
+    id: string,
+    key?: string,
+    displayStr?: string,
+    position?: string,
+    relativeId?: string,
+    callback?: (err?: void | string) => void
+) {
     assert(parentId && typeof parentId === "string", "parentId must be a string");
     assert(title && typeof title === "string", "title must be a string");
     assert(id && typeof id === "string", "id must be a string");
@@ -174,7 +188,10 @@ export function addMenuItem(parentId, title, id, key, displayStr, position, rela
     });
 };
 
-export function getMenuItemState(commandId, callback) {
+export function getMenuItemState(
+    commandId: string,
+    callback: (err?: void | string, enabled?: boolean, checked?: boolean) => void
+) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const obj = _findMenuItemById(commandId);
@@ -185,7 +202,10 @@ export function getMenuItemState(commandId, callback) {
     });
 };
 
-export function getMenuPosition(commandId, callback) {
+export function getMenuPosition(
+    commandId: string,
+    callback: (err?: void | string, parentId?: string, position?: number) => void
+) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const res = _findMenuItemPosition(commandId);
@@ -193,7 +213,7 @@ export function getMenuPosition(commandId, callback) {
     });
 };
 
-export function getMenuTitle(commandId, callback) {
+export function getMenuTitle(commandId: string, callback: (err?: void | string, title?: string) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const obj = _findMenuItemById(commandId);
@@ -204,7 +224,7 @@ export function getMenuTitle(commandId, callback) {
     });
 };
 
-export function removeMenu(commandId, callback) {
+export function removeMenu(commandId: string, callback: (err?: void | string, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
@@ -212,7 +232,7 @@ export function removeMenu(commandId, callback) {
     });
 };
 
-export function removeMenuItem(commandId, callback) {
+export function removeMenuItem(commandId: string, callback: (err?: void | string, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
@@ -220,7 +240,12 @@ export function removeMenuItem(commandId, callback) {
     });
 };
 
-export function setMenuItemShortcut(commandId, shortcut, displayStr, callback) {
+export function setMenuItemShortcut(
+    commandId: string,
+    shortcut: string,
+    displayStr: string,
+    callback: (err?: void | string) => void
+) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(shortcut && typeof shortcut === "string", "shortcut must be a string");
     process.nextTick(function () {
@@ -235,7 +260,12 @@ export function setMenuItemShortcut(commandId, shortcut, displayStr, callback) {
     });
 };
 
-export function setMenuItemState(commandId, enabled, checked, callback) {
+export function setMenuItemState(
+    commandId: string,
+    enabled: boolean,
+    checked: boolean,
+    callback: (err?: void | string) => void
+) {
     assert(typeof enabled === "boolean", "enabled must be a boolean");
     assert(typeof checked === "boolean", "checked must be a boolean");
     process.nextTick(function () {
@@ -255,7 +285,11 @@ export function setMenuItemState(commandId, enabled, checked, callback) {
     });
 };
 
-export function setMenuTitle(commandId, title, callback) {
+export function setMenuTitle(
+    commandId: string,
+    title: string,
+    callback: (err?: void | string) => void
+) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(title && typeof title === "string", "title must be a string");
     process.nextTick(function () {

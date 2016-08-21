@@ -11,26 +11,26 @@ const trash = require("trash");
     to support functionality required by brackets
 */
 
-export function isBinaryFile(filename, callback) {
+export function isBinaryFile(filename: string, callback: (err?: Error, res?: boolean) => void) {
     isbinaryfile(filename, callback);
 };
 
-export function isBinaryFileSync(filename) {
+export function isBinaryFileSync(filename: string): boolean {
     return isbinaryfile(filename);
 };
 
-export function isEncodingSupported(encoding) {
+export function isEncodingSupported(encoding: string): boolean {
     return ["ascii", "utf-8", "utf8"].indexOf(encoding.toLowerCase()) !== -1;
 };
 
-export function isNetworkDrive(path, callback) {
+export function isNetworkDrive(path: string, callback: (err?: Error, res?: boolean) => void) {
     // TODO: implement
     process.nextTick(function () {
         callback(null, false);
     });
 };
 
-export function moveToTrash(path, callback) {
+export function moveToTrash(path: string, callback: (err?: Error) => void) {
     fs.stat(path, function (err) {
         if (err) {
             return callback(err);
@@ -40,7 +40,7 @@ export function moveToTrash(path, callback) {
     });
 };
 
-export function readTextFile(filename, encoding, callback) {
+export function readTextFile(filename: string, encoding: string, callback: (err?: Error, res?: string) => void) {
     if (typeof encoding === "function") {
         callback = encoding;
         encoding = "utf-8";
@@ -51,14 +51,14 @@ export function readTextFile(filename, encoding, callback) {
     }
     // isbinaryfile check first because it checks first 1000 bytes of a file
     // so we don't load whole file if it's binary
-    isbinaryfile(filename, function(err, isBinary) {
+    isbinaryfile(filename, function(err: Error, isBinary: boolean) {
         if (err) {
             return callback(err);
         }
         if (isBinary) {
-            err = new Error("ECHARSET: file is a binary file: " + filename);
-            err.code = "ECHARSET";
-            return callback(err);
+            const err2: NodeJS.ErrnoException = new Error("ECHARSET: file is a binary file: " + filename);
+            err2.code = "ECHARSET";
+            return callback(err2);
         }
         fs.readFile(filename, encoding, function (err2, content) {
             if (err2) {
@@ -70,9 +70,9 @@ export function readTextFile(filename, encoding, callback) {
             // \uFFFD is used to replace an incoming character
             // whose value is unknown or unrepresentable
             if (/\uFFFD/.test(content)) {
-                err = new Error("ECHARSET: unsupported encoding in file: " + filename);
-                err.code = "ECHARSET";
-                return callback(err);
+                const err3: NodeJS.ErrnoException = new Error("ECHARSET: unsupported encoding in file: " + filename);
+                err3.code = "ECHARSET";
+                return callback(err3);
             }
 
             callback(null, content);
@@ -80,7 +80,7 @@ export function readTextFile(filename, encoding, callback) {
     });
 };
 
-export function remove(path, callback) {
+export function remove(path: string, callback: (err?: Error) => void) {
     fs.stat(path, function (err, stats) {
         if (err) {
             return callback(err);
@@ -89,7 +89,7 @@ export function remove(path, callback) {
     });
 };
 
-export function rename(oldPath, newPath, callback) {
+export function rename(oldPath: string, newPath: string, callback: (err?: Error) => void) {
     fs.stat(newPath, function (err, stats) {
         if (err && err.code === "ENOENT") {
             return fs.rename(oldPath, newPath, callback);
@@ -103,8 +103,19 @@ export function rename(oldPath, newPath, callback) {
     });
 };
 
-export function showOpenDialog(allowMultipleSelection, chooseDirectory, title, initialPath, fileTypes, callback) {
-    const properties = [];
+export function showOpenDialog(
+    allowMultipleSelection: boolean,
+    chooseDirectory: boolean,
+    title: string,
+    defaultPath: string,
+    /**
+     * Extensions without wildcards or dots (e.g. 'png' is good but '.png' and '*.png' are bad).
+     * To show all files, use the '*' wildcard (no other wildcard is supported).
+     */
+    filters: { name: string; extensions: string[]; }[],
+    callback: (err?: Error, fileNames?: string[]) => void
+) {
+    const properties: ("openFile" | "openDirectory" | "multiSelections" | "createDirectory" | "showHiddenFiles")[] = [];
     if (chooseDirectory) {
         properties.push("openDirectory");
     } else {
@@ -116,22 +127,27 @@ export function showOpenDialog(allowMultipleSelection, chooseDirectory, title, i
     // TODO: I don't think defaultPath and filters work right now - we should test that
     // Also, it doesn't return an error code on failure any more (and doesn't pass one to the callback as well)
     return dialog.showOpenDialog({
-        title: title,
-        defaultPath: initialPath,
-        filters: fileTypes,
-        properties: properties
-    }, function (paths) {
-        callback(null, paths.map(utils.convertWindowsPathToUnixPath));
+        title,
+        defaultPath,
+        filters,
+        properties
+    }, function (fileNames: string[]) {
+        callback(null, fileNames.map(utils.convertWindowsPathToUnixPath));
     });
 };
 
-export function showSaveDialog(title, initialPath, proposedNewFilename, callback) {
+export function showSaveDialog(
+    title: string,
+    defaultPath: string,
+    proposedNewFilename: string,
+    callback: (err?: Error, fileName?: string) => void
+) {
     // TODO: Implement proposedNewFilename
     // TODO: I don't think defaultPath works right now - we should test that
     // Also, it doesn't return an error code on failure any more (and doesn't pass one to the callback as well)
     return dialog.showSaveDialog({
-        title: title,
-        defaultPath: initialPath
+        title,
+        defaultPath
     }, function (path) {
         callback(null, utils.convertWindowsPathToUnixPath(path));
     });

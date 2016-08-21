@@ -1,13 +1,13 @@
 import * as assert from "assert";
 import * as path from "path";
 import * as utils from "../utils";
-import { app, remote, shell } from "electron";
+import { remote, shell } from "electron";
 
+const app = remote.app;
 const REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
 const shellState = remote.require("./shell-state");
 const startupTime = process.hrtime();
 
-export const NO_ERROR = null;
 export const ERR_NOT_FOUND = "NOTFOUND";
 // TODO: cleanup unused below
 export const ERR_CL_TOOLS_CANCELLED = 12;
@@ -22,7 +22,7 @@ export const ERR_NODE_PORT_NOT_YET_SET = -2;
 // TODO: this should be changeable
 export const language = "en";
 
-export function closeLiveBrowser(callback) {
+export function closeLiveBrowser(callback: (err?: Error) => void) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.closeLiveBrowser not implemented"));
@@ -45,14 +45,14 @@ export function getExtensionsFolder() {
 };
 
 // TODO: it seems that both arguments aren't needed anymore
-export function showExtensionsFolder(appURL, callback) {
+export function showExtensionsFolder(appURL: any, callback: (err?: Error) => void) {
     process.nextTick(function () {
         shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(getExtensionsFolder()));
-        if (callback) { callback(NO_ERROR); }
+        if (callback) { callback(); }
     });
 };
 
-export function getDroppedFiles(callback) {
+export function getDroppedFiles(callback: (err?: Error) => void) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getDroppedFiles not implemented"));
@@ -66,7 +66,7 @@ export function getElapsedMilliseconds() {
     return diff[0] * 1000 + diff[1] / 1000000;
 };
 
-export function getNodeState(callback) {
+export function getNodeState(callback: (errCode: string, port: number) => void) {
     process.nextTick(function () {
         const errorCode = exports[shellState.get("socketServer.state")];
         const port = shellState.get("socketServer.port");
@@ -74,46 +74,53 @@ export function getNodeState(callback) {
     });
 };
 
-export function getPendingFilesToOpen(callback) {
+export function getPendingFilesToOpen(callback: (err?: Error, filePaths?: string[]) => void) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getPendingFilesToOpen not implemented"), []);
     });
 };
 
-export function getRemoteDebuggingPort() {
+export function getRemoteDebuggingPort(): number {
     return REMOTE_DEBUGGING_PORT;
 };
 
-export function getUserHomeDirectory() {
+export function getUserHomeDirectory(): string {
     return utils.convertWindowsPathToUnixPath(app.getPath("home"));
 };
 
-export function getUserDocumentsDirectory() {
+export function getUserDocumentsDirectory(): string {
     console.warn("DEPRECATED: don't use app.getUserDocumentsDirectory(); replaced by app.getUserHomeDirectory()");
     return getUserHomeDirectory();
 };
 
-export function installCommandLine(callback) {
+export function installCommandLine(callback: (err?: Error) => void): void {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.installCommandLine not implemented"));
     });
 };
 
-export function openLiveBrowser(url, enableRemoteDebugging, callback) {
+export function openLiveBrowser(
+    url: string,
+    enableRemoteDebugging: boolean,
+    callback: (err?: Error) => void
+) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.openLiveBrowser not implemented" + url));
     });
 };
 
-export function openURLInDefaultBrowser(url, callback) {
+export function openURLInDefaultBrowser(
+    url: string,
+    callback: (err?: Error) => void
+) {
     assert(url && typeof url === "string", "url must be a string");
     process.nextTick(function () {
         shell.openExternal(url);
         if (callback) {
-            callback(NO_ERROR);
+            callback();
         }
     });
 };
@@ -128,9 +135,12 @@ export function showDeveloperTools() {
 };
 
 // TODO: get rid of callback? This call is not throwing any error.
-export function showOSFolder(path, callback) {
+export function showOSFolder(
+    path: string,
+    callback: () => void
+): void {
     process.nextTick(function () {
         shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
-        if (callback) { callback(NO_ERROR); }
+        if (callback) { callback(); }
     });
 };

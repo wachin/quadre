@@ -40,8 +40,8 @@ export function get(key: string): any {
 
 export function getNumber(key: string): number {
     const result = get(key);
-    if (typeof result !== "number") {
-        throw new Error(`getNumber -> not-a-number: ${result}`);
+    if (result != null && typeof result !== "number") {
+        throw new Error(`getNumber -> not-a-number: ${key} = ${result}`);
     }
     return result;
 }

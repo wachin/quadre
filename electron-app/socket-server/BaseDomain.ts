@@ -1,9 +1,11 @@
+import DomainManager from "./domain-manager";
+
 /**
  * @private
  * @type {DomainManager}
  * DomainManager provided at initialization time
  */
-let _domainManager = null;
+let _domainManager: typeof DomainManager = null;
 
 /**
  * @private
@@ -49,7 +51,7 @@ function cmdLoadDomainModulesFromPaths(paths: string[]): boolean {
  * Registers commands with the DomainManager
  * @param {DomainManager} domainManager The DomainManager to use
  */
-function init(domainManager) {
+function init(domainManager: typeof DomainManager) {
     _domainManager = domainManager;
 
     _domainManager.registerDomain("base", {major: 0, minor: 1});

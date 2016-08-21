@@ -1,13 +1,8 @@
-/*jshint globalstrict:true, node:true*/
+import * as _ from "lodash";
+import { remote } from "electron";
 
-"use strict";
-
-var _ = require("lodash");
-var electron = require("electron");
-
-var remote = electron.remote;
-var app = _.extend({}, require("./app"), remote.require("./appshell/app-menu"));
-var fs = _.extend({}, require("fs-extra"), require("./fs-additions"));
+const app = _.extend({}, require("./app"), remote.require("./appshell/app-menu"));
+const fs = _.extend({}, require("fs-extra"), require("./fs-additions"));
 
 // prevent using this alias, rather use .remove
 delete fs.delete;
@@ -15,7 +10,4 @@ delete fs.delete;
 // make sure extensions folder exists
 fs.ensureDir(app.getExtensionsFolder());
 
-module.exports = {
-    app: app,
-    fs: fs
-};
+export default { app, fs };
