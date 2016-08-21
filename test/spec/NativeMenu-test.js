@@ -63,7 +63,7 @@ define(function (require, exports, module) {
             waitsFor(function () { return complete; });
             
             runs(function () {
-                expect(error).toBe(brackets.app.NO_ERROR);
+                expect(error).toBe(null);
             });
 
         });
@@ -101,7 +101,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify menu is found
@@ -117,7 +117,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(TEST_MENU_TITLE);
                 });
 
@@ -161,7 +161,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -177,7 +177,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -194,7 +194,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify menu is found
@@ -213,7 +213,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                     expect(position).toBeGreaterThan(0);
                 });
@@ -229,7 +229,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -248,7 +248,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 runs(function () {
@@ -262,7 +262,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify menu is found
@@ -283,7 +283,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                 });
 
@@ -303,7 +303,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                     expect(position).toBe(targetPos);
                 });
@@ -343,7 +343,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 runs(function () {
@@ -357,7 +357,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify menu is found
@@ -378,7 +378,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                 });
 
@@ -398,7 +398,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                     expect(position).toBe(targetPos);
                 });
@@ -455,7 +455,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe("");
                     expect(position).toBeGreaterThan(0);
                 });
@@ -490,7 +490,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -506,7 +506,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -523,7 +523,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify item
@@ -539,7 +539,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(TEST_MENU_ITEM);
                     complete = false;
                     brackets.app.removeMenuItem(TEST_MENU_ITEM_ID, function (err) {
@@ -580,7 +580,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Add a menu item into the empty menu
@@ -595,7 +595,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
             });
@@ -619,7 +619,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -636,7 +636,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify item is found in the right position
@@ -655,7 +655,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe(TEST_MENU_ID);
                     expect(position).toBe(0);
                 });
@@ -673,7 +673,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe("Brackets Test Command Custom 1");
                 });
 
@@ -699,7 +699,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify item is found in the right position
@@ -718,7 +718,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe(TEST_MENU_ID);
                     expect(position).toBe(1);
                 });
@@ -736,7 +736,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe("Brackets Test Command Custom 2");
                 });
 
@@ -763,7 +763,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify item is found in the right position
@@ -782,7 +782,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe(TEST_MENU_ID);
                     expect(position).toBe(1);
                 });
@@ -800,7 +800,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe("Brackets Test Command Custom 3");
                 });
 
@@ -826,7 +826,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Verify item is found in the right position
@@ -845,7 +845,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe(TEST_MENU_ID);
                     expect(position).toBe(0);
                 });
@@ -863,7 +863,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe("Brackets Test Command Custom 4");
                 });
 
@@ -908,7 +908,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(parentId).toBe(TEST_MENU_ID);
                     expect(position).toBe(1);
                 });
@@ -926,7 +926,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe("Brackets Test Command Custom 5");
                 });
 
@@ -982,7 +982,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(index).toBe(2);
                 });
 
@@ -1012,7 +1012,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(index).toBe(6);
                 });
 
@@ -1042,7 +1042,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(index).toBe(0);
                 });
 
@@ -1072,7 +1072,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(index).toBe(5);
                 });
                 runs(function () {
@@ -1104,7 +1104,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 runs(function () {
@@ -1118,7 +1118,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -1175,7 +1175,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -1197,7 +1197,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -1215,7 +1215,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; }, "calling removeMenuItem");
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Make sure it's gone
@@ -1285,7 +1285,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -1308,7 +1308,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
             it("should be able to set enabled state", function () {
@@ -1328,7 +1328,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
 //                    expect(enabled).toBe(true);
                 });
 
@@ -1344,7 +1344,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Make sure it is enabled
@@ -1360,7 +1360,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(enabled).toBe(false);
                 });
             });
@@ -1381,7 +1381,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(checked).toBe(false);
                 });
 
@@ -1397,7 +1397,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Make sure it is enabled
@@ -1413,7 +1413,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
 //                    expect(checked).toBe(true);
                 });
             });
@@ -1450,7 +1450,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
 
@@ -1475,7 +1475,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
             });
             it("should be able to set menu title", function () {
@@ -1496,7 +1496,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(TEST_MENU_TITLE);
                 });
 
@@ -1512,7 +1512,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Make sure it is set
@@ -1528,7 +1528,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(NEW_TITLE);
                 });
             });
@@ -1550,7 +1550,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(TEST_MENU_ITEM);
                 });
 
@@ -1566,7 +1566,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                 });
 
                 // Make sure it is set
@@ -1582,7 +1582,7 @@ define(function (require, exports, module) {
                 waitsFor(function () { return complete; });
 
                 runs(function () {
-                    expect(error).toBe(brackets.app.NO_ERROR);
+                    expect(error).toBe(null);
                     expect(title).toBe(NEW_TITLE);
                 });
             });
@@ -1611,7 +1611,7 @@ define(function (require, exports, module) {
             waitsFor(function () { return complete; });
             
             runs(function () {
-                expect(error).toBe(brackets.app.NO_ERROR);
+                expect(error).toBe(null);
             });
         });
     }); // describe("Native Menus")

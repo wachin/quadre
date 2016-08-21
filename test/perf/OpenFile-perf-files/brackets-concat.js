@@ -1472,7 +1472,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
     
     NativeFileSystem.Entry.prototype.getMetadata = function (successCallBack, errorCallback) {
         brackets.fs.stat(this.fullPath, function (err, stat) {
-            if (err === brackets.fs.NO_ERROR) {
+            if (err == null) {
                 var metadata = new NativeFileSystem.Metadata(stat.mtime);
                 successCallBack(metadata);
             } else {
@@ -1554,7 +1554,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
 
             brackets.fs.writeFile(fileEntry.fullPath, data, _FSEncodings.UTF8, function (err) {
 
-                if ((err !== brackets.fs.NO_ERROR) && self.onerror) {
+                if (err != null && self.onerror) {
                     var fileError = NativeFileSystem._nativeToFileError(err);
 
                     // TODO (issue #241): set readonly FileSaver.error attribute
@@ -1801,7 +1801,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
 
         // Use stat() to check if file exists
         brackets.fs.stat(fileFullPath, function (err, stats) {
-            if ((err === brackets.fs.NO_ERROR)) {
+            if (err == null) {
                 // NO_ERROR implies the path already exists
 
                 // throw error if the file the path is a directory
@@ -35704,7 +35704,7 @@ define('utils/ExtensionLoader',['require','exports','module','file/NativeFileSys
         var fileExists = false, statComplete = false;
         brackets.fs.stat(extensionPath, function (err, stat) {
             statComplete = true;
-            if (err === brackets.fs.NO_ERROR && stat.isFile()) {
+            if (err == null && stat.isFile()) {
                 // unit test file exists
                 var extensionRequire = brackets.libRequire.config({
                     context: name,
@@ -39726,7 +39726,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
     
     NativeFileSystem.Entry.prototype.getMetadata = function (successCallBack, errorCallback) {
         brackets.fs.stat(this.fullPath, function (err, stat) {
-            if (err === brackets.fs.NO_ERROR) {
+            if (err == null) {
                 var metadata = new NativeFileSystem.Metadata(stat.mtime);
                 successCallBack(metadata);
             } else {
@@ -39808,7 +39808,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
 
             brackets.fs.writeFile(fileEntry.fullPath, data, _FSEncodings.UTF8, function (err) {
 
-                if ((err !== brackets.fs.NO_ERROR) && self.onerror) {
+                if (err != null && self.onerror) {
                     var fileError = NativeFileSystem._nativeToFileError(err);
 
                     // TODO (issue #241): set readonly FileSaver.error attribute
@@ -40055,7 +40055,7 @@ define('file/NativeFileSystem',['require','exports','module','utils/Async'],func
 
         // Use stat() to check if file exists
         brackets.fs.stat(fileFullPath, function (err, stats) {
-            if ((err === brackets.fs.NO_ERROR)) {
+            if (err == null) {
                 // NO_ERROR implies the path already exists
 
                 // throw error if the file the path is a directory
@@ -73958,7 +73958,7 @@ define('utils/ExtensionLoader',['require','exports','module','file/NativeFileSys
         var fileExists = false, statComplete = false;
         brackets.fs.stat(extensionPath, function (err, stat) {
             statComplete = true;
-            if (err === brackets.fs.NO_ERROR && stat.isFile()) {
+            if (err == null && stat.isFile()) {
                 // unit test file exists
                 var extensionRequire = brackets.libRequire.config({
                     context: name,
