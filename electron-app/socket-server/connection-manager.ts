@@ -3,7 +3,7 @@ export interface ConnectionMessage {
     domain: string;
     command?: string;
     event?: string;
-    parameters: any[];
+    parameters?: any[];
 }
 
 export interface ConnectionErrorMessage {
@@ -38,7 +38,7 @@ export class Connection {
      * @type {WebSocket}
      * The connection's WebSocket
      */
-    private _ws: WebSocket = null;
+    private _ws: WebSocket | null = null;
 
     /**
      * @private
@@ -108,7 +108,7 @@ export class Connection {
 
         const validId = m.id != null;
         const hasDomain = !!m.domain;
-        const hasCommand = !!m.command;
+        const hasCommand = typeof m.command === "string";
 
         if (validId && hasDomain && hasCommand) {
             // okay if m.parameters is null/undefined
@@ -117,7 +117,7 @@ export class Connection {
                     this,
                     m.id,
                     m.domain,
-                    m.command,
+                    m.command as string,
                     m.parameters
                 );
             } catch (executionError) {
@@ -197,7 +197,7 @@ export class Connection {
      * @param {string} event Name of the event
      * @param {object} parameters Event parameters. Must be JSON.stringify-able.
      */
-    public sendEventMessage(id: number, domain: string, event: string, parameters: any[]) {
+    public sendEventMessage(id: number, domain: string, event: string, parameters?: any[]) {
         this._send("event", {
             id: id,
             domain: domain,
@@ -222,10 +222,12 @@ export function createConnection(ws: WebSocket) {
 export function closeAllConnections() {
     while (_connections.length > 0) {
         const conn = _connections.shift();
-        try {
-            conn.close();
-        } catch (err) {
-            // ignore
+        if (conn) {
+            try {
+                conn.close();
+            } catch (err) {
+                // ignore
+            }
         }
     }
 }
@@ -237,7 +239,7 @@ export function closeAllConnections() {
  * @param {string} event Name of the event
  * @param {object} parameters Event parameters. Must be JSON.stringify-able.
  */
-export function sendEventToAllConnections(id: number, domain: string, event: string, parameters: any[]) {
+export function sendEventToAllConnections(id: number, domain: string, event: string, parameters?: any[]) {
     _connections.forEach(function (c) {
         c.sendEventMessage(id, domain, event, parameters);
     });

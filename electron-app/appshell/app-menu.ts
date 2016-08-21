@@ -20,7 +20,7 @@ function _refreshMenu(callback: () => void) {
 
 function _findMenuItemPosition(
     id: string, where: MenuItemOptions[] = menuTemplate, whereId: string = ""
-): [string, number] {
+): [string, number] | null {
     const result = _.find(where, {id: id});
     if (result) {
         return [whereId, _.findIndex(where, {id: id})];
@@ -43,7 +43,7 @@ function _deleteMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate
     return deleted.length > 0 ? true : false;
 }
 
-function _findMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): MenuItemOptions {
+function _findMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): MenuItemOptions | null {
     const result = _.find(where, {id: id});
     if (result) {
         return result;
@@ -58,9 +58,9 @@ function _addToPosition(
     obj: MenuItemOptions,
     target: MenuItemOptions[],
     position: string,
-    relativeId: string
-): void | string {
-    let retVal: void | string = null;
+    relativeId: string | null
+): string | null {
+    let retVal: string | null = null;
     if (position === "first") {
         target.unshift(obj);
     } else if (position === "last") {
@@ -100,8 +100,8 @@ function _addToPosition(
 }
 
 function _fixBracketsKeyboardShortcut(shortcut: string): string {
-    if (typeof shortcut !== "string" || shortcut.trim() === "") {
-        return null;
+    if (shortcut.trim() === "") {
+        return "";
     }
 
     shortcut = shortcut.replace(/-/g, "+");
@@ -114,7 +114,7 @@ function _fixBracketsKeyboardShortcut(shortcut: string): string {
 
     if (!shortcut.match(/^[\x00-\x7F]+$/)) {
         console.error("Non ASCII keyboard shortcut used: " + shortcut);
-        shortcut = null;
+        return "";
     }
 
     return shortcut;
@@ -140,11 +140,11 @@ export function addMenuItem(
     parentId: string,
     title: string,
     id: string,
-    key?: string,
-    displayStr?: string,
-    position?: string,
-    relativeId?: string,
-    callback?: (err?: void | string) => void
+    key: string | null,
+    displayStr: string | null,
+    position: string | null,
+    relativeId: string | null,
+    callback: (err?: string | null) => void
 ) {
     assert(parentId && typeof parentId === "string", "parentId must be a string");
     assert(title && typeof title === "string", "title must be a string");
@@ -155,7 +155,9 @@ export function addMenuItem(
     assert(!relativeId || relativeId && typeof relativeId === "string", "relativeId must be a string");
     assert(typeof callback === "function", "callback must be a function");
     process.nextTick(function () {
-        key = _fixBracketsKeyboardShortcut(key);
+        if (typeof key === "string") {
+            key = _fixBracketsKeyboardShortcut(key);
+        }
 
         const isSeparator = title === "---";
         const newObj: MenuItemOptions = {
@@ -189,7 +191,7 @@ export function addMenuItem(
 
 export function getMenuItemState(
     commandId: string,
-    callback: (err?: void | string, enabled?: boolean, checked?: boolean) => void
+    callback: (err?: string | null, enabled?: boolean, checked?: boolean) => void
 ) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
@@ -203,16 +205,16 @@ export function getMenuItemState(
 
 export function getMenuPosition(
     commandId: string,
-    callback: (err?: void | string, parentId?: string, position?: number) => void
+    callback: (err?: string | null, parentId?: string, position?: number) => void
 ) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const res = _findMenuItemPosition(commandId);
-        callback(null, res[0], res[1]);
+        return res ? callback(null, res[0], res[1]) : callback(null);
     });
 };
 
-export function getMenuTitle(commandId: string, callback: (err?: void | string, title?: string) => void) {
+export function getMenuTitle(commandId: string, callback: (err?: string | null, title?: string) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const obj = _findMenuItemById(commandId);
@@ -223,7 +225,7 @@ export function getMenuTitle(commandId: string, callback: (err?: void | string, 
     });
 };
 
-export function removeMenu(commandId: string, callback: (err?: void | string, deleted?: boolean) => void) {
+export function removeMenu(commandId: string, callback: (err?: string | null, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
@@ -231,7 +233,7 @@ export function removeMenu(commandId: string, callback: (err?: void | string, de
     });
 };
 
-export function removeMenuItem(commandId: string, callback: (err?: void | string, deleted?: boolean) => void) {
+export function removeMenuItem(commandId: string, callback: (err?: string | null, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
@@ -243,13 +245,16 @@ export function setMenuItemShortcut(
     commandId: string,
     shortcut: string,
     displayStr: string,
-    callback: (err?: void | string) => void
+    callback: (err?: string | null) => void
 ) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(shortcut && typeof shortcut === "string", "shortcut must be a string");
     process.nextTick(function () {
         shortcut = _fixBracketsKeyboardShortcut(shortcut);
         const obj = _findMenuItemById(commandId);
+        if (!obj) {
+            return callback(ERR_NOT_FOUND);
+        }
         if (shortcut) {
             obj.accelerator = shortcut;
         } else {
@@ -263,7 +268,7 @@ export function setMenuItemState(
     commandId: string,
     enabled: boolean,
     checked: boolean,
-    callback: (err?: void | string) => void
+    callback: (err?: string | null) => void
 ) {
     assert(typeof enabled === "boolean", "enabled must be a boolean");
     assert(typeof checked === "boolean", "checked must be a boolean");
@@ -287,7 +292,7 @@ export function setMenuItemState(
 export function setMenuTitle(
     commandId: string,
     title: string,
-    callback: (err?: void | string) => void
+    callback: (err?: string | null) => void
 ) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     assert(title && typeof title === "string", "title must be a string");

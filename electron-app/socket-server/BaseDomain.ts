@@ -5,7 +5,7 @@ import DomainManager from "./domain-manager";
  * @type {DomainManager}
  * DomainManager provided at initialization time
  */
-let _domainManager: typeof DomainManager = null;
+let _domainManager: typeof DomainManager | null = null;
 
 /**
  * @private

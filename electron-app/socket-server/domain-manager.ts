@@ -57,7 +57,7 @@ let _eventCount = 1;
  * and execution of all commands and events. It is a singleton, and is passed
  * to a domain in its init() method.
  */
-const DomainManager = {
+export const DomainManager = {
 
     /**
      * Returns whether a domain with the specified name exists or not.
@@ -151,7 +151,7 @@ const DomainManager = {
         id: number,
         domainName: string,
         commandName: string,
-        parameters: any[]
+        parameters: any[] = []
     ) {
         if (_domains[domainName] &&
                 _domains[domainName].commands[commandName]) {
@@ -215,7 +215,7 @@ const DomainManager = {
      * @param {string} eventName The event name.
      * @param {?Array} parameters The parameters. Must be JSON.stringify-able
      */
-    emitEvent: function emitEvent(domainName: string, eventName: string, parameters?: DomainCommandArgument[]) {
+    emitEvent: function emitEvent(domainName: string, eventName: string, parameters?: any[]) {
         if (_domains[domainName] && _domains[domainName].events[eventName]) {
             ConnectionManager.sendEventToAllConnections(
                 _eventCount++,

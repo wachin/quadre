@@ -23,7 +23,7 @@ export function open(url: string | string[], id: string, options: Electron.Brows
     // close if exists, do not call .open for refresh
     if (windows[id]) {
         windows[id].close();
-        windows[id] = null;
+        delete windows[id];
     }
     const win = new BrowserWindow({
         width: options.width || 800,
@@ -34,7 +34,7 @@ export function open(url: string | string[], id: string, options: Electron.Brows
         }
     });
     win.on("closed", function() {
-        windows[id] = null;
+        delete windows[id];
     });
     win.loadURL(resolveUrl(url));
     windows[id] = win;

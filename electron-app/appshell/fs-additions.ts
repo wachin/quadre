@@ -23,7 +23,7 @@ export function isEncodingSupported(encoding: string): boolean {
     return ["ascii", "utf-8", "utf8"].indexOf(encoding.toLowerCase()) !== -1;
 };
 
-export function isNetworkDrive(path: string, callback: (err?: Error, res?: boolean) => void) {
+export function isNetworkDrive(path: string, callback: (err: Error | null, res: boolean) => void) {
     // TODO: implement
     process.nextTick(function () {
         callback(null, false);
@@ -40,7 +40,7 @@ export function moveToTrash(path: string, callback: (err?: Error) => void) {
     });
 };
 
-export function readTextFile(filename: string, encoding: string, callback: (err?: Error, res?: string) => void) {
+export function readTextFile(filename: string, encoding: string, callback: (err: Error | null, res?: string) => void) {
     if (typeof encoding === "function") {
         callback = encoding;
         encoding = "utf-8";
@@ -113,7 +113,7 @@ export function showOpenDialog(
      * To show all files, use the '*' wildcard (no other wildcard is supported).
      */
     filters: { name: string; extensions: string[]; }[],
-    callback: (err?: Error, fileNames?: string[]) => void
+    callback: (err: Error | null, fileNames?: string[]) => void
 ) {
     const properties: ("openFile" | "openDirectory" | "multiSelections" | "createDirectory" | "showHiddenFiles")[] = [];
     if (chooseDirectory) {
@@ -140,7 +140,7 @@ export function showSaveDialog(
     title: string,
     defaultPath: string,
     proposedNewFilename: string,
-    callback: (err?: Error, fileName?: string) => void
+    callback: (err: Error | null, fileName?: string) => void
 ) {
     // TODO: Implement proposedNewFilename
     // TODO: I don't think defaultPath works right now - we should test that

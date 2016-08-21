@@ -8,9 +8,9 @@ const log = Logger.get("socket-server");
 const portscanner = require("portscanner");
 
 const DEFAULT_PORT = 8123;
-let httpServer: http.Server = null;
-let httpPort: number = null;
-let wsServer: WebSocket.Server = null;
+let httpServer: http.Server | null = null;
+let httpPort: number = 0;
+let wsServer: WebSocket.Server | null = null;
 
 function initPort() {
     return new Promise(function (resolve, reject) {
@@ -29,10 +29,10 @@ function initPort() {
     });
 }
 
-function initHttp() {
-    return new Promise(function (resolve, reject) {
-        const server = http.createServer(function(req, res) {
-            if (req.method === "GET" && req.url.indexOf("/api") === 0) {
+function initHttp(): Promise<http.Server> {
+    return new Promise((resolve, reject) => {
+        const server = http.createServer((req, res) => {
+            if (req.method === "GET" && req.url && req.url.indexOf("/api") === 0) {
                 res.setHeader("Content-Type", "application/json");
                 res.end(JSON.stringify(DomainManager.getDomainDescriptions(), null, 4));
                 return;
@@ -48,14 +48,14 @@ function initHttp() {
         });
         server.listen(httpPort, function() {
             httpServer = server;
-            resolve();
+            resolve(server);
         });
     });
 }
 
-function initWebsockets() {
+function initWebsockets(_httpServer: http.Server) {
     wsServer = new Server({
-        server: httpServer
+        server: _httpServer
     });
     wsServer.on("error", function (err) {
         log.error("wsServer error: " + err);
@@ -63,21 +63,12 @@ function initWebsockets() {
     wsServer.on("connection", ConnectionManager.createConnection);
 }
 
-export function start(callback: (err: Error, res?: any) => void) {
+export function start(callback: (err: Error | null, res?: any) => void) {
     initPort()
-        .then(function () {
-            return initHttp();
-        })
-        .then(function () {
-            return initWebsockets();
-        })
-        .then(function () {
-            return DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
-        })
-        .then(function () {
-            return httpPort;
-        })
-        .then(res => callback(null, res))
+        .then(() => initHttp())
+        .then(_httpServer => initWebsockets(_httpServer))
+        .then(() => DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]))
+        .then(() => callback(null, httpPort))
         .catch(err => callback(err));
 };
 

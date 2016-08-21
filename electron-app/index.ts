@@ -152,7 +152,8 @@ export function getMainWindow() {
 
 export function restart(query: {} | string) {
     while (wins.length > 0) {
-        wins.shift().close();
+        const win = wins.shift();
+        if (win) { win.close(); }
     }
     openBracketsWindow(query);
 };
