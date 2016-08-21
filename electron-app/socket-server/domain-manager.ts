@@ -242,9 +242,11 @@ export const DomainManager = {
     loadDomainModulesFromPaths: function loadDomainModulesFromPaths(paths: string[]): boolean {
         paths.forEach(path => {
             const m = require(path);
-            if (m && m.init && _initializedDomainModules.indexOf(m) < 0) {
-                m.init(this);
-                _initializedDomainModules.push(m); // don't init more than once
+            if (m && m.init) {
+                if (_initializedDomainModules.indexOf(m) < 0) {
+                    m.init(this);
+                    _initializedDomainModules.push(m); // don't init more than once
+                }
             } else {
                 throw new Error(`domain at ${path} didn't return an object with 'init' property`);
             }
