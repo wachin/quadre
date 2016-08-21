@@ -7,7 +7,6 @@ import * as main from "../index";
 
 const menuTemplate: MenuItemOptions[] = [];
 
-export const NO_ERROR: void = null;
 export const ERR_NOT_FOUND = "NOTFOUND";
 
 const __refreshMenu = _.debounce(function () {
@@ -61,7 +60,7 @@ function _addToPosition(
     position: string,
     relativeId: string
 ): void | string {
-    let retVal: void | string = NO_ERROR;
+    let retVal: void | string = null;
     if (position === "first") {
         target.unshift(obj);
     } else if (position === "last") {
@@ -198,7 +197,7 @@ export function getMenuItemState(
         if (!obj) {
             return callback(ERR_NOT_FOUND);
         }
-        callback(NO_ERROR, obj.enabled === true, obj.checked === true);
+        callback(null, obj.enabled === true, obj.checked === true);
     });
 };
 
@@ -209,7 +208,7 @@ export function getMenuPosition(
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const res = _findMenuItemPosition(commandId);
-        callback(NO_ERROR, res[0], res[1]);
+        callback(null, res[0], res[1]);
     });
 };
 
@@ -220,7 +219,7 @@ export function getMenuTitle(commandId: string, callback: (err?: void | string, 
         if (!obj) {
             return callback(ERR_NOT_FOUND);
         }
-        callback(NO_ERROR, obj.label);
+        callback(null, obj.label);
     });
 };
 
@@ -228,7 +227,7 @@ export function removeMenu(commandId: string, callback: (err?: void | string, de
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
-        _refreshMenu(callback.bind(null, deleted ? NO_ERROR : ERR_NOT_FOUND));
+        _refreshMenu(callback.bind(null, deleted ? null : ERR_NOT_FOUND));
     });
 };
 
@@ -236,7 +235,7 @@ export function removeMenuItem(commandId: string, callback: (err?: void | string
     assert(commandId && typeof commandId === "string", "commandId must be a string");
     process.nextTick(function () {
         const deleted = _deleteMenuItemById(commandId);
-        _refreshMenu(callback.bind(null, deleted ? NO_ERROR : ERR_NOT_FOUND));
+        _refreshMenu(callback.bind(null, deleted ? null : ERR_NOT_FOUND));
     });
 };
 
@@ -256,7 +255,7 @@ export function setMenuItemShortcut(
         } else {
             delete obj.accelerator;
         }
-        _refreshMenu(callback.bind(null, NO_ERROR));
+        _refreshMenu(callback.bind(null, null));
     });
 };
 
@@ -281,7 +280,7 @@ export function setMenuItemState(
             // TODO: Change addMenuItem to set the type (checkbox, radio, ... submenu)
             obj.type = "checkbox";
         }
-        _refreshMenu(callback.bind(null, NO_ERROR));
+        _refreshMenu(callback.bind(null, null));
     });
 };
 
@@ -298,6 +297,6 @@ export function setMenuTitle(
             return callback(ERR_NOT_FOUND);
         }
         obj.label = title;
-        _refreshMenu(callback.bind(null, NO_ERROR));
+        _refreshMenu(callback.bind(null, null));
     });
 };
