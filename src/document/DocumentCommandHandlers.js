@@ -1415,7 +1415,10 @@ define(function (require, exports, module) {
      */
     if (!window.isSpecRunner) {
         window.onbeforeunload = function () {
-            return _windowGoingAway;
+            // note: in electron, any non-void return value will cause abort
+            if (!_windowGoingAway) {
+                return false;
+            }
         };
         browserWindow.on("close", function (event) {
             if (!_windowGoingAway) {

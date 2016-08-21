@@ -528,17 +528,18 @@ define(function (require, exports, module) {
         );
 
         function refreshInterfaceCallback(spec) {
-            function makeCommandFunction(domainName, commandSpec) {
+            function makeCommandFunction(domainName, commandName) {
                 return function () {
                     var deferred = $.Deferred();
                     var parameters = Array.prototype.slice.call(arguments, 0);
                     var id = self._getNextCommandID();
                     self._pendingCommandDeferreds[id] = deferred;
-                    self._send({id: id,
-                               domain: domainName,
-                               command: commandSpec.name,
-                               parameters: parameters
-                               });
+                    self._send({
+                        id: id,
+                        domain: domainName,
+                        command: commandName,
+                        parameters: parameters
+                    });
                     return deferred;
                 };
             }
@@ -546,16 +547,18 @@ define(function (require, exports, module) {
             // TODO: Don't replace the domain object every time. Instead, merge.
             self.domains = {};
             self.domainEvents = {};
-            spec.forEach(function (domainSpec) {
-                self.domains[domainSpec.domain] = {};
-                domainSpec.commands.forEach(function (commandSpec) {
-                    self.domains[domainSpec.domain][commandSpec.name] =
-                        makeCommandFunction(domainSpec.domain, commandSpec);
+            Object.keys(spec).forEach(function (domainKey) {
+                var domainSpec = spec[domainKey];
+                self.domains[domainKey] = {};
+                Object.keys(domainSpec.commands).forEach(function (commandKey) {
+                    var commandSpec = domainSpec.commands[commandKey];
+                    self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
                 });
-                self.domainEvents[domainSpec.domain] = {};
-                domainSpec.events.forEach(function (eventSpec) {
+                self.domainEvents[domainKey] = {};
+                Object.keys(domainSpec.events).forEach(function (eventKey) {
+                    var eventSpec = domainSpec.events[eventKey];
                     var parameters = eventSpec.parameters;
-                    self.domainEvents[domainSpec.domain][eventSpec.name] = parameters;
+                    self.domainEvents[domainKey][eventKey] = parameters;
                 });
             });
             deferred.resolve();

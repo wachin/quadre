@@ -106,17 +106,26 @@ export class Connection {
             return;
         }
 
-        if (m.id !== null && m.id !== undefined && m.domain && m.command) {
+        const validId = m.id != null;
+        const hasDomain = !!m.domain;
+        const hasCommand = !!m.command;
+
+        if (validId && hasDomain && hasCommand) {
             // okay if m.parameters is null/undefined
             try {
-                DomainManager.executeCommand(this, m.id, m.domain,
-                    m.command, m.parameters);
+                DomainManager.executeCommand(
+                    this,
+                    m.id,
+                    m.domain,
+                    m.command,
+                    m.parameters
+                );
             } catch (executionError) {
                 this.sendCommandError(m.id, executionError.message,
                     executionError.stack);
             }
         } else {
-            this.sendError("Malformed message: " + message);
+            this.sendError(`Malformed message (${validId}, ${hasDomain}, ${hasCommand}): ${message}`);
         }
     }
 
