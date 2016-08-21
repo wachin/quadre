@@ -10,4 +10,5 @@ delete fs.delete;
 // make sure extensions folder exists
 fs.ensureDir(app.getExtensionsFolder());
 
-export default { app, fs };
+// this needs to be node-require style export
+module.exports = { app, fs };
