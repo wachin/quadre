@@ -1,0 +1,35 @@
+{
+  "name": "brackets-electron",
+  "productName": "Brackets-Electron",
+  "description": "An open source code editor for the web, written in JavaScript, HTML and CSS.",
+  "author": "Brackets",
+  "license": "MIT",
+  "homepage": "http://brackets.io",
+  "version": "1.8.0-0",
+  "apiVersion": "1.8.0",
+  "issues": {
+    "url": "http://github.com/adobe/brackets/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adobe/brackets.git",
+    "branch": "",
+    "SHA": ""
+  },
+  "dependencies": {
+    "bluebird": "2.10.1",
+    "fs-extra": "0.24.0",
+    "isbinaryfile": "3.0.0",
+    "lodash": "4.15.0",
+    "portscanner": "1.0.0",
+    "strip-bom": "2.0.0",
+    "trash": "2.0.0",
+    "typescript": "2.0.0",
+    "watch": "0.19.2",
+    "ws": "0.8.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "1.0.14",
+    "pathwatcher": "6.7.1"
+  }
+}

@@ -9,7 +9,8 @@ Thumbs.db
 
 # ignore compiled files
 /.grunt/
-/dist
+/dist/
+/dist-build/
 /src/.index.html
 /src/styles/brackets.min.css
 /src/styles/brackets.min.css.map
@@ -38,7 +39,3 @@ Thumbs.db
 
 # Files that can be automatically downloaded that we don't want to ship with our builds
 /src/extensibility/node/node_modules/request/tests/
-
-# Build packages
-/Brackets-Electron-win32/
-/Brackets-Electron.app/

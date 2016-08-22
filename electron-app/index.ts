@@ -9,7 +9,7 @@ import * as shellConfig from "./shell-config";
 import * as shellState from "./shell-state";
 import * as SocketServer from "./socket-server"; // Implementation of Brackets' shell server
 
-const appInfo = require("../package.json");
+const appInfo = require("./package.json");
 
 const log = logger.get("ipc-log");
 ipcMain.on("log", function (event, ...args) {
