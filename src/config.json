@@ -59,12 +59,12 @@
         "output": "dist-build"
     },
     "scripts": {
-        "build": "rimraf ./dist && gulp build && tsc",
+        "build": "rimraf ./dist && gulp build && tsc --project app && tsc --project src",
         "install": "sh ./pre-rebuild.sh && electron-rebuild && npm run build",
         "start": "electron .",
         "pack": "npm run test && build --dir",
         "dist": "npm run test && build",
-        "dev": "rimraf ./dist && concurrently --kill-others \"gulp watch\" \"tsc --watch\"",
+        "dev": "rimraf ./dist && concurrently --kill-others \"gulp watch\" \"tsc --watch --project app\" \"tsc --watch --project src\"",
         "test": "npm run build && tslint -c tslint.json --project tsconfig.json"
     },
     "dependencies": {

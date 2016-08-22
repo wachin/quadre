@@ -1,8 +1,9 @@
 {
     "compilerOptions": {
-        "outDir": "../dist",
+        "outDir": "../dist/www",
         "noImplicitAny": false,
         "noImplicitReturns": false,
+        "rootDir": ".",
         "sourceMap": true,
         "target": "es6",
         "module": "commonjs",

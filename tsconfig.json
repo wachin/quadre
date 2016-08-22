@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": ".",
     "sourceMap": true,
     "target": "es6",
     "module": "commonjs",
@@ -13,10 +14,6 @@
     "noUnusedLocals": true,
     "removeComments": true,
     "strictNullChecks": true
-  },
-  "include": [
-    "app/**/*",
-    "src/**/*"
-  ]
+  }
 }
 

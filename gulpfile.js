@@ -15,15 +15,15 @@ gulp.task('sync-tsconfigs', () => {
             outDir: `../${DIST_DIR}`
         },
         include: ['./**/*']
-    }, tsconfigJSON), null, 4));
+    }, tsconfigJSON), null, 4) + '\n');
     fs.writeFileSync(path.resolve(__dirname, 'src', 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
         compilerOptions: {
-            outDir: `../${DIST_DIR}`,
+            outDir: `../${DIST_DIR}/www`,
             noImplicitAny: false,
             noImplicitReturns: false
         },
         include: ['./**/*']
-    }, tsconfigJSON), null, 4));
+    }, tsconfigJSON), null, 4) + '\n');
 });
 
 gulp.task('sync-package-json', () => {
@@ -42,15 +42,15 @@ gulp.task('sync-package-json', () => {
         'dependencies',
         'optionalDependencies'
     ]);
-    const appJsonStr = JSON.stringify(appJson, null, 4) + '\n';
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr);
+    const appJsonStr = JSON.stringify(appJson, null, 4);
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr + '\n');
 });
 
 gulp.task('write-config', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
     const appConfigStr = JSON.stringify(_.defaults({}, appConfigJSON, packageJSON), null, 4);
-    fs.writeFileSync(path.resolve(__dirname, 'src', 'config.json'), appConfigStr);
+    fs.writeFileSync(path.resolve(__dirname, 'src', 'config.json'), appConfigStr + '\n');
 });
 
 function copyJs(filePath) {
