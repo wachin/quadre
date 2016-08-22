@@ -63,7 +63,7 @@ SocketServer.start(function (err: Error, port: number) {
 export function openBracketsWindow(query: {} | string = {}) {
 
     // compose path to brackets' index file
-    const indexPath = "file://" + path.resolve(__dirname, "..", "src", "index.html");
+    const indexPath = "file://" + path.resolve(__dirname, "www", "index.html");
 
     // build a query for brackets' window
     let queryString = "";

@@ -4,21 +4,21 @@ const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
 
-const BASE_DIR = 'app';
-const DIST_DIR = 'dist';
-const JS_GLOB = `${BASE_DIR}/**/*.{js,json}`;
+const BASE_DIRS = ['app', 'src'];
+const DIST_DIRS = ['dist', 'dist/www'];
 
 gulp.task('sync-tsconfigs', () => {
     const tsconfigJSON = require(path.resolve(__dirname, 'tsconfig.json'));
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
+    delete tsconfigJSON.exclude;
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[0], 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
         compilerOptions: {
-            outDir: `../${DIST_DIR}`
+            outDir: `../${DIST_DIRS[0]}`
         },
         include: ['./**/*']
     }, tsconfigJSON), null, 4) + '\n');
-    fs.writeFileSync(path.resolve(__dirname, 'src', 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[1], 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
         compilerOptions: {
-            outDir: `../${DIST_DIR}/www`,
+            outDir: `../${DIST_DIRS[1]}`,
             noImplicitAny: false,
             noImplicitReturns: false
         },
@@ -43,37 +43,37 @@ gulp.task('sync-package-json', () => {
         'optionalDependencies'
     ]);
     const appJsonStr = JSON.stringify(appJson, null, 4);
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr + '\n');
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[0], 'package.json'), appJsonStr + '\n');
 });
 
 gulp.task('write-config', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
     const appConfigStr = JSON.stringify(_.defaults({}, appConfigJSON, packageJSON), null, 4);
-    fs.writeFileSync(path.resolve(__dirname, 'src', 'config.json'), appConfigStr + '\n');
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[1], 'config.json'), appConfigStr + '\n');
 });
 
-function copyJs(filePath) {
-    let from;
-    let to;
-    if (filePath) {
-        const relative = path.relative(path.join(__dirname, BASE_DIR), filePath);
-        from = path.join(BASE_DIR, relative);
-        to = path.dirname(path.join(DIST_DIR, relative));
-    } else {
-        from = JS_GLOB;
-        to = DIST_DIR;
-    }
+function copyJs(filePath, srcDir, distDir) {
+    const relative = path.relative(path.join(__dirname, srcDir), filePath);
+    const from = path.join(srcDir, relative);
+    const to = path.dirname(path.join(distDir, relative));
     return gulp.src(from)
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', ['sync-tsconfigs', 'sync-package-json', 'write-config'], () => {
-    copyJs();
+gulp.task('build', ['sync-tsconfigs', 'sync-package-json', 'write-config'], (_cb) => {
+    const cb = _.after(BASE_DIRS.length, _cb);
+    BASE_DIRS.forEach((srcDir, idx) => {
+        gulp.src(`${srcDir}/**/!(*.ts|*.tsx)`)
+            .pipe(gulp.dest(DIST_DIRS[idx]))
+            .on('end', cb);
+    });
 });
 
 gulp.task('watch', ['build'], () => {
-    watch(JS_GLOB, file => copyJs(file.path));
+    BASE_DIRS.forEach((srcDir, idx) => {
+        watch(`${srcDir}/**/!(*.ts|*.tsx)`, file => copyJs(file.path, srcDir, DIST_DIRS[idx]));
+    });
 });
 
 gulp.task('default', ['build']);

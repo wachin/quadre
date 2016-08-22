@@ -1,40 +1,40 @@
-declare var define: any;
-declare var node: any;
-declare var appshell: any;
+declare const define: any;
+declare const node: any;
+declare const appshell: any;
 
 define(function (require, exports, module) {
     "use strict";
 
-    var FileUtils           = require("file/FileUtils"),
-        FileSystemStats     = require("filesystem/FileSystemStats"),
-        FileSystemError     = require("filesystem/FileSystemError");
+    const FileUtils       = require("file/FileUtils");
+    const FileSystemStats = require("filesystem/FileSystemStats");
+    const FileSystemError = require("filesystem/FileSystemError");
 
     /**
      * @const
      */
-    var FILE_WATCHER_BATCH_TIMEOUT = 200;   // 200ms - granularity of file watcher changes
+    const FILE_WATCHER_BATCH_TIMEOUT = 200;   // 200ms - granularity of file watcher changes
 
     /**
      * Callback to notify FileSystem of watcher changes
      * @type {?function(string, FileSystemStats=)}
      */
-    var _changeCallback;
+    let _changeCallback;
 
     /**
      * Callback to notify FileSystem if watchers stop working entirely
      * @type {?function()}
      */
-    var _offlineCallback;
+    let _offlineCallback;
 
     /** Timeout used to batch up file watcher changes (setTimeout() return value) */
-    var _changeTimeout;
+    let _changeTimeout;
 
     /**
      * Pending file watcher changes - map from fullPath to flag indicating whether we need to pass stats
      * to _changeCallback() for this path.
      * @type {!Object.<string, boolean>}
      */
-    var _pendingChanges = {};
+    let _pendingChanges = {};
 
     /**
      * Enqueue a file change event for eventual reporting back to the FileSystem.
@@ -50,8 +50,8 @@ define(function (require, exports, module) {
             _changeTimeout = window.setTimeout(function () {
                 if (_changeCallback) {
                     Object.keys(_pendingChanges).forEach(function (path) {
-                        var needsStats = _pendingChanges[path];
-                        if (needsStats) {
+                        const _needsStats = _pendingChanges[path];
+                        if (_needsStats) {
                             exports.stat(path, function (err, stats) {
                                 if (err) {
                                     // warning has been removed due to spamming the console - see #7332
@@ -96,15 +96,15 @@ define(function (require, exports, module) {
         }
     }
 
-    var _bracketsPath   = FileUtils.getNativeBracketsDirectoryPath();
-    var _modulePath     = FileUtils.getNativeModuleDirectoryPath(module);
-    var workerPath = [_bracketsPath, _modulePath, "node/FileWatcherWorker.js"].join("/");
-    var worker = node.require("child_process").fork(workerPath);
-    var workerCounter = 0;
-    var workerCallbacks = {};
-    var workerSend = function (msg, data, callback) {
+    const _bracketsPath   = FileUtils.getNativeBracketsDirectoryPath();
+    const _modulePath     = FileUtils.getNativeModuleDirectoryPath(module);
+    const workerPath = [_bracketsPath, _modulePath, "node/FileWatcherWorker.js"].join("/");
+    const worker = node.require("child_process").fork(workerPath);
+    let workerCounter = 0;
+    const workerCallbacks = {};
+    const workerSend = function (msg, data, callback) {
         if (callback) {
-            var id = workerCounter++;
+            const id = workerCounter++;
             workerCallbacks[id] = callback;
             msg = msg + "!" + id;
         }
@@ -113,22 +113,22 @@ define(function (require, exports, module) {
 
     // If the connection closes, notify the FileSystem that watchers have gone offline.
     worker.on("disconnect", function () {
-	   if (_offlineCallback) { _offlineCallback(); }
-	});
+        if (_offlineCallback) { _offlineCallback(); }
+    });
     // Setup the message handler. This only needs to happen once.
     worker.on("message", function (obj) {
-        var callbackId;
-        var msg = obj.msg;
-        var data = obj.data;
+        let callbackId;
+        let msg = obj.msg;
+        const data = obj.data;
 
         if (msg.indexOf("!") !== -1) {
-            var spl = msg.split("!");
+            const spl = msg.split("!");
             msg = spl[0];
             callbackId = parseInt(spl[1], 10);
         }
 
         if (msg === "log") {
-            console.log(data);
+            console.log(data); // tslint:disable-line
         } else if (msg === "callback") {
             workerCallbacks[callbackId].apply(null, data);
             workerCallbacks[callbackId] = null;
@@ -166,9 +166,9 @@ define(function (require, exports, module) {
             case "EACCES":
             case "EROFS":
                 return FileSystemError.PERM_DENIED;
+            default:
+                console.warn("got error from fs, but no FileSystemError mapping was found: " + err);
         }
-
-        console.warn("got error from fs, but no FileSystemError mapping was found: " + err);
 
         // do not actually return FileSystemError.UNKNOWN
         // it has no point hiding what the actual error is
@@ -185,7 +185,7 @@ define(function (require, exports, module) {
      */
     function _wrap(cb) {
         return function (err) {
-            var args = Array.prototype.slice.call(arguments);
+            const args = Array.prototype.slice.call(arguments);
             args[0] = _mapError(args[0]);
             cb.apply(null, args);
         };
@@ -204,7 +204,9 @@ define(function (require, exports, module) {
      * @param {function(?string, Array.<string>=)} callback
      */
     function showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, callback) {
-        appshell.fs.showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback));
+        appshell.fs.showOpenDialog(
+            allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback)
+        );
     }
 
     /**
@@ -240,7 +242,7 @@ define(function (require, exports, module) {
                     return callback(new Error("realPath for symbolic link is not implemented in appshell.fs.stat"));
                 }
 
-                var options = {
+                const options = {
                     isFile: stats.isFile(),
                     mtime: stats.mtime,
                     size: stats.size,
@@ -248,7 +250,7 @@ define(function (require, exports, module) {
                     hash: stats.mtime.getTime()
                 };
 
-                var fsStats = new FileSystemStats(options);
+                const fsStats = new FileSystemStats(options);
 
                 callback(null, fsStats);
             }
@@ -298,16 +300,16 @@ define(function (require, exports, module) {
                 return;
             }
 
-            var count = contents.length;
+            let count = contents.length;
             if (!count) {
                 callback(null, [], []);
                 return;
             }
 
-            var stats: any[] = [];
+            const stats: any[] = [];
             contents.forEach(function (val, idx) {
-                stat(path + "/" + val, function (err, stat) {
-                    stats[idx] = err || stat;
+                stat(path + "/" + val, function (err2, stat) {
+                    stats[idx] = err2 || stat;
                     count--;
                     if (count <= 0) {
                         callback(null, contents, stats);
@@ -336,8 +338,8 @@ define(function (require, exports, module) {
             if (err) {
                 callback(_mapError(err));
             } else {
-                stat(path, function (err, stat) {
-                    callback(err, stat);
+                stat(path, function (err2, stat) {
+                    callback(err2, stat);
                 });
             }
         });
@@ -372,7 +374,7 @@ define(function (require, exports, module) {
      * @param {function(?string, string=, FileSystemStats=)} callback
      */
     function readFile(path, options, callback) {
-        var encoding = options.encoding || "utf8";
+        const encoding = options.encoding || "utf8";
 
         // callback to be executed when the call to stat completes
         //  or immediately if a stat object was passed as an argument
@@ -420,15 +422,15 @@ define(function (require, exports, module) {
      * @param {function(?string, FileSystemStats=, boolean)} callback
      */
     function writeFile(path, data, options, callback) {
-        var encoding = options.encoding || "utf8";
+        const encoding = options.encoding || "utf8";
 
         function _finishWrite(created) {
             appshell.fs.writeFile(path, data, encoding, function (err) {
                 if (err) {
                     callback(_mapError(err));
                 } else {
-                    stat(path, function (err, stat) {
-                        callback(err, stat, created);
+                    stat(path, function (err2, stat) {
+                        callback(err2, stat, created);
                     });
                 }
             });
@@ -565,7 +567,6 @@ define(function (require, exports, module) {
     function unwatchAll(callback) {
         workerSend("unwatchAll", null, callback);
     }
-
 
     // Export public API
     exports.showOpenDialog  = showOpenDialog;
