@@ -8,7 +8,6 @@ Thumbs.db
 /npm-debug.log
 
 # ignore compiled files
-/.grunt/
 /dist/
 /dist-build/
 /src/.index.html
