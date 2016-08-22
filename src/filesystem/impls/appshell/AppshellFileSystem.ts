@@ -1,36 +1,14 @@
-/*
- * Copyright (c) 2013 Adobe Systems Incorporated. All rights reserved.
- *  
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation 
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions:
- *  
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *  
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
- * 
- */
-
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, appshell, node, window */
+declare var define: any;
+declare var node: any;
+declare var appshell: any;
 
 define(function (require, exports, module) {
     "use strict";
-    
+
     var FileUtils           = require("file/FileUtils"),
         FileSystemStats     = require("filesystem/FileSystemStats"),
         FileSystemError     = require("filesystem/FileSystemError");
-    
+
     /**
      * @const
      */
@@ -41,16 +19,16 @@ define(function (require, exports, module) {
      * @type {?function(string, FileSystemStats=)}
      */
     var _changeCallback;
-    
+
     /**
      * Callback to notify FileSystem if watchers stop working entirely
      * @type {?function()}
      */
     var _offlineCallback;
-    
+
     /** Timeout used to batch up file watcher changes (setTimeout() return value) */
     var _changeTimeout;
-    
+
     /**
      * Pending file watcher changes - map from fullPath to flag indicating whether we need to pass stats
      * to _changeCallback() for this path.
@@ -60,7 +38,7 @@ define(function (require, exports, module) {
 
     /**
      * Enqueue a file change event for eventual reporting back to the FileSystem.
-     * 
+     *
      * @param {string} changedPath The path that was changed
      * @param {boolean} needsStats Whether or not the eventual change event should include stats
      * @private
@@ -87,16 +65,16 @@ define(function (require, exports, module) {
                         }
                     });
                 }
-                
+
                 _changeTimeout = null;
                 _pendingChanges = {};
             }, FILE_WATCHER_BATCH_TIMEOUT);
         }
     }
-    
+
     /**
      * Event handler for the Node fileWatcher domain's change event.
-     * 
+     *
      * @param {jQuery.Event} The underlying change event
      * @param {string} event The type of the event: either "change" or "rename"
      * @param {string} path The path that is reported to have changed
@@ -163,7 +141,7 @@ define(function (require, exports, module) {
 
     /**
      * Convert appshell error codes to FileSystemError values.
-     * 
+     *
      * @param {?number} err An appshell error code
      * @return {?string} A FileSystemError string, or null if there was no error code.
      * @private
@@ -172,7 +150,7 @@ define(function (require, exports, module) {
         if (!err) {
             return null;
         }
-        
+
         switch (err.code) {
             case "EEXIST":
                 return FileSystemError.ALREADY_EXISTS;
@@ -196,11 +174,11 @@ define(function (require, exports, module) {
         // it has no point hiding what the actual error is
         return err;
     }
-    
+
     /**
      * Convert a callback to one that transforms its first parameter from an
      * appshell error code to a FileSystemError string.
-     * 
+     *
      * @param {function(?number)} cb A callback that expects an appshell error code
      * @return {function(?string)} A callback that expects a FileSystemError string
      * @private
@@ -212,12 +190,12 @@ define(function (require, exports, module) {
             cb.apply(null, args);
         };
     }
-    
+
     /**
      * Display an open-files dialog to the user and call back asynchronously with
      * either a FileSystmError string or an array of path strings, which indicate
      * the entry or entries selected.
-     * 
+     *
      * @param {boolean} allowMultipleSelection
      * @param {boolean} chooseDirectories
      * @param {string} title
@@ -228,12 +206,12 @@ define(function (require, exports, module) {
     function showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, callback) {
         appshell.fs.showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback));
     }
-    
+
     /**
      * Display a save-file dialog and call back asynchronously with either a
      * FileSystemError string or the path to which the user has chosen to save
      * the file. If the dialog is cancelled, the path string will be empty.
-     * 
+     *
      * @param {string} title
      * @param {string} initialPath
      * @param {string} proposedNewFilename
@@ -242,12 +220,12 @@ define(function (require, exports, module) {
     function showSaveDialog(title, initialPath, proposedNewFilename, callback) {
         appshell.fs.showSaveDialog(title, initialPath, proposedNewFilename, _wrap(callback));
     }
-    
+
     /**
      * Stat the file or directory at the given path, calling back
      * asynchronously with either a FileSystemError string or the entry's
      * associated FileSystemStats object.
-     * 
+     *
      * @param {string} path
      * @param {function(?string, FileSystemStats=)} callback
      */
@@ -269,21 +247,21 @@ define(function (require, exports, module) {
                     realPath: stats.realPath,
                     hash: stats.mtime.getTime()
                 };
-                
+
                 var fsStats = new FileSystemStats(options);
-                
+
                 callback(null, fsStats);
             }
         });
     }
-    
+
     /**
      * Determine whether a file or directory exists at the given path by calling
      * back asynchronously with either a FileSystemError string or a boolean,
      * which is true if the file exists and false otherwise. The error will never
      * be FileSystemError.NOT_FOUND; in that case, there will be no error and the
      * boolean parameter will be false.
-     * 
+     *
      * @param {string} path
      * @param {function(?string, boolean)} callback
      */
@@ -301,15 +279,15 @@ define(function (require, exports, module) {
             callback(null, true);
         });
     }
-    
+
     /**
      * Read the contents of the directory at the given path, calling back
-     * asynchronously either with a FileSystemError string or an array of 
+     * asynchronously either with a FileSystemError string or an array of
      * FileSystemEntry objects along with another consistent array, each index
      * of which either contains a FileSystemStats object for the corresponding
      * FileSystemEntry object in the second parameter or a FileSystemError
      * string describing a stat error.
-     * 
+     *
      * @param {string} path
      * @param {function(?string, Array.<FileSystemEntry>=, Array.<string|FileSystemStats>=)} callback
      */
@@ -319,14 +297,14 @@ define(function (require, exports, module) {
                 callback(_mapError(err));
                 return;
             }
-            
+
             var count = contents.length;
             if (!count) {
                 callback(null, [], []);
                 return;
             }
-            
-            var stats = [];
+
+            var stats: any[] = [];
             contents.forEach(function (val, idx) {
                 stat(path + "/" + val, function (err, stat) {
                     stats[idx] = err || stat;
@@ -338,13 +316,13 @@ define(function (require, exports, module) {
             });
         });
     }
-    
+
     /**
      * Create a directory at the given path, and call back asynchronously with
      * either a FileSystemError string or a stats object for the newly created
      * directory. The octal mode parameter is optional; if unspecified, the mode
      * of the created directory is implementation dependent.
-     * 
+     *
      * @param {string} path
      * @param {number=} mode The base-eight mode of the newly created directory.
      * @param {function(?string, FileSystemStats=)=} callback
@@ -364,11 +342,11 @@ define(function (require, exports, module) {
             }
         });
     }
-    
+
     /**
      * Rename the file or directory at oldPath to newPath, and call back
      * asynchronously with a possibly null FileSystemError string.
-     * 
+     *
      * @param {string} oldPath
      * @param {string} newPath
      * @param {function(?string)=} callback
@@ -376,7 +354,7 @@ define(function (require, exports, module) {
     function rename(oldPath, newPath, callback) {
         appshell.fs.rename(oldPath, newPath, _wrap(callback));
     }
-    
+
     /**
      * Read the contents of the file at the given path, calling back
      * asynchronously with either a FileSystemError string, or with the data and
@@ -384,11 +362,11 @@ define(function (require, exports, module) {
      * parameter can be used to specify an encoding (default "utf8"), and also
      * a cached stats object that the implementation is free to use in order
      * to avoid an additional stat call.
-     * 
+     *
      * Note: if either the read or the stat call fails then neither the read data
      * nor stat will be passed back, and the call should be considered to have failed.
      * If both calls fail, the error from the read call is passed back.
-     * 
+     *
      * @param {string} path
      * @param {{encoding: string=, stat: FileSystemStats=}} options
      * @param {function(?string, string=, FileSystemStats=)} callback
@@ -411,7 +389,7 @@ define(function (require, exports, module) {
                 });
             }
         }
-        
+
         if (options.stat) {
             doReadFile(options.stat);
         } else {
@@ -435,7 +413,7 @@ define(function (require, exports, module) {
      * is used to the current state of the file before overwriting it. If a
      * consistency hash is provided but does not match the hash of the file on
      * disk, a FileSystemError.CONTENTS_MODIFIED error is passed to the callback.
-     * 
+     *
      * @param {string} path
      * @param {string} data
      * @param {{encoding : string=, mode : number=, expectedHash : object=, expectedContents : string=}} options
@@ -443,7 +421,7 @@ define(function (require, exports, module) {
      */
     function writeFile(path, data, options, callback) {
         var encoding = options.encoding || "utf8";
-        
+
         function _finishWrite(created) {
             appshell.fs.writeFile(path, data, encoding, function (err) {
                 if (err) {
@@ -455,7 +433,7 @@ define(function (require, exports, module) {
                 }
             });
         }
-        
+
         stat(path, function (err, stats) {
             if (err) {
                 switch (err) {
@@ -467,7 +445,7 @@ define(function (require, exports, module) {
                 }
                 return;
             }
-            
+
             if (options.hasOwnProperty("expectedHash") && options.expectedHash !== stats._hash) {
                 console.error("Blind write attempted: ", path, stats._hash, options.expectedHash);
 
@@ -477,7 +455,7 @@ define(function (require, exports, module) {
                             callback(FileSystemError.CONTENTS_MODIFIED);
                             return;
                         }
-                    
+
                         _finishWrite(false);
                     });
                     return;
@@ -486,16 +464,16 @@ define(function (require, exports, module) {
                     return;
                 }
             }
-            
+
             _finishWrite(false);
         });
     }
-    
+
     /**
      * Unlink (i.e., permanently delete) the file or directory at the given path,
      * calling back asynchronously with a possibly null FileSystemError string.
      * Directories will be unlinked even when non-empty.
-     * 
+     *
      * @param {string} path
      * @param {function(string)=} callback
      */
@@ -510,7 +488,7 @@ define(function (require, exports, module) {
      * Move the file or directory at the given path to a system dependent trash
      * location, calling back asynchronously with a possibly null FileSystemError
      * string. Directories will be moved even when non-empty.
-     * 
+     *
      * @param {string} path
      * @param {function(string)=} callback
      */
@@ -519,7 +497,7 @@ define(function (require, exports, module) {
             callback(_mapError(err));
         });
     }
-    
+
     /**
      * Initialize file watching for this filesystem, using the supplied
      * changeCallback to provide change notifications. The first parameter of
@@ -532,7 +510,7 @@ define(function (require, exports, module) {
      * readily available. The offlineCallback will be called in case watchers
      * are no longer expected to function properly. All watched paths are
      * cleared when the offlineCallback is called.
-     * 
+     *
      * @param {function(?string, FileSystemStats=)} changeCallback
      * @param {function()=} offlineCallback
      */
@@ -540,7 +518,7 @@ define(function (require, exports, module) {
         _changeCallback = changeCallback;
         _offlineCallback = offlineCallback;
     }
-    
+
     /**
      * Start providing change notifications for the file or directory at the
      * given path, calling back asynchronously with a possibly null FileSystemError
@@ -548,7 +526,7 @@ define(function (require, exports, module) {
      * using the changeCallback function provided by the initWatchers method.
      * Note that change notifications are only provided recursively for directories
      * when the recursiveWatch property of this module is true.
-     * 
+     *
      * @param {string} path
      * @param {function(?string)=} callback
      */
@@ -569,14 +547,14 @@ define(function (require, exports, module) {
      * Stop providing change notifications for the file or directory at the
      * given path, calling back asynchronously with a possibly null FileSystemError
      * string when the operation is complete.
-     * 
+     *
      * @param {string} path
      * @param {function(?string)=} callback
      */
     function unwatchPath(path, callback) {
         workerSend("unwatchPath", path, callback);
     }
-    
+
     /**
      * Stop providing change notifications for all previously watched files and
      * directories, optionally calling back asynchronously with a possibly null
@@ -588,7 +566,7 @@ define(function (require, exports, module) {
         workerSend("unwatchAll", null, callback);
     }
 
-    
+
     // Export public API
     exports.showOpenDialog  = showOpenDialog;
     exports.showSaveDialog  = showSaveDialog;
@@ -605,7 +583,7 @@ define(function (require, exports, module) {
     exports.watchPath       = watchPath;
     exports.unwatchPath     = unwatchPath;
     exports.unwatchAll      = unwatchAll;
-    
+
     /**
      * Indicates whether or not recursive watching notifications are supported
      * by the watchPath call. Currently, only Darwin supports recursive watching.
@@ -613,11 +591,11 @@ define(function (require, exports, module) {
      * @type {boolean}
      */
     exports.recursiveWatch = true;
-    
+
     /**
      * Indicates whether or not the filesystem should expect and normalize UNC
      * paths. If set, then //server/directory/ is a normalized path; otherwise the
-     * filesystem will normalize it to /server/directory. Currently, UNC path 
+     * filesystem will normalize it to /server/directory. Currently, UNC path
      * normalization only occurs on Windows.
      *
      * @type {boolean}

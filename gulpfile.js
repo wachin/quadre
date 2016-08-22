@@ -8,6 +8,24 @@ const BASE_DIR = 'electron-app';
 const DIST_DIR = 'dist';
 const JS_GLOB = `${BASE_DIR}/**/*.{js,json}`;
 
+gulp.task('sync-tsconfigs', () => {
+    const tsconfigJSON = require(path.resolve(__dirname, 'tsconfig.json'));
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
+        compilerOptions: {
+            outDir: `../${DIST_DIR}`
+        },
+        include: ['./**/*']
+    }, tsconfigJSON), null, 4));
+    fs.writeFileSync(path.resolve(__dirname, 'src', 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
+        compilerOptions: {
+            outDir: `../${DIST_DIR}`,
+            noImplicitAny: false,
+            noImplicitReturns: false
+        },
+        include: ['./**/*']
+    }, tsconfigJSON), null, 4));
+});
+
 gulp.task('sync-package-json', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     const appJson = _.pick(packageJSON, [
@@ -24,7 +42,7 @@ gulp.task('sync-package-json', () => {
         'dependencies',
         'optionalDependencies'
     ]);
-    const appJsonStr = JSON.stringify(appJson, null, 2) + '\n';
+    const appJsonStr = JSON.stringify(appJson, null, 4) + '\n';
     fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr);
 });
 
@@ -50,7 +68,7 @@ function copyJs(filePath) {
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', ['sync-package-json', 'write-config'], () => {
+gulp.task('build', ['sync-tsconfigs', 'sync-package-json', 'write-config'], () => {
     copyJs();
 });
 

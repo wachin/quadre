@@ -21,7 +21,7 @@
  *
  */
 
-/*global define, $, brackets, electron, window, WebSocket */
+/*jslint regexp: true */
 
 define(function (require, exports, module) {
     "use strict";
