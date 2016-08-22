@@ -15,7 +15,8 @@
     "strictNullChecks": true
   },
   "include": [
-    "electron-app/**/*"
+    "app/**/*",
+    "src/**/*"
   ]
 }
 

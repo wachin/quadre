@@ -4,7 +4,7 @@ const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
 
-const BASE_DIR = 'electron-app';
+const BASE_DIR = 'app';
 const DIST_DIR = 'dist';
 const JS_GLOB = `${BASE_DIR}/**/*.{js,json}`;
 
