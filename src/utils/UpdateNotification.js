@@ -47,8 +47,9 @@ define(function (require, exports, module) {
     // duration of two minutes in milliseconds
     var TWO_MINUTES = 1000 * 60 * 2;
 
-    // Extract current build number from package.json version field 0.0.0-0
-    var _buildNumber = Number(/-([0-9]+)/.exec(brackets.metadata.version)[1]);
+    // Extract current build number from package.json version field 0.0.0
+    // major and minor should match Brackets, last number is build version
+    var _buildNumber = Number(brackets.metadata.version.match(/[0-9]+$/)[0]);
 
     // Init default last build number
     PreferencesManager.stateManager.definePreference("lastNotifiedBuildNumber", "number", 0);
