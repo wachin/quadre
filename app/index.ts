@@ -89,7 +89,6 @@ export function openBracketsWindow(query: {} | string = {}) {
 
     const winOptions = {
         title: appInfo.productName,
-        icon: path.resolve(__dirname, "res", "appicon.png"),
         x: shellConfig.getNumber("window.posX"),
         y: shellConfig.getNumber("window.posY"),
         width: shellConfig.getNumber("window.width"),
