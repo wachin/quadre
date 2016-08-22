@@ -24,7 +24,8 @@ function syncPackageJson() {
         'dependencies',
         'optionalDependencies'
     ]);
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), JSON.stringify(appJson, null, 2));
+    const appJsonStr = JSON.stringify(appJson, null, 2) + '\n';
+    fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr);
 }
 
 function copyJs(filePath) {
