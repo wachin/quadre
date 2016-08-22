@@ -8,9 +8,9 @@ const BASE_DIR = 'electron-app';
 const DIST_DIR = 'dist';
 const JS_GLOB = `${BASE_DIR}/**/*.{js,json}`;
 
-function syncPackageJson() {
-    const packageJson = require(path.resolve(__dirname, 'package.json'));
-    const appJson = _.pick(packageJson, [
+gulp.task('sync-package-json', () => {
+    const packageJSON = require(path.resolve(__dirname, 'package.json'));
+    const appJson = _.pick(packageJSON, [
         'name',
         'productName',
         'description',
@@ -26,7 +26,14 @@ function syncPackageJson() {
     ]);
     const appJsonStr = JSON.stringify(appJson, null, 2) + '\n';
     fs.writeFileSync(path.resolve(__dirname, BASE_DIR, 'package.json'), appJsonStr);
-}
+});
+
+gulp.task('write-config', () => {
+    const packageJSON = require(path.resolve(__dirname, 'package.json'));
+    const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
+    const appConfigStr = JSON.stringify(_.defaults({}, appConfigJSON, packageJSON), null, 4);
+    fs.writeFileSync(path.resolve(__dirname, 'src', 'config.json'), appConfigStr);
+});
 
 function copyJs(filePath) {
     let from;
@@ -43,8 +50,7 @@ function copyJs(filePath) {
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', () => {
-    syncPackageJson();
+gulp.task('build', ['sync-package-json', 'write-config'], () => {
     copyJs();
 });
 
