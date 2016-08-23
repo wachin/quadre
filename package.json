@@ -2,7 +2,7 @@
   "name": "brackets-electron",
   "productName": "Brackets-Electron",
   "description": "An open source code editor for the web.",
-  "author": "Brackets",
+  "author": "Brackets Team <brackets-dev@googlegroups.com>",
   "license": "MIT",
   "homepage": "http://brackets.io",
   "version": "1.8.0",
