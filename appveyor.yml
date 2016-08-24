@@ -7,6 +7,8 @@ cache:
 
 install:
   - ps: Install-Product node 6 x64
+  - npm -g install npm@next
+  - set PATH=%APPDATA%\npm;%PATH%
   - npm install
   - npm prune
 
