@@ -1648,7 +1648,7 @@ define(function (require, exports, module) {
                     href = href.substr(0, fragment);
                 }
 
-                electron.remote.require("./index").restart(href);
+                electron.remote.require("./shell").restart(href);
             });
         }).fail(function () {
             _isReloading = false;

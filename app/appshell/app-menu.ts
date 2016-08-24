@@ -3,7 +3,7 @@ interface MenuItemOptions extends Electron.MenuItemOptions {}
 import * as _ from "lodash";
 import * as assert from "assert";
 import { Menu } from "electron";
-import * as main from "../index";
+import * as main from "../shell";
 
 const menuTemplate: MenuItemOptions[] = [];
 
