@@ -41,6 +41,7 @@
     "start": "electron .",
     "pack": "npm run test && build --dir",
     "dist": "npm run test && build",
+    "publish-win": "build -w --publish onTagOrDraft",
     "dev": "rimraf ./dist && concurrently --kill-others \"gulp watch\" \"tsc --watch --project app\" \"tsc --watch --project src\"",
     "test": "npm run build && tslint -c tslint.json --project tsconfig.json"
   },
