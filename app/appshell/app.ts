@@ -90,8 +90,7 @@ export function getUserHomeDirectory(): string {
 };
 
 export function getUserDocumentsDirectory(): string {
-    console.warn("DEPRECATED: don't use app.getUserDocumentsDirectory(); replaced by app.getUserHomeDirectory()");
-    return getUserHomeDirectory();
+    return utils.convertWindowsPathToUnixPath(app.getPath("documents"));
 };
 
 export function installCommandLine(callback: (err?: Error) => void): void {
