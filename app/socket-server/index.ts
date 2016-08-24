@@ -1,10 +1,10 @@
 import * as http from "http";
 import * as ConnectionManager from "./connection-manager";
 import DomainManager from "./domain-manager";
-import * as Logger from "../logger";
+import { getLogger } from "../utils";
 import * as WebSocket from "ws";
 const Server = WebSocket.Server;
-const log = Logger.get("socket-server");
+const log = getLogger("socket-server");
 const portscanner = require("portscanner");
 
 const DEFAULT_PORT = 8123;

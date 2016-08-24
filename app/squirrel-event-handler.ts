@@ -1,9 +1,9 @@
 import { app } from "electron";
 import { spawn } from "child_process";
-import * as logger from "./logger";
+import { getLogger } from "./utils";
 import * as path from "path";
 
-const log = logger.get("squirrel-event-handler");
+const log = getLogger("squirrel-event-handler");
 
 function spawnUpdate(args: string[]): Promise<void> {
     return new Promise(resolve => {

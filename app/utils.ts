@@ -1,3 +1,18 @@
+import { app } from "electron";
+const { log, warn, error } = console; // tslint:disable-line
+
+export function isDev() {
+    return app.getPath("exe").endsWith("electron.exe");
+}
+
+export function getLogger(name: string) {
+    return {
+        info: (...msgs: string[]) => log(`[${name}]`, ...msgs),
+        warn: (...msgs: string[]) => warn(`[${name}]`, ...msgs),
+        error: (...msgs: string[]) => error(`[${name}]`, ...msgs)
+    };
+}
+
 export function errToString(err: Error): string {
     if (err.stack) {
         return err.stack;

@@ -3,9 +3,8 @@ import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
 import * as utils from "./utils";
-import * as logger from "./logger";
 import { app } from "electron";
-const log = logger.get("shell-config");
+const log = utils.getLogger("shell-config");
 
 const CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
 let config: {};

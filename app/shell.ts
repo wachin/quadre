@@ -1,8 +1,9 @@
 #!/usr/bin/env electron
 
 import { app, BrowserWindow, ipcMain } from "electron";
+import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import * as logger from "./logger";
+import { getLogger } from "./utils";
 import * as path from "path";
 import * as utils from "./utils";
 import * as shellConfig from "./shell-config";
@@ -11,7 +12,7 @@ import * as SocketServer from "./socket-server"; // Implementation of Brackets' 
 
 const appInfo = require("./package.json");
 
-const log = logger.get("ipc-log");
+const log = getLogger("ipc-log");
 ipcMain.on("log", function (event, ...args) {
     log.info(...args);
 });
@@ -48,7 +49,7 @@ app.on("window-all-closed", function () {
 });
 
 // Start the socket server used by Brackets'
-const socketServerLog = logger.get("socket-server");
+const socketServerLog = getLogger("socket-server");
 SocketServer.start(function (err: Error, port: number) {
     if (err) {
         shellState.set("socketServer.state", "ERR_NODE_FAILED");
@@ -60,7 +61,7 @@ SocketServer.start(function (err: Error, port: number) {
     }
 });
 
-export function openBracketsWindow(query: {} | string = {}) {
+export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {
 
     // compose path to brackets' index file
     const indexPath = "file://" + path.resolve(__dirname, "www", "index.html");
@@ -142,7 +143,7 @@ export function openBracketsWindow(query: {} | string = {}) {
 // This method will be called when Electron has done everything
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
-    openBracketsWindow();
+    new AutoUpdater(openBracketsWindow());
 });
 
 export function getMainWindow() {
