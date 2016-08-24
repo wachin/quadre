@@ -3,7 +3,9 @@ import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
 import * as utils from "./utils";
+import * as logger from "./logger";
 import { app } from "electron";
+const log = logger.get("shell-config");
 
 const CONFIG_PATH = path.resolve(utils.convertWindowsPathToUnixPath(app.getPath("userData")), "shell-config.json");
 let config: {};
@@ -12,17 +14,27 @@ if (!process.env.TMPDIR && !process.env.TMP && !process.env.TEMP) {
     process.env.TMPDIR = process.env.TMP = process.env.TEMP = os.tmpdir();
 }
 
+function readDefaultConfig() {
+    config = fs.readJsonSync(path.resolve(__dirname, "default-shell-config.json"));
+}
+
+function writeDefaultConfig() {
+    readDefaultConfig();
+    fs.ensureDirSync(path.dirname(CONFIG_PATH));
+    fs.writeJsonSync(CONFIG_PATH, config);
+}
+
 try {
     config = fs.readJsonSync(CONFIG_PATH);
 } catch (err) {
     if (err.code === "ENOENT") {
-        config = fs.readJsonSync(path.resolve(__dirname, "default-shell-config.json"));
-        fs.ensureDirSync(path.dirname(CONFIG_PATH));
-        fs.writeJsonSync(CONFIG_PATH, config);
+        writeDefaultConfig();
     } else if (err.name === "SyntaxError") {
-        throw new Error("File is not a valid json: " + CONFIG_PATH);
+        log.error(`File is not a valid json: ${CONFIG_PATH} - ${err}`);
+        readDefaultConfig();
     } else {
-        throw err;
+        log.error(`Can't read file: ${CONFIG_PATH} - ${err}`);
+        readDefaultConfig();
     }
 }
 
