@@ -44,7 +44,6 @@ script:
 - node --version
 - npm --version
 - npm run test
-- npm install appdmg
 - npm run publish-mac-linux
 
 branches:
