@@ -19,10 +19,12 @@ install:
   - npm install
   - npm prune
 
-test_script:
+before_build:
   - node --version
   - npm --version
   - npm run test
 
 build_script:
   - npm run publish-win
+
+test: off
