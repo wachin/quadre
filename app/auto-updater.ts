@@ -3,7 +3,7 @@ import { app, autoUpdater, BrowserWindow } from "electron";
 import { getLogger, isDev } from "./utils";
 
 const log = getLogger("auto-updater");
-const UPDATE_SERVER_HOST = "onshape-download.develar.org";
+const UPDATE_SERVER_HOST = "brackets-electron.herokuapp.com";
 
 function notify(title: string, message: string) {
   let windows = BrowserWindow.getAllWindows();
@@ -41,7 +41,7 @@ export default class AppUpdater {
     autoUpdater.addListener("update-not-available", () => {
       log.info("update-not-available");
     });
-    autoUpdater.setFeedURL(`https://${UPDATE_SERVER_HOST}/update/${os.platform()}_${os.arch()}/${version}`);
+    autoUpdater.setFeedURL(`https://${UPDATE_SERVER_HOST}/update/${os.platform()}/${version}`);
 
     window.webContents.once("did-frame-finish-load", (event: any) => {
       autoUpdater.checkForUpdates();
