@@ -4,11 +4,15 @@ platform:
 cache:
   - node_modules
   - '%USERPROFILE%\.electron'
+  - '%APPDATA%\npm'
 
 install:
   - ps: Install-Product node 6 x64
   - npm -g install npm@next
   - set PATH=%APPDATA%\npm;%PATH%
+  - node --version
+  - npm --version
+  - node-gyp --version
   - npm install
   - npm prune
 
