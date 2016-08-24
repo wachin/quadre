@@ -113,7 +113,7 @@ export function showOpenDialog(
      * To show all files, use the '*' wildcard (no other wildcard is supported).
      */
     filters: { name: string; extensions: string[]; }[],
-    callback: (err: Error | null, fileNames?: string[]) => void
+    callback: (err: Error | null, fileNames: string[]) => void
 ) {
     const properties: ("openFile" | "openDirectory" | "multiSelections" | "createDirectory" | "showHiddenFiles")[] = [];
     if (chooseDirectory) {
@@ -132,7 +132,7 @@ export function showOpenDialog(
         filters,
         properties
     }, function (fileNames: string[]) {
-        callback(null, fileNames.map(utils.convertWindowsPathToUnixPath));
+        callback(null, fileNames ? fileNames.map(utils.convertWindowsPathToUnixPath) : []);
     });
 };
 
