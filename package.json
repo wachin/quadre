@@ -41,7 +41,8 @@
     "pack": "npm run test && build --dir",
     "dist": "npm run test && build",
     "publish-win": "build -w --publish onTagOrDraft",
-    "publish-mac-linux": "build -ml --publish onTagOrDraft",
+    "publish-mac": "build -m --publish onTagOrDraft",
+    "publish-linux": "build -l --publish onTagOrDraft",
     "dev": "rimraf ./dist && concurrently --kill-others \"gulp watch\" \"tsc --watch --project app\" \"tsc --watch --project src\"",
     "test": "npm run build && tslint -c tslint.json --project tsconfig.json"
   },
