@@ -12,11 +12,10 @@ cache:
 
 install:
   - ps: Install-Product node 6 x64
-  - npm -g install npm@next
+  - npm -g install npm@latest
   - set PATH=%APPDATA%\npm;%PATH%
   - node --version
   - npm --version
-  - node-gyp --version
   - npm install
   - npm prune
 
