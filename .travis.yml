@@ -1,7 +1,3 @@
-env:
-  global:
-    secure: QPR+Dsz8ejdlffXKf9UjJPNQAAdGmFTsI5jBIxsS/JCfzhR334bgH2NY7NUe+XmMzmaOjjRmHGhK0SRKYD6IRlfgQGDRXWHR5NWVpYb1y5J/sHyEH7rU+TeP8cOBdfML268scV5eWR8aRnLgh75CP0vwc7r8YAcqcUrCDTrRAcI=
-
 language: c
 
 matrix:

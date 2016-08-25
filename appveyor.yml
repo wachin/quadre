@@ -1,7 +1,3 @@
-environment:
-  GH_TOKEN:
-    secure: aHR/oHfCV08nk3sEPkU9TwQCMkH9q8T4p35GsiRiEeld7VTN86waeiADM6oQkfuE
-
 platform:
   - x64
 
