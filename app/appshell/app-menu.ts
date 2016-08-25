@@ -21,9 +21,9 @@ function _refreshMenu(callback: () => void) {
 function _findMenuItemPosition(
     id: string, where: MenuItemOptions[] = menuTemplate, whereId: string = ""
 ): [string, number] | null {
-    const result = _.find(where, {id: id});
+    const result = _.find(where, { id });
     if (result) {
-        return [whereId, _.findIndex(where, {id: id})];
+        return [whereId, _.findIndex(where, { id })];
     }
     const results = _.compact(where.map(function (menuItem) {
         return menuItem.submenu ? _findMenuItemPosition(id, menuItem.submenu as MenuItemOptions[], menuItem.id) : null;
@@ -32,7 +32,7 @@ function _findMenuItemPosition(
 }
 
 function _deleteMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): boolean {
-    const result = _.findIndex(where, {id: id});
+    const result = _.findIndex(where, { id });
     if (result !== -1) {
         where.splice(result, 1);
         return true;
@@ -44,7 +44,7 @@ function _deleteMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate
 }
 
 function _findMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate): MenuItemOptions | null {
-    const result = _.find(where, {id: id});
+    const result = _.find(where, { id });
     if (result) {
         return result;
     }
@@ -127,10 +127,7 @@ export function addMenu(title: string, id: string, position: string, relativeId:
     assert(!relativeId || relativeId && typeof relativeId === "string", "relativeId must be a string");
     assert(typeof callback === "function", "callback must be a function");
     process.nextTick(function () {
-        const newObj = {
-            id: id,
-            label: title
-        };
+        const newObj = { id, label: title };
         const err = _addToPosition(newObj, menuTemplate, position || "last", relativeId);
         _refreshMenu(callback.bind(null, err));
     });
@@ -162,11 +159,9 @@ export function addMenuItem(
         const isSeparator = title === "---";
         const newObj: MenuItemOptions = {
             type: isSeparator ? "separator" : "normal",
-            id: id,
+            id,
             label: title,
-            click: function () {
-                main.getMainWindow().webContents.send("executeCommand", id);
-            }
+            click: () => main.getMainWindow().webContents.send("executeCommand", id)
         };
 
         if (key) {

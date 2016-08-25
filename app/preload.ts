@@ -18,12 +18,12 @@ let t: any;
 
 try {
     t = {
-        electron: electron,
-        process: process,
-        require: require,
-        module: module,
-        __filename: __filename,
-        __dirname: __dirname,
+        electron,
+        process,
+        require,
+        module,
+        __filename,
+        __dirname,
         appshell: require("./appshell/index")
     };
 } catch (err) {

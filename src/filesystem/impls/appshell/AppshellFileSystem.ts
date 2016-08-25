@@ -108,7 +108,7 @@ define(function (require, exports, module) {
             workerCallbacks[id] = callback;
             msg = msg + "!" + id;
         }
-        worker.send({msg: msg, data: data});
+        worker.send({ msg, data });
     };
 
     // If the connection closes, notify the FileSystem that watchers have gone offline.

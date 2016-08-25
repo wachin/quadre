@@ -72,7 +72,7 @@ export class Connection {
     private _send(type: string, message: ConnectionMessage | ConnectionErrorMessage | CommandResponse | CommandError) {
         if (this._ws && this._connected) {
             try {
-                this._ws.send(JSON.stringify({type: type, message: message}));
+                this._ws.send(JSON.stringify({ type, message }));
             } catch (e) {
                 console.error("[Connection] Unable to stringify message: " + e.message);
             }
@@ -149,7 +149,7 @@ export class Connection {
      * @param {object} message Error message. Must be JSON.stringify-able.
      */
     public sendError(message: string) {
-        this._send("error", {message: message});
+        this._send("error", { message });
     }
 
     /**
@@ -173,7 +173,7 @@ export class Connection {
 
             this._sendBinary(message);
         } else {
-            this._send("commandResponse", {id: id, response: response });
+            this._send("commandResponse", { id, response });
         }
     }
 
@@ -187,7 +187,7 @@ export class Connection {
      *    be JSON.stringify-able.
      */
     public sendCommandError(id: number, message: string, stack?: string) {
-        this._send("commandError", {id: id, message: message, stack: stack});
+        this._send("commandError", { id, message, stack });
     }
 
     /**
@@ -198,12 +198,7 @@ export class Connection {
      * @param {object} parameters Event parameters. Must be JSON.stringify-able.
      */
     public sendEventMessage(id: number, domain: string, event: string, parameters?: any[]) {
-        this._send("event", {
-            id: id,
-            domain: domain,
-            event: event,
-            parameters: parameters
-        });
+        this._send("event", { id, domain, event, parameters });
     }
 
 }
