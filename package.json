@@ -43,7 +43,8 @@
     "publish-mac": "build -m --publish onTagOrDraft",
     "publish-linux": "build -l --publish onTagOrDraft",
     "dev": "rimraf ./dist && concurrently --kill-others \"gulp watch\" \"tsc --watch --project app\" \"tsc --watch --project src\"",
-    "test": "npm run build && tslint -c tslint.json --project tsconfig.json"
+    "test": "npm run build && npm run tslint",
+    "tslint": "tslint -c tslint.json --project tsconfig.json"
   },
   "dependencies": {
     "fs-extra": "0.30.0",
