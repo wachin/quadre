@@ -30,13 +30,15 @@ export function isNetworkDrive(path: string, callback: (err: Error | null, res: 
     });
 };
 
-export function moveToTrash(path: string, callback: (err?: Error) => void) {
+export function moveToTrash(path: string, callback: (err: Error | null, result?: any) => void) {
     fs.stat(path, function (err) {
         if (err) {
             return callback(err);
         }
         // trash expects an array of files which is inconsistent with fs-extra apis
-        trash(Array.isArray(path) ? path : [path], callback);
+        trash(Array.isArray(path) ? path : [path])
+            .then((r: any) => callback(null, r))
+            .catch((e: Error) => callback(e));
     });
 };
 
