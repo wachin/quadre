@@ -2,17 +2,15 @@ env:
   global:
     secure: QPR+Dsz8ejdlffXKf9UjJPNQAAdGmFTsI5jBIxsS/JCfzhR334bgH2NY7NUe+XmMzmaOjjRmHGhK0SRKYD6IRlfgQGDRXWHR5NWVpYb1y5J/sHyEH7rU+TeP8cOBdfML268scV5eWR8aRnLgh75CP0vwc7r8YAcqcUrCDTrRAcI=
 
-osx_image: xcode7.3
-
-sudo: required
-dist: trusty
-
 language: c
 
 matrix:
   include:
     - os: osx
+      osx_image: xcode7.3
     - os: linux
+      dist: trusty
+      sudo: required
       env: CC=clang CXX=clang++ npm_config_clang=1
       compiler: clang
 
