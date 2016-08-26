@@ -22,34 +22,37 @@
  */
 
 /*global appshell */
+declare const define: any;
+declare const node: any;
+declare const appshell: any;
 
 define(function (require, exports, module) {
     "use strict";
 
-    var FileUtils           = require("file/FileUtils"),
-        FileSystemStats     = require("filesystem/FileSystemStats"),
-        FileSystemError     = require("filesystem/FileSystemError"),
-        NodeDomain          = require("utils/NodeDomain");
+    const FileUtils       = require("file/FileUtils");
+    const FileSystemStats = require("filesystem/FileSystemStats");
+    const FileSystemError = require("filesystem/FileSystemError");
+    const NodeDomain      = require("utils/NodeDomain");
 
     /**
      * @const
      */
-    var FILE_WATCHER_BATCH_TIMEOUT = 200;   // 200ms - granularity of file watcher changes
+    const FILE_WATCHER_BATCH_TIMEOUT = 200;   // 200ms - granularity of file watcher changes
 
     /**
      * Callback to notify FileSystem of watcher changes
      * @type {?function(string, FileSystemStats=)}
      */
-    var _changeCallback;
+    let _changeCallback;
 
     /**
      * Callback to notify FileSystem if watchers stop working entirely
      * @type {?function()}
      */
-    var _offlineCallback;
+    let _offlineCallback;
 
     /** Timeout used to batch up file watcher changes (setTimeout() return value) */
-    var _changeTimeout;
+    let _changeTimeout;
 
     /**
      * Pending file watcher changes - map from fullPath to flag indicating whether we need to pass stats
@@ -108,7 +111,6 @@ define(function (require, exports, module) {
      * @private
      */
     function _fileWatcherChange(evt, event, parentDirPath, entryName, statsObj) {
-        var change;
         switch (event) {
         case "changed":
             // an existing file/directory was modified; stats are passed if available
@@ -145,23 +147,28 @@ define(function (require, exports, module) {
             return null;
         }
 
-        switch (err) {
-        case appshell.fs.ERR_INVALID_PARAMS:
-            return FileSystemError.INVALID_PARAMS;
-        case appshell.fs.ERR_NOT_FOUND:
-            return FileSystemError.NOT_FOUND;
-        case appshell.fs.ERR_CANT_READ:
-            return FileSystemError.NOT_READABLE;
-        case appshell.fs.ERR_CANT_WRITE:
-            return FileSystemError.NOT_WRITABLE;
-        case appshell.fs.ERR_UNSUPPORTED_ENCODING:
-            return FileSystemError.UNSUPPORTED_ENCODING;
-        case appshell.fs.ERR_OUT_OF_SPACE:
-            return FileSystemError.OUT_OF_SPACE;
-        case appshell.fs.ERR_FILE_EXISTS:
-            return FileSystemError.ALREADY_EXISTS;
+        switch (err.code) {
+            case "EEXIST":
+                return FileSystemError.ALREADY_EXISTS;
+            case "ENOENT":
+            case "ENOTDIR":
+                return FileSystemError.NOT_FOUND;
+            case "ENOSPC":
+                return FileSystemError.OUT_OF_SPACE;
+            case "ECHARSET":
+                return FileSystemError.UNSUPPORTED_ENCODING;
+            case "EISDIR":
+            case "EPERM":
+            case "EACCES":
+            case "EROFS":
+                return FileSystemError.PERM_DENIED;
+            default:
+                console.warn("got error from fs, but no FileSystemError mapping was found: " + err);
         }
-        return FileSystemError.UNKNOWN;
+        
+        // do not actually return FileSystemError.UNKNOWN
+        // it has no point hiding what the actual error is
+        return err;
     }
 
     /**
@@ -219,10 +226,16 @@ define(function (require, exports, module) {
      * @param {function(?string, FileSystemStats=)} callback
      */
     function stat(path, callback) {
-        appshell.fs.stat(path, function (err, stats) {
+        appshell.fs.lstat(path, function (err, stats) {
             if (err) {
                 callback(_mapError(err));
             } else {
+                if (stats.isSymbolicLink()) {
+                    // TODO: Implement realPath. If "filename" is a symlink,
+                    // realPath should be the actual path to the linked object.
+                    return callback(new Error("realPath for symbolic link is not implemented in appshell.fs.stat"));
+                }
+                
                 var options = {
                     isFile: stats.isFile(),
                     mtime: stats.mtime,
@@ -287,7 +300,7 @@ define(function (require, exports, module) {
                 return;
             }
 
-            var stats = [];
+            const stats: any[] = [];
             contents.forEach(function (val, idx) {
                 stat(path + "/" + val, function (err, stat) {
                     stats[idx] = err || stat;
@@ -315,7 +328,7 @@ define(function (require, exports, module) {
             callback = mode;
             mode = parseInt("0755", 8);
         }
-        appshell.fs.makedir(path, mode, function (err) {
+        appshell.fs.mkdir(path, mode, function (err) {
             if (err) {
                 callback(_mapError(err));
             } else {
@@ -363,7 +376,7 @@ define(function (require, exports, module) {
             if (stat.size > (FileUtils.MAX_FILE_SIZE)) {
                 callback(FileSystemError.EXCEEDS_MAX_FILE_SIZE);
             } else {
-                appshell.fs.readFile(path, encoding, function (_err, _data) {
+                appshell.fs.readTextFile(path, encoding, function (_err, _data) {
                     if (_err) {
                         callback(_mapError(_err));
                     } else {
@@ -433,7 +446,7 @@ define(function (require, exports, module) {
                 console.error("Blind write attempted: ", path, stats._hash, options.expectedHash);
 
                 if (options.hasOwnProperty("expectedContents")) {
-                    appshell.fs.readFile(path, encoding, function (_err, _data) {
+                    appshell.fs.readTextFile(path, encoding, function (_err, _data) {
                         if (_err || _data !== options.expectedContents) {
                             callback(FileSystemError.CONTENTS_MODIFIED);
                             return;
@@ -461,7 +474,7 @@ define(function (require, exports, module) {
      * @param {function(string)=} callback
      */
     function unlink(path, callback) {
-        appshell.fs.unlink(path, function (err) {
+        appshell.fs.remove(path, function (err) {
             callback(_mapError(err));
         });
     }
@@ -499,10 +512,6 @@ define(function (require, exports, module) {
     function initWatchers(changeCallback, offlineCallback) {
         _changeCallback = changeCallback;
         _offlineCallback = offlineCallback;
-
-        if (_isRunningOnWindowsXP && _offlineCallback) {
-            _offlineCallback();
-        }
     }
 
     /**
@@ -518,10 +527,6 @@ define(function (require, exports, module) {
      * @param {function(?string)=} callback
      */
     function watchPath(path, ignored, callback) {
-        if (_isRunningOnWindowsXP) {
-            callback(FileSystemError.NOT_SUPPORTED);
-            return;
-        }
         appshell.fs.isNetworkDrive(path, function (err, isNetworkDrive) {
             if (err || isNetworkDrive) {
                 if (isNetworkDrive) {
