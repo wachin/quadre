@@ -59,16 +59,13 @@ define(function (require, exports, module) {
      * to _changeCallback() for this path.
      * @type {!Object.<string, boolean>}
      */
-    var _pendingChanges = {};
+    let _pendingChanges = {};
 
-    var _bracketsPath   = FileUtils.getNativeBracketsDirectoryPath(),
-        _modulePath     = FileUtils.getNativeModuleDirectoryPath(module),
-        _nodePath       = "node/FileWatcherDomain",
-        _domainPath     = [_bracketsPath, _modulePath, _nodePath].join("/"),
-        _nodeDomain     = new NodeDomain("fileWatcher", _domainPath);
-
-    var _isRunningOnWindowsXP = window.navigator.userAgent.indexOf("Windows NT 5.") >= 0;
-
+    const _bracketsPath = FileUtils.getNativeBracketsDirectoryPath();
+    const _modulePath   = FileUtils.getNativeModuleDirectoryPath(module);
+    const _nodePath     = "node/FileWatcherDomain";
+    const _domainPath   = [_bracketsPath, _modulePath, _nodePath].join("/");
+    const _nodeDomain   = new NodeDomain("fileWatcher", _domainPath);
 
     // If the connection closes, notify the FileSystem that watchers have gone offline.
     _nodeDomain.connection.on("close", function (event, promise) {
@@ -114,7 +111,7 @@ define(function (require, exports, module) {
         switch (event) {
         case "changed":
             // an existing file/directory was modified; stats are passed if available
-            var fsStats;
+            let fsStats;
             if (statsObj) {
                 fsStats = new FileSystemStats(statsObj);
             } else {
@@ -165,7 +162,7 @@ define(function (require, exports, module) {
             default:
                 console.warn("got error from fs, but no FileSystemError mapping was found: " + err);
         }
-        
+
         // do not actually return FileSystemError.UNKNOWN
         // it has no point hiding what the actual error is
         return err;
@@ -181,7 +178,7 @@ define(function (require, exports, module) {
      */
     function _wrap(cb) {
         return function (err) {
-            var args = Array.prototype.slice.call(arguments);
+            const args = Array.prototype.slice.call(arguments);
             args[0] = _mapError(args[0]);
             cb.apply(null, args);
         };
@@ -200,7 +197,9 @@ define(function (require, exports, module) {
      * @param {function(?string, Array.<string>=)} callback
      */
     function showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, callback) {
-        appshell.fs.showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback));
+        appshell.fs.showOpenDialog(
+            allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback)
+        );
     }
 
     /**
@@ -235,8 +234,8 @@ define(function (require, exports, module) {
                     // realPath should be the actual path to the linked object.
                     return callback(new Error("realPath for symbolic link is not implemented in appshell.fs.stat"));
                 }
-                
-                var options = {
+
+                const options = {
                     isFile: stats.isFile(),
                     mtime: stats.mtime,
                     size: stats.size,
@@ -244,7 +243,7 @@ define(function (require, exports, module) {
                     hash: stats.mtime.getTime()
                 };
 
-                var fsStats = new FileSystemStats(options);
+                const fsStats = new FileSystemStats(options);
 
                 callback(null, fsStats);
             }
@@ -294,7 +293,7 @@ define(function (require, exports, module) {
                 return;
             }
 
-            var count = contents.length;
+            let count = contents.length;
             if (!count) {
                 callback(null, [], []);
                 return;
@@ -302,8 +301,8 @@ define(function (require, exports, module) {
 
             const stats: any[] = [];
             contents.forEach(function (val, idx) {
-                stat(path + "/" + val, function (err, stat) {
-                    stats[idx] = err || stat;
+                stat(path + "/" + val, function (err2, stat) {
+                    stats[idx] = err2 || stat;
                     count--;
                     if (count <= 0) {
                         callback(null, contents, stats);
@@ -332,8 +331,8 @@ define(function (require, exports, module) {
             if (err) {
                 callback(_mapError(err));
             } else {
-                stat(path, function (err, stat) {
-                    callback(err, stat);
+                stat(path, function (err2, stat) {
+                    callback(err2, stat);
                 });
             }
         });
@@ -368,7 +367,7 @@ define(function (require, exports, module) {
      * @param {function(?string, string=, FileSystemStats=)} callback
      */
     function readFile(path, options, callback) {
-        var encoding = options.encoding || "utf8";
+        const encoding = options.encoding || "utf8";
 
         // callback to be executed when the call to stat completes
         //  or immediately if a stat object was passed as an argument
@@ -416,15 +415,15 @@ define(function (require, exports, module) {
      * @param {function(?string, FileSystemStats=, boolean)} callback
      */
     function writeFile(path, data, options, callback) {
-        var encoding = options.encoding || "utf8";
+        const encoding = options.encoding || "utf8";
 
         function _finishWrite(created) {
             appshell.fs.writeFile(path, data, encoding, function (err) {
                 if (err) {
                     callback(_mapError(err));
                 } else {
-                    stat(path, function (err, stat) {
-                        callback(err, stat, created);
+                    stat(path, function (err2, stat) {
+                        callback(err2, stat, created);
                     });
                 }
             });
@@ -567,7 +566,6 @@ define(function (require, exports, module) {
         _nodeDomain.exec("unwatchAll")
             .then(callback, callback);
     }
-
 
     // Export public API
     exports.showOpenDialog  = showOpenDialog;
