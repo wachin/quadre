@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 - present Adobe Systems Incorporated. All rights reserved.
+ * Copyright (c) 2016 - present Adobe Systems Incorporated. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,35 +26,29 @@
 "use strict";
 
 module.exports = function (grunt) {
-    var common      = {},
-        path        = require("path"),
-        _platform;
+    var exec    = require("child_process").exec,
+        common  = require("./lib/common")(grunt),
+        build   = require("./build")(grunt);
 
-    function writeJSON(grunt, path, obj) {
-        grunt.file.write(path, JSON.stringify(obj, null, "    "));
-    }
+    grunt.registerTask("npm-install", "Install node_modules to the dist folder so it gets bundled with release", function () {
+        var npmShrinkwrapJSON = grunt.file.readJSON("npm-shrinkwrap.json");
+        common.writeJSON(grunt, "dist/npm-shrinkwrap.json", npmShrinkwrapJSON);
 
-    function resolve(relPath) {
-        return path.resolve(process.cwd(), relPath);
-    }
+        var packageJSON = grunt.file.readJSON("package.json");
+        delete packageJSON.devDependencies;
+        delete packageJSON.scripts; // we don't want to run post-install scripts in dist folder
+        common.writeJSON(grunt, "dist/package.json", packageJSON);
 
-    function platform() {
-        if (!_platform) {
-            if (process.platform === "darwin") {
-                _platform = "mac";
-            } else if (process.platform === "win32") {
-                _platform = "win";
+        var done = this.async();
+        exec("npm install --production", { cwd: "./dist" }, function (err, stdout, stderr) {
+            if (err) {
+                grunt.log.error(stderr);
+                done(false);
             } else {
-                _platform = "linux";
+                grunt.log.writeln(stdout);
+                done();
             }
-        }
+        });
+    });
 
-        return _platform;
-    }
-
-    common.writeJSON    = writeJSON;
-    common.resolve      = resolve;
-    common.platform     = platform;
-
-    return common;
 };
