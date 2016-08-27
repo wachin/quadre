@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "rimraf ./dist && gulp build && tsc --project app && tsc --project src",
-    "install": "sh ./pre-rebuild.sh && electron-rebuild -p -f -n=48 -e=node_modules/electron && grunt install && npm run build",
+    "install": "sh ./pre-rebuild.sh && electron-rebuild -e=node_modules/electron && grunt install && npm run build",
     "start": "electron .",
     "pack": "npm run test && build --dir",
     "dist": "npm run test && build",
