@@ -28,11 +28,11 @@ before_install:
 
 install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew install node
+    brew install node;
   else
-    nvm install 6
+    nvm install 6;
   fi
-- npm -g install npm@latest
+- npm -g install npm@latest node-gyp@latest
 - node --version
 - npm --version
 - npm install
