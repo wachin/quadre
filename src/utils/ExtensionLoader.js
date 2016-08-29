@@ -167,7 +167,7 @@ define(function (require, exports, module) {
         };
 
         // Read optional requirejs-config.json
-        var promise = _mergeConfig(extensionConfig).then(function (mergedConfig) {
+        var promise = _mergeConfig(_.cloneDeep(extensionConfig)).then(function (mergedConfig) {
             // Create new RequireJS context and load extension entry point
             var extensionRequire = brackets.libRequire.config(mergedConfig),
                 extensionRequireDeferred = new $.Deferred();
