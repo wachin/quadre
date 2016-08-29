@@ -67,7 +67,6 @@ module.exports = function (grunt) {
                             'nls/{,*/}*.js',
                             'xorigin.js',
                             'dependencies.js',
-                            'thirdparty/requirejs/require.js',
                             'LiveDevelopment/launch.html',
                             'LiveDevelopment/MultiBrowserImpl/transports/**',
                             'LiveDevelopment/MultiBrowserImpl/launchers/**'

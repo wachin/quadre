@@ -1,8 +1,13 @@
+/* eslint-env node */
+
+"use strict";
+
 const _ = require('lodash');
 const fs = require('fs');
 const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
+const exec = require("child_process").exec;
 
 const BASE_DIRS = ['app', 'src'];
 const DIST_DIRS = ['dist', 'dist/www'];
@@ -28,6 +33,10 @@ gulp.task('sync-tsconfigs', () => {
 
 gulp.task('sync-package-json', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
+    
+    // indent packageJSON to 4 spaces
+    fs.writeFileSync(path.resolve(__dirname, 'package.json'), JSON.stringify(packageJSON, null, 4) + '\n');
+    
     const appJson = _.pick(packageJSON, [
         'name',
         'productName',
@@ -70,10 +79,31 @@ gulp.task('build', ['sync-tsconfigs', 'sync-package-json', 'write-config'], (_cb
     });
 });
 
-gulp.task('watch', ['build'], () => {
-    BASE_DIRS.forEach((srcDir, idx) => {
-        watch(`${srcDir}/**/!(*.ts|*.tsx)`, file => copyJs(file.path, srcDir, DIST_DIRS[idx]));
+function runNpmInstall(where, callback) {
+    console.log("running npm install --production in " + where);
+    exec('npm install --production', { cwd: './' + where }, function (err, stdout, stderr) {
+        if (err) {
+            console.error(stderr);
+        } else {
+            console.log(stdout || "finished npm install in " + where);
+        }
+        return err ? callback(stderr) : callback(null, stdout);
+    });
+}
+
+gulp.task('npm-install-dist', ['build'], (cb) => {
+    runNpmInstall("dist", function (err) {
+        return err ? cb(err) : cb(null);
     });
 });
 
-gulp.task('default', ['build']);
+gulp.task('watch', ['npm-install-dist'], () => {
+    BASE_DIRS.forEach((srcDir, idx) => {
+        watch(`${srcDir}/**/!(*.ts|*.tsx)`, file => {
+            copyJs(file.path, srcDir, DIST_DIRS[idx]);
+            console.log(`copied modified ${file.path} from ${srcDir} to ${DIST_DIRS[idx]}`);
+        });
+    });
+});
+
+gulp.task('default', ['npm-install-dist']);
