@@ -5,7 +5,7 @@
   "author": "Brackets Team <brackets-dev@googlegroups.com>",
   "license": "MIT",
   "homepage": "http://brackets.io",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "apiVersion": "1.8.0",
   "issues": {
     "url": "http://github.com/zaggino/brackets-electron/issues"
