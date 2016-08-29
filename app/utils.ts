@@ -2,7 +2,7 @@ import { app } from "electron";
 const { log, warn, error } = console; // tslint:disable-line
 
 export function isDev() {
-    return app.getPath("exe").endsWith("electron.exe");
+    return /(\/|\\)electron.exe$/i.test(app.getPath("exe"));
 }
 
 export function getLogger(name: string) {
