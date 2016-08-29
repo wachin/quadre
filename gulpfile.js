@@ -3,7 +3,7 @@
 "use strict";
 
 const _ = require('lodash');
-const fs = require('fs');
+const fs = require('fs-extra');
 const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
@@ -53,14 +53,18 @@ gulp.task('copy-dist-package-json', () => {
         'optionalDependencies'
     ]);
     const appJsonStr = JSON.stringify(appJson, null, 4);
-    fs.writeFileSync(path.resolve(__dirname, DIST_DIRS[0], 'package.json'), appJsonStr + '\n');
+    const dir = path.resolve(__dirname, DIST_DIRS[0]);
+    fs.ensureDirSync(dir);
+    fs.writeFileSync(path.resolve(dir, 'package.json'), appJsonStr + '\n');
 });
 
 gulp.task('write-dist-config-json', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
     const appConfigStr = JSON.stringify(_.defaults({}, appConfigJSON, packageJSON), null, 4);
-    fs.writeFileSync(path.resolve(__dirname, DIST_DIRS[1], 'config.json'), appConfigStr + '\n');
+    const dir = path.resolve(__dirname, DIST_DIRS[1]);
+    fs.ensureDirSync(dir);
+    fs.writeFileSync(path.resolve(dir, 'config.json'), appConfigStr + '\n');
 });
 
 function copyJs(filePath, srcDir, distDir) {
