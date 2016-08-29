@@ -32,7 +32,7 @@
             "linting.usePreferredOnly": true
         },
         "typescript": {
-            "linting.prefer": ["TypeScript"],
+            "linting.prefer": ["TypeScript", "ESLint"],
             "linting.usePreferredOnly": true
         }
     },
