@@ -7,9 +7,6 @@
 [submodule "src/thirdparty/mustache"]
 	path = src/thirdparty/mustache
 	url = https://github.com/janl/mustache.js.git
-[submodule "src/thirdparty/requirejs"]
-	path = src/thirdparty/requirejs
-	url = https://github.com/jrburke/requirejs.git
 [submodule "src/thirdparty/text"]
 	path = src/thirdparty/text
 	url = https://github.com/requirejs/text.git
