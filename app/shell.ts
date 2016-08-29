@@ -1,7 +1,7 @@
 #!/usr/bin/env electron
 
 import { app, BrowserWindow, ipcMain } from "electron";
-import AutoUpdater from "./auto-updater";
+// import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
 import { getLogger } from "./utils";
 import * as path from "path";

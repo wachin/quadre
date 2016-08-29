@@ -58,7 +58,7 @@
     },
     "scripts": {
         "build": "rimraf ./dist && gulp build && tsc --project app && tsc --project src",
-        "install": "sh ./pre-rebuild.sh && electron-rebuild -f -e=node_modules/electron && grunt install && npm run build",
+        "install": "sh ./pre-rebuild.sh && electron-rebuild -e=node_modules/electron && grunt install && npm run build",
         "start": "electron .",
         "pack": "npm run test && build --dir",
         "dist": "npm run test && build",
@@ -98,6 +98,7 @@
         "electron-packager": "7.7.0",
         "electron-rebuild": "1.2.0",
         "eslint": "3.3.1",
+        "glob": "7.0.6",
         "grunt": "0.4.5",
         "grunt-cleanempty": "1.0.3",
         "grunt-cli": "0.1.9",
