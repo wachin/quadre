@@ -40,7 +40,7 @@ export function getApplicationSupportDirectory() {
 
 export function getExtensionsFolder() {
     return utils.convertWindowsPathToUnixPath(
-        path.resolve(getApplicationSupportDirectory(), "..", "Brackets", "extensions")
+        path.resolve(getApplicationSupportDirectory(), "extensions")
     );
 };
 
