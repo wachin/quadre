@@ -143,7 +143,8 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // This method will be called when Electron has done everything
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
-    new AutoUpdater(openBracketsWindow());
+    openBracketsWindow();
+    // new AutoUpdater(openBracketsWindow());
 });
 
 export function getMainWindow() {
