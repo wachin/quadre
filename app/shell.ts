@@ -1,7 +1,7 @@
-#!/usr/bin/env electron
+/* eslint-env node */
 
 import { app, BrowserWindow, ipcMain } from "electron";
-// import AutoUpdater from "./auto-updater";
+import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
 import { getLogger } from "./utils";
 import * as path from "path";
@@ -143,8 +143,7 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // This method will be called when Electron has done everything
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
-    openBracketsWindow();
-    // new AutoUpdater(openBracketsWindow());
+    new AutoUpdater(openBracketsWindow());
 });
 
 export function getMainWindow() {

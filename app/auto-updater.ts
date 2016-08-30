@@ -16,10 +16,14 @@ function notify(title: string, message: string) {
 export default class AppUpdater {
     constructor(window: Electron.BrowserWindow) {
         if (isDev()) {
+            log.info(`isDev() true, auto-updater disabled`);
             return;
         }
 
         const version = app.getVersion();
+        const feedUrl = `https://${UPDATE_SERVER_HOST}/update/${os.platform()}/${version}`;
+        autoUpdater.setFeedURL(feedUrl);
+
         autoUpdater.addListener("update-available", (event: any) => {
             log.info("A new update is available");
         });
@@ -41,8 +45,6 @@ export default class AppUpdater {
         autoUpdater.addListener("update-not-available", () => {
             log.info("update-not-available");
         });
-        autoUpdater.setFeedURL(`https://${UPDATE_SERVER_HOST}/update/${os.platform()}/${version}`);
-
         window.webContents.once("did-frame-finish-load", (event: any) => {
             autoUpdater.checkForUpdates();
         });

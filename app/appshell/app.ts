@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 import * as assert from "assert";
 import * as path from "path";
 import * as utils from "../utils";

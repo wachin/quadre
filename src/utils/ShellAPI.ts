@@ -21,8 +21,8 @@
  *
  */
 
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, $, electron, window */
+declare const $: any;
+declare const electron: any;
 
  /**
   * This is JavaScript API exposed to the native shell when Brackets is run in a native shell rather than a browser.
@@ -31,11 +31,11 @@ define(function (require, exports, module) {
     "use strict";
 
     // Load dependent modules
-    var AppInit        = require("utils/AppInit"),
-        CommandManager = require("command/CommandManager"),
-        Commands       = require("command/Commands");
+    const AppInit        = require("utils/AppInit");
+    const CommandManager = require("command/CommandManager");
+    const Commands       = require("command/Commands");
 
-    var appReady = false; // Set to true after app is fully initialized
+    let appReady = false; // Set to true after app is fully initialized
 
     /**
      * The native function BracketsShellAPI::DispatchBracketsJSCommand calls this function in order to enable
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
             // Another hack to fix issue #3219 so that all test windows are closed
             // as before the fix for #3152 has been introduced. isBracketsTestWindow
             // property is explicitly set in createTestWindowAndRun() in SpecRunnerUtils.js.
-            if (window.isBracketsTestWindow) {
+            if ((window as any).isBracketsTestWindow) {
                 return false;
             }
             // Return false for all commands except file.close_window command for
@@ -56,9 +56,21 @@ define(function (require, exports, module) {
             return (eventName === Commands.FILE_CLOSE_WINDOW);
         }
 
-        var promise = CommandManager.execute(eventName);
-
+        const promise = CommandManager.execute(eventName);
         return (promise && promise.state() === "rejected") ? false : true;
+    });
+
+    electron.ipcRenderer.on("log", function (evt, level, ...args) {
+        switch (level) {
+            case "error":
+                (console as any).error("[shell]", ...args);
+                break;
+            case "warn":
+                (console as any).warn("[shell]", ...args);
+                break;
+            default:
+                (console as any).log("[shell]", ...args);
+        }
     });
 
     AppInit.appReady(function () {
