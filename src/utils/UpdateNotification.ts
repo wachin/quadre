@@ -206,31 +206,6 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Return a new array of version information that is newer than "buildNumber".
-     * Returns null if there is no new version information.
-     */
-    function _stripOldVersionInfo(versionInfo, buildNumber) {
-        // Do a simple linear search. Since we are going in reverse-chronological order, we
-        // should get through the search quickly.
-        let lastIndex = 0;
-        const len = versionInfo.length;
-
-        while (lastIndex < len) {
-            if (versionInfo[lastIndex].buildNumber <= buildNumber) {
-                break;
-            }
-            lastIndex++;
-        }
-
-        if (lastIndex > 0) {
-            return versionInfo.slice(0, lastIndex);
-        }
-
-        // No new version info
-        return null;
-    }
-
-    /**
      * Show a dialog that shows the update
      */
     function _showUpdateNotificationDialog(updates) {
@@ -339,9 +314,13 @@ define(function (require, exports, module) {
         }
 
         _getUpdateInformation(force || usingOverrides, usingOverrides, versionInfoUrl)
-            .done(function (versionInfo) {
+            .done(function (allUpdates) {
+
+                const semver = node.require("semver");
+                const currentVersion = node.require("./package.json").version;
+
                 // Get all available updates
-                const allUpdates = _stripOldVersionInfo(versionInfo, _buildNumber);
+                const availableUpdates = allUpdates.filter(x => semver.gt(x.versionString, currentVersion));
 
                 // When running directly from GitHub source (as opposed to
                 // an installed build), _buildNumber is 0. In this case, if the
@@ -352,7 +331,7 @@ define(function (require, exports, module) {
                     return;
                 }
 
-                if (allUpdates) {
+                if (availableUpdates && availableUpdates.length > 0) {
                     // Always show the "update available" icon if any updates are available
                     const $updateNotification = $("#update-notification");
 
@@ -366,11 +345,11 @@ define(function (require, exports, module) {
 
                     // Only show the update dialog if force = true, or if the user hasn't been
                     // alerted of this update
-                    if (force || allUpdates[0].buildNumber >  lastNotifiedBuildNumber) {
-                        _showUpdateNotificationDialog(allUpdates);
+                    if (force || availableUpdates[0].buildNumber >  lastNotifiedBuildNumber) {
+                        _showUpdateNotificationDialog(availableUpdates);
 
                         // Update prefs with the last notified build number
-                        lastNotifiedBuildNumber = allUpdates[0].buildNumber;
+                        lastNotifiedBuildNumber = availableUpdates[0].buildNumber;
                         // Don't save prefs is we have overridden values
                         if (!usingOverrides) {
                             PreferencesManager.setViewState("lastNotifiedBuildNumber", lastNotifiedBuildNumber);
