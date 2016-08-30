@@ -30,15 +30,15 @@ declare const brackets: any;
 define(function (require, exports, module) {
     "use strict";
 
-    const Dialogs              = require("widgets/Dialogs"),
-        DefaultDialogs       = require("widgets/DefaultDialogs"),
-        ExtensionManager     = require("extensibility/ExtensionManager"),
-        PreferencesManager   = require("preferences/PreferencesManager"),
-        NativeApp            = require("utils/NativeApp"),
-        Strings              = require("strings"),
-        UpdateDialogTemplate = require("text!htmlContent/update-dialog.html"),
-        UpdateListTemplate   = require("text!htmlContent/update-list.html"),
-        Mustache             = require("thirdparty/mustache/mustache");
+    const Dialogs              = require("widgets/Dialogs");
+    const DefaultDialogs       = require("widgets/DefaultDialogs");
+    const ExtensionManager     = require("extensibility/ExtensionManager");
+    const PreferencesManager   = require("preferences/PreferencesManager");
+    const NativeApp            = require("utils/NativeApp");
+    const Strings              = require("strings");
+    const UpdateDialogTemplate = require("text!htmlContent/update-dialog.html");
+    const UpdateListTemplate   = require("text!htmlContent/update-list.html");
+    const Mustache             = require("thirdparty/mustache/mustache");
 
     // make sure the global brackets variable is loaded
     require("utils/Global");
@@ -65,9 +65,9 @@ define(function (require, exports, module) {
     PreferencesManager.stateManager.definePreference("extensionUpdateInfo", "Array", []);
 
     PreferencesManager.convertPreferences(module, {
-        "lastNotifiedBuildNumber": "user",
-        "lastInfoURLFetchTime": "user",
-        "updateInfo": "user"
+        lastNotifiedBuildNumber: "user",
+        lastInfoURLFetchTime: "user",
+        updateInfo: "user"
     }, true);
 
     // URL to load version info from. By default this is loaded no more than once a day. If
@@ -97,7 +97,8 @@ define(function (require, exports, module) {
      * Construct a new version update url with the given locale.
      *
      * @param {string=} locale - optional locale, defaults to 'brackets.getLocale()' when omitted.
-     * @param {boolean=} removeCountryPartOfLocale - optional, remove existing country information from locale 'en-gb' => 'en'
+     * @param {boolean=} removeCountryPartOfLocale - optional, remove existing
+     *                   country information from locale 'en-gb' => 'en'
      * return {string} the new version update url
      */
     function _getVersionInfoUrl(locale?, removeCountryPartOfLocale?) {
@@ -107,7 +108,7 @@ define(function (require, exports, module) {
             locale = locale.substring(0, 2);
         }
 
-        return brackets.config.update_info_url + '?locale=' + locale;
+        return brackets.config.update_info_url + "?locale=" + locale;
     }
 
     /**
@@ -170,11 +171,11 @@ define(function (require, exports, module) {
                             url: tmpUrl,
                             cache: false,
                             type: "HEAD"
-                        }).fail(function (jqXHR, status, error) {
+                        }).fail(function (_jqXHR, _status, _error) {
                             localVersionInfoUrl = _getVersionInfoUrl("en");
-                        }).done(function (jqXHR, status, error) {
+                        }).done(function (_jqXHR, _status, _error) {
                             localVersionInfoUrl = tmpUrl;
-                        }).always(function (jqXHR, status, error) {
+                        }).always(function (_jqXHR, _status, _error) {
                             lookupPromise.resolve();
                         });
                     } else {
@@ -265,8 +266,8 @@ define(function (require, exports, module) {
             });
 
         // Populate the update data
-        const $dlg        = $(".update-dialog.instance"),
-            $updateList = $dlg.find(".update-info");
+        const $dlg        = $(".update-dialog.instance");
+        const $updateList = $dlg.find(".update-info");
 
         updates.Strings = Strings;
         $updateList.html(Mustache.render(UpdateListTemplate, updates));
@@ -289,9 +290,9 @@ define(function (require, exports, module) {
      *  to determine state of the update notification.
      */
     function checkForExtensionsUpdate() {
-        const lastExtensionRegistryCheckTime = PreferencesManager.getViewState("lastExtensionRegistryCheckTime"),
-            timeOfNextCheck = lastExtensionRegistryCheckTime + ONE_DAY,
-            currentTime = (new Date()).getTime();
+        const lastExtensionRegistryCheckTime = PreferencesManager.getViewState("lastExtensionRegistryCheckTime");
+        const timeOfNextCheck = lastExtensionRegistryCheckTime + ONE_DAY;
+        const currentTime = (new Date()).getTime();
 
         // update icon according to previously saved information
         let availableUpdates = PreferencesManager.getViewState("extensionUpdateInfo");
