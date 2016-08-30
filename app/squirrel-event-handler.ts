@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* global Promise */
 
 import { app } from "electron";
 import { spawn } from "child_process";

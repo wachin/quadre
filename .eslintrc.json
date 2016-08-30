@@ -53,6 +53,9 @@
         "eol-last": 0
     },
     "globals": {
+        "Promise": false,
+        "node": false,
+
         "brackets": false,
 
         "require": false,

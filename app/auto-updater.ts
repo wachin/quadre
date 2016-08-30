@@ -3,7 +3,7 @@ import { app, autoUpdater, BrowserWindow } from "electron";
 import { getLogger, isDev } from "./utils";
 
 const log = getLogger("auto-updater");
-const UPDATE_SERVER_HOST = "brackets-electron-nuts.herokuapp.com";
+export const UPDATE_SERVER_HOST = "brackets-electron-nuts.herokuapp.com";
 
 function notify(title: string, message: string) {
     let windows = BrowserWindow.getAllWindows();

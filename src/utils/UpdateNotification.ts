@@ -21,6 +21,8 @@
  *
  */
 
+import * as lodash from "lodash";
+
 declare const brackets: any;
 
 /**
@@ -28,7 +30,10 @@ declare const brackets: any;
  *
  */
 define(function (require, exports, module) {
-    "use strict";
+
+    const _: typeof lodash = node.require("lodash");
+    const getLogger = node.require("./utils").getLogger;
+    const log = getLogger("UpdateNotification");
 
     const Dialogs              = require("widgets/Dialogs");
     const DefaultDialogs       = require("widgets/DefaultDialogs");
@@ -93,22 +98,22 @@ define(function (require, exports, module) {
      */
     let _addedClickHandler = false;
 
-    /**
-     * Construct a new version update url with the given locale.
-     *
-     * @param {string=} locale - optional locale, defaults to 'brackets.getLocale()' when omitted.
-     * @param {boolean=} removeCountryPartOfLocale - optional, remove existing
-     *                   country information from locale 'en-gb' => 'en'
-     * return {string} the new version update url
-     */
-    function _getVersionInfoUrl(locale?, removeCountryPartOfLocale?) {
-        locale = locale || brackets.getLocale();
+    function transformAtomFeed(obj: any): Array<any> {
+        const GH = `https://github.com/zaggino/brackets-electron`;
 
-        if (removeCountryPartOfLocale) {
-            locale = locale.substring(0, 2);
-        }
+        let entries = _.get(obj, "feed.entry", []);
+        if (!_.isArray(entries)) { entries = [ entries ] as any; }
 
-        return brackets.config.update_info_url + "?locale=" + locale;
+        return entries.map((entry: any) => {
+            return {
+                buildNumber: entry.title._,
+                versionString: entry.title._,
+                dateString: entry.updated,
+                releaseNotesURL: GH,
+                downloadURL: GH + "/releases",
+                newFeatures: []
+            };
+        });
     }
 
     /**
@@ -148,78 +153,50 @@ define(function (require, exports, module) {
         }
 
         if (fetchData) {
-            const lookupPromise = new $.Deferred();
-            let localVersionInfoUrl;
 
-            // If the current locale isn't "en" or "en-US", check whether we actually have a
-            //   locale-specific update notification, and fall back to "en" if not.
-            // Note: we check for both "en" and "en-US" to watch for the general case or
-            //    country-specific English locale.  The former appears default on Mac, while
-            //    the latter appears default on Windows.
-            const locale = brackets.getLocale().toLowerCase();
-            if (locale !== "en" && locale !== "en-us") {
-                localVersionInfoUrl = _versionInfoUrl || _getVersionInfoUrl();
-                $.ajax({
-                    url: localVersionInfoUrl,
-                    cache: false,
-                    type: "HEAD"
-                }).fail(function (jqXHR, status, error) {
-                    // get rid of any country information from locale and try again
-                    const tmpUrl = _getVersionInfoUrl(brackets.getLocale(), true);
-                    if (tmpUrl !== localVersionInfoUrl) {
-                        $.ajax({
-                            url: tmpUrl,
-                            cache: false,
-                            type: "HEAD"
-                        }).fail(function (_jqXHR, _status, _error) {
-                            localVersionInfoUrl = _getVersionInfoUrl("en");
-                        }).done(function (_jqXHR, _status, _error) {
-                            localVersionInfoUrl = tmpUrl;
-                        }).always(function (_jqXHR, _status, _error) {
-                            lookupPromise.resolve();
-                        });
-                    } else {
-                        localVersionInfoUrl = _getVersionInfoUrl("en");
-                        lookupPromise.resolve();
-                    }
-                }).done(function (jqXHR, status, error) {
-                    lookupPromise.resolve();
-                });
-            } else {
-                localVersionInfoUrl = _versionInfoUrl || _getVersionInfoUrl("en");
-                lookupPromise.resolve();
-            }
+            const autoUpdater = electron.remote.require("./auto-updater");
+            const parseXml = node.require("./xml-utils").parseXml;
+            const UPDATE_SERVER_HOST = autoUpdater.UPDATE_SERVER_HOST;
+            const url = `https://${UPDATE_SERVER_HOST}/feed/channel/all.atom`;
 
-            lookupPromise.done(function () {
-                $.ajax({
-                    url: localVersionInfoUrl,
-                    dataType: "json",
-                    cache: false
-                }).done(function (updateInfo, textStatus, jqXHR) {
-                    if (!dontCache) {
-                        lastInfoURLFetchTime = (new Date()).getTime();
-                        PreferencesManager.setViewState("lastInfoURLFetchTime", lastInfoURLFetchTime);
-                        PreferencesManager.setViewState("updateInfo", updateInfo);
-                    }
-                    result.resolve(updateInfo);
-                }).fail(function (jqXHR, status, error) {
-                    // When loading data for unit tests, the error handler is
-                    // called but the responseText is valid. Try to use it here,
-                    // but *don't* save the results in prefs.
+            $.ajax({
+                url,
+                cache: false
+            }).done(async function (_response, _textStatus, jqXHR) {
 
-                    if (!jqXHR.responseText) {
-                        // Text is NULL or empty string, reject().
-                        result.reject();
-                        return;
-                    }
+                let jsData;
+                try {
+                    jsData = await parseXml(jqXHR.responseText);
+                } catch (err) {
+                    log.error(`Error parsing update feed xml: ${err}`);
+                    return;
+                }
 
-                    try {
-                        data = JSON.parse(jqXHR.responseText);
-                        result.resolve(data);
-                    } catch (e) {
-                        result.reject();
-                    }
-                });
+                const updateInfo = transformAtomFeed(jsData);
+                if (!dontCache) {
+                    lastInfoURLFetchTime = (new Date()).getTime();
+                    PreferencesManager.setViewState("lastInfoURLFetchTime", lastInfoURLFetchTime);
+                    PreferencesManager.setViewState("updateInfo", updateInfo);
+                }
+                result.resolve(updateInfo);
+
+            }).fail(function (jqXHR, status, error) {
+                // When loading data for unit tests, the error handler is
+                // called but the responseText is valid. Try to use it here,
+                // but *don't* save the results in prefs.
+
+                if (!jqXHR.responseText) {
+                    // Text is NULL or empty string, reject().
+                    result.reject();
+                    return;
+                }
+
+                try {
+                    data = JSON.parse(jqXHR.responseText);
+                    result.resolve(data);
+                } catch (e) {
+                    result.reject();
+                }
             });
         } else {
             result.resolve(data);
