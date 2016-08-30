@@ -21,6 +21,8 @@
  *
  */
 
+declare const brackets: any;
+
 /**
  *  Utilities functions for displaying update notifications
  *
@@ -98,7 +100,7 @@ define(function (require, exports, module) {
      * @param {boolean=} removeCountryPartOfLocale - optional, remove existing country information from locale 'en-gb' => 'en'
      * return {string} the new version update url
      */
-    function _getVersionInfoUrl(locale, removeCountryPartOfLocale) {
+    function _getVersionInfoUrl(locale?, removeCountryPartOfLocale?) {
         locale = locale || brackets.getLocale();
 
         if (removeCountryPartOfLocale) {
@@ -322,7 +324,7 @@ define(function (require, exports, module) {
      * @param {Object} _testValues This should only be used for testing purposes. See comments for details.
      * @return {$.Promise} jQuery Promise object that is resolved or rejected after the update check is complete.
      */
-    function checkForUpdate(force, _testValues) {
+    function checkForUpdate(force?, _testValues?) {
         // This is the last version we notified the user about. If checkForUpdate()
         // is called with "false", only show the update notification dialog if there
         // is an update newer than this one. This value is saved in preferences.
