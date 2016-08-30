@@ -30,7 +30,7 @@ declare const brackets: any;
 define(function (require, exports, module) {
     "use strict";
 
-    var Dialogs              = require("widgets/Dialogs"),
+    const Dialogs              = require("widgets/Dialogs"),
         DefaultDialogs       = require("widgets/DefaultDialogs"),
         ExtensionManager     = require("extensibility/ExtensionManager"),
         PreferencesManager   = require("preferences/PreferencesManager"),
@@ -44,14 +44,14 @@ define(function (require, exports, module) {
     require("utils/Global");
 
     // duration of one day in milliseconds
-    var ONE_DAY = 1000 * 60 * 60 * 24;
+    const ONE_DAY = 1000 * 60 * 60 * 24;
 
     // duration of two minutes in milliseconds
-    var TWO_MINUTES = 1000 * 60 * 2;
+    const TWO_MINUTES = 1000 * 60 * 2;
 
     // Extract current build number from package.json version field 0.0.0
     // major and minor should match Brackets, last number is build version
-    var _buildNumber = Number(brackets.metadata.version.match(/[0-9]+$/)[0]);
+    let _buildNumber = Number(brackets.metadata.version.match(/[0-9]+$/)[0]);
 
     // Init default last build number
     PreferencesManager.stateManager.definePreference("lastNotifiedBuildNumber", "number", 0);
@@ -91,7 +91,7 @@ define(function (require, exports, module) {
      * @private
      * Flag that indicates if we've added a click handler to the update notification icon.
      */
-    var _addedClickHandler = false;
+    let _addedClickHandler = false;
 
     /**
      * Construct a new version update url with the given locale.
@@ -124,11 +124,11 @@ define(function (require, exports, module) {
      */
     function _getUpdateInformation(force, dontCache, _versionInfoUrl) {
         // Last time the versionInfoURL was fetched
-        var lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
+        let lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
 
-        var result = new $.Deferred();
-        var fetchData = false;
-        var data;
+        const result = new $.Deferred();
+        let fetchData = false;
+        let data;
 
         // If force is true, always fetch
         if (force) {
@@ -147,15 +147,15 @@ define(function (require, exports, module) {
         }
 
         if (fetchData) {
-            var lookupPromise = new $.Deferred(),
-                localVersionInfoUrl;
+            const lookupPromise = new $.Deferred();
+            let localVersionInfoUrl;
 
             // If the current locale isn't "en" or "en-US", check whether we actually have a
             //   locale-specific update notification, and fall back to "en" if not.
             // Note: we check for both "en" and "en-US" to watch for the general case or
             //    country-specific English locale.  The former appears default on Mac, while
             //    the latter appears default on Windows.
-            var locale = brackets.getLocale().toLowerCase();
+            const locale = brackets.getLocale().toLowerCase();
             if (locale !== "en" && locale !== "en-us") {
                 localVersionInfoUrl = _versionInfoUrl || _getVersionInfoUrl();
                 $.ajax({
@@ -164,7 +164,7 @@ define(function (require, exports, module) {
                     type: "HEAD"
                 }).fail(function (jqXHR, status, error) {
                     // get rid of any country information from locale and try again
-                    var tmpUrl = _getVersionInfoUrl(brackets.getLocale(), true);
+                    const tmpUrl = _getVersionInfoUrl(brackets.getLocale(), true);
                     if (tmpUrl !== localVersionInfoUrl) {
                         $.ajax({
                             url: tmpUrl,
@@ -234,8 +234,8 @@ define(function (require, exports, module) {
     function _stripOldVersionInfo(versionInfo, buildNumber) {
         // Do a simple linear search. Since we are going in reverse-chronological order, we
         // should get through the search quickly.
-        var lastIndex = 0;
-        var len = versionInfo.length;
+        let lastIndex = 0;
+        const len = versionInfo.length;
 
         while (lastIndex < len) {
             if (versionInfo[lastIndex].buildNumber <= buildNumber) {
@@ -265,7 +265,7 @@ define(function (require, exports, module) {
             });
 
         // Populate the update data
-        var $dlg        = $(".update-dialog.instance"),
+        const $dlg        = $(".update-dialog.instance"),
             $updateList = $dlg.find(".update-info");
 
         updates.Strings = Strings;
@@ -276,7 +276,7 @@ define(function (require, exports, module) {
      * Calculate state of notification everytime registries are downloaded - no matter who triggered the download
      */
     function _onRegistryDownloaded() {
-        var availableUpdates = ExtensionManager.getAvailableUpdates();
+        const availableUpdates = ExtensionManager.getAvailableUpdates();
         PreferencesManager.setViewState("extensionUpdateInfo", availableUpdates);
         PreferencesManager.setViewState("lastExtensionRegistryCheckTime", (new Date()).getTime());
         $("#toolbar-extension-manager").toggleClass("updatesAvailable", availableUpdates.length > 0);
@@ -289,12 +289,12 @@ define(function (require, exports, module) {
      *  to determine state of the update notification.
      */
     function checkForExtensionsUpdate() {
-        var lastExtensionRegistryCheckTime = PreferencesManager.getViewState("lastExtensionRegistryCheckTime"),
+        const lastExtensionRegistryCheckTime = PreferencesManager.getViewState("lastExtensionRegistryCheckTime"),
             timeOfNextCheck = lastExtensionRegistryCheckTime + ONE_DAY,
             currentTime = (new Date()).getTime();
 
         // update icon according to previously saved information
-        var availableUpdates = PreferencesManager.getViewState("extensionUpdateInfo");
+        let availableUpdates = PreferencesManager.getViewState("extensionUpdateInfo");
         availableUpdates = ExtensionManager.cleanAvailableUpdates(availableUpdates);
         $("#toolbar-extension-manager").toggleClass("updatesAvailable", availableUpdates.length > 0);
 
@@ -328,16 +328,16 @@ define(function (require, exports, module) {
         // This is the last version we notified the user about. If checkForUpdate()
         // is called with "false", only show the update notification dialog if there
         // is an update newer than this one. This value is saved in preferences.
-        var lastNotifiedBuildNumber = PreferencesManager.getViewState("lastNotifiedBuildNumber");
+        let lastNotifiedBuildNumber = PreferencesManager.getViewState("lastNotifiedBuildNumber");
 
         // The second param, if non-null, is an Object containing value overrides. Values
         // in the object temporarily override the local values. This should *only* be used for testing.
         // If any overrides are set, permanent changes are not made (including showing
         // the update notification icon and saving prefs).
-        var oldValues;
-        var usingOverrides = false; // true if any of the values are overridden.
-        var result = new $.Deferred();
-        var versionInfoUrl;
+        let oldValues;
+        let usingOverrides = false; // true if any of the values are overridden.
+        const result = new $.Deferred();
+        let versionInfoUrl;
 
         if (_testValues) {
             oldValues = {};
@@ -363,7 +363,7 @@ define(function (require, exports, module) {
         _getUpdateInformation(force || usingOverrides, usingOverrides, versionInfoUrl)
             .done(function (versionInfo) {
                 // Get all available updates
-                var allUpdates = _stripOldVersionInfo(versionInfo, _buildNumber);
+                const allUpdates = _stripOldVersionInfo(versionInfo, _buildNumber);
 
                 // When running directly from GitHub source (as opposed to
                 // an installed build), _buildNumber is 0. In this case, if the
@@ -376,7 +376,7 @@ define(function (require, exports, module) {
 
                 if (allUpdates) {
                     // Always show the "update available" icon if any updates are available
-                    var $updateNotification = $("#update-notification");
+                    const $updateNotification = $("#update-notification");
 
                     $updateNotification.css("display", "block");
                     if (!_addedClickHandler) {
