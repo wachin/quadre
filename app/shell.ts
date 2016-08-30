@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import { getLogger } from "./utils";
+import { getLogger, setLoggerWindow } from "./utils";
 import * as path from "path";
 import * as utils from "./utils";
 import * as shellConfig from "./shell-config";
@@ -143,7 +143,9 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // This method will be called when Electron has done everything
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
-    new AutoUpdater(openBracketsWindow());
+    const win = openBracketsWindow();
+    new AutoUpdater(win);
+    setLoggerWindow(win);
 });
 
 export function getMainWindow() {
@@ -155,5 +157,6 @@ export function restart(query: {} | string) {
         const win = wins.shift();
         if (win) { win.close(); }
     }
-    openBracketsWindow(query);
+    const win = openBracketsWindow(query);
+    setLoggerWindow(win);
 };

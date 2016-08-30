@@ -1,29 +1,24 @@
 /* eslint-env node */
 
-import { app, BrowserWindow } from "electron";
+import { app } from "electron";
 
 export function isDev() {
     return /(\/|\\)electron.exe$/i.test(app.getPath("exe"));
 }
 
-let mainWindow: Electron.BrowserWindow;
-let mainWindowLoaded: boolean = false;
-function logWithLevel(level: string, ...args: string[]) {
+let loggerWindow: Electron.BrowserWindow;
 
-    // this works when it's called from shell, not from renderer process
-    if (mainWindow == null && BrowserWindow) {
-        let windows = BrowserWindow.getAllWindows();
-        if (windows.length > 0) {
-            mainWindow = windows[0];
-            mainWindow.webContents.once("did-frame-finish-load", (event: any) => {
-                mainWindowLoaded = true;
-            });
-        }
-    }
+export function setLoggerWindow(win: Electron.BrowserWindow) {
+    win.webContents.once("did-frame-finish-load", (event: any) => {
+        loggerWindow = win;
+    });
+}
+
+function logWithLevel(level: string, ...args: string[]): void {
 
     // if there's main window, log into its console
-    if (mainWindow != null && mainWindowLoaded) {
-        mainWindow.webContents.send("log", level, ...args);
+    if (loggerWindow) {
+        loggerWindow.webContents.send("log", level, ...args);
         return;
     }
 
