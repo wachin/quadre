@@ -103,6 +103,9 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 
     // create the browser window
     const win = new BrowserWindow(winOptions);
+    if (process.argv.indexOf("--devtools") !== -1) {
+        win.webContents.openDevTools({ mode: "detach" });
+    }
     wins.push(win);
 
     // load the index.html of the app
