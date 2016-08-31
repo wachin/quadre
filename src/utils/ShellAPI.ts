@@ -60,17 +60,8 @@ define(function (require, exports, module) {
         return (promise && promise.state() === "rejected") ? false : true;
     });
 
-    electron.ipcRenderer.on("log", function (evt, level, ...args) {
-        switch (level) {
-            case "error":
-                (console as any).error("[shell]", ...args);
-                break;
-            case "warn":
-                (console as any).warn("[shell]", ...args);
-                break;
-            default:
-                (console as any).log("[shell]", ...args);
-        }
+    electron.ipcRenderer.on("console-msg", function (evt, method, ...args) {
+        console[method]("[shell]", ...args);
     });
 
     electron.ipcRenderer.on("notify", function (evt, title, message) {

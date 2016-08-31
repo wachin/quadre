@@ -6,40 +6,39 @@ export function isDev() {
     return /(\/|\\)electron.exe$/i.test(app.getPath("exe"));
 }
 
-let loggerWindow: Electron.BrowserWindow;
+let mainWindow: Electron.BrowserWindow;
 
 export function setLoggerWindow(win: Electron.BrowserWindow) {
     win.webContents.once("did-frame-finish-load", (event: any) => {
-        loggerWindow = win;
+        mainWindow = win;
     });
 }
 
-function logWithLevel(level: string, ...args: string[]): void {
-
-    // if there's main window, log into its console
-    if (loggerWindow) {
-        loggerWindow.webContents.send("log", level, ...args);
+const _console: any = {};
+function callMainWindowConsole(method: string, ...args: string[]) {
+    if (mainWindow) {
+        mainWindow.webContents.send("console-msg", method, ...args);
         return;
     }
+    _console[method].call(console, ...args);
+}
 
-    // if there's no main window, use normal logging
-    switch (level) {
-        case "error":
-            (console as any).error(...args);
-            break;
-        case "warn":
-            (console as any).warn(...args);
-            break;
-        default:
-            (console as any).log(...args);
-    }
+// this is run only for shell, we hijack console.xxx methods so they can be passed onto main window
+if (app) {
+    const c: any = console;
+    Object.keys(c).forEach((key: string) => {
+        if (typeof c[key] !== "function") { return; }
+        _console[key] = c[key];
+        c[key] = (...args: any[]) => callMainWindowConsole(key, ...args);
+    });
 }
 
 export function getLogger(name: string) {
     return {
-        info: (...msgs: string[]) => logWithLevel("info", `[${name}]`, ...msgs),
-        warn: (...msgs: string[]) => logWithLevel("warn", `[${name}]`, ...msgs),
-        error: (...msgs: string[]) => logWithLevel("error", `[${name}]`, ...msgs)
+        log: (...msgs: string[]) => console.log(`[${name}]`, ...msgs), // tslint:disable-line
+        info: (...msgs: string[]) => console.info(`[${name}]`, ...msgs), // tslint:disable-line
+        warn: (...msgs: string[]) => console.warn(`[${name}]`, ...msgs),
+        error: (...msgs: string[]) => console.error(`[${name}]`, ...msgs)
     };
 }
 
