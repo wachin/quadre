@@ -1,5 +1,15 @@
-Welcome to Brackets! [![Build Status](https://travis-ci.org/adobe/brackets.svg?branch=master)](https://travis-ci.org/adobe/brackets)
--------------------
+# brackets-electron
+
+Windows: [![Build status](https://ci.appveyor.com/api/projects/status/e1ib9s6nn5aeymis?svg=true)](https://ci.appveyor.com/project/zaggino/brackets-electron)
+
+Mac, Linux: [![Build Status](https://travis-ci.org/zaggino/brackets-electron.svg?branch=master)](https://travis-ci.org/zaggino/brackets-electron)
+
+## how to hack
+
+run `npm run dev` in one terminal, `npm start` in the other, be sure to do the usual updates (git pull, git submodule update, npm install, etc) before.
+
+Welcome to Brackets!
+--------------------
 
 Brackets is a modern open-source code editor for HTML, CSS
 and JavaScript that's *built* in HTML, CSS and JavaScript. 
