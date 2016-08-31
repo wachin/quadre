@@ -99,17 +99,19 @@ define(function (require, exports, module) {
     let _addedClickHandler = false;
 
     function transformAtomFeed(obj: any): Array<any> {
+        const currentVersion = node.require("./package.json").version;
         const GH = `https://github.com/zaggino/brackets-electron`;
 
         let entries = _.get(obj, "feed.entry", []);
         if (!_.isArray(entries)) { entries = [ entries ] as any; }
 
         return entries.map((entry: any) => {
+            const version = entry.title._;
             return {
-                buildNumber: entry.title._,
-                versionString: entry.title._,
+                buildNumber: version,
+                versionString: version,
                 dateString: entry.updated,
-                releaseNotesURL: GH,
+                releaseNotesURL: GH + `/compare/v${currentVersion}...v${version}`,
                 downloadURL: GH + "/releases",
                 newFeatures: []
             };
