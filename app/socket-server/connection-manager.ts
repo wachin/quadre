@@ -1,6 +1,6 @@
 import DomainManager from "./domain-manager";
 import * as WebSocket from "ws";
-import { errToString } from "../utils";
+import { errToMessage, errToString } from "../utils";
 
 export interface ConnectionMessage {
     id: number;
@@ -122,7 +122,7 @@ export class Connection {
                     m.parameters
                 );
             } catch (executionError) {
-                this.sendCommandError(m.id, executionError.message, errToString(executionError));
+                this.sendCommandError(m.id, errToMessage(executionError), errToString(executionError));
             }
         } else {
             this.sendError(`Malformed message (${validId}, ${hasDomain}, ${hasCommand}): ${message}`);

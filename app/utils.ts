@@ -52,6 +52,14 @@ export function errToString(err: Error): string {
     return err.toString();
 }
 
+export function errToMessage(err: Error): string {
+    let message = err.message;
+    if (message && err.name) {
+        message = err.name + ": " + message;
+    }
+    return message ? message : err.toString();
+}
+
 export function convertWindowsPathToUnixPath(path: string): string {
     return process.platform === "win32" ? path.replace(/\\/g, "/") : path;
 }
