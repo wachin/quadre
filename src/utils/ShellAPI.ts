@@ -73,7 +73,12 @@ define(function (require, exports, module) {
         }
     });
 
+    electron.ipcRenderer.on("notify", function (evt, title, message) {
+        window.alert(`${title}\n\n${message}`);
+    });
+
     AppInit.appReady(function () {
+        electron.ipcRenderer.send("brackets-app-ready");
         appReady = true;
     });
 

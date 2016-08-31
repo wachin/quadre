@@ -1,16 +1,12 @@
 import * as os from "os";
-import { app, autoUpdater, BrowserWindow } from "electron";
+import { app, autoUpdater, ipcMain } from "electron";
 import { getLogger, isDev } from "./utils";
 
 const log = getLogger("auto-updater");
 export const UPDATE_SERVER_HOST = "brackets-electron-nuts.herokuapp.com";
 
-function notify(title: string, message: string) {
-    let windows = BrowserWindow.getAllWindows();
-    if (windows.length === 0) {
-        return;
-    }
-    windows[0].webContents.send("notify", title, message);
+function notify(window: Electron.BrowserWindow, title: string, message: string) {
+    window.webContents.send("notify", title, message);
 }
 
 export default class AppUpdater {
@@ -31,6 +27,7 @@ export default class AppUpdater {
             "update-downloaded",
             (event: any, releaseNotes: string, releaseName: string, releaseDate: string, updateURL: string) => {
                 notify(
+                    window,
                     "A new update is ready to install",
                     `Version ${releaseName} is downloaded and will be automatically installed on Quit`
                 );
@@ -45,7 +42,7 @@ export default class AppUpdater {
         autoUpdater.addListener("update-not-available", () => {
             log.info("update-not-available");
         });
-        window.webContents.once("did-frame-finish-load", (event: any) => {
+        ipcMain.on("brackets-app-ready", () => {
             autoUpdater.checkForUpdates();
         });
     }
