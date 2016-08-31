@@ -31,7 +31,6 @@ module.exports = function (grunt) {
         pattern: [
             'grunt-*',
             '!grunt-cli',
-            '!grunt-lib-phantomjs',
             '!grunt-template-jasmine-requirejs'
         ]
     });
@@ -275,7 +274,6 @@ module.exports = function (grunt) {
                 specs : '<%= meta.specs %>',
                 /* Keep in sync with test/SpecRunner.html dependencies */
                 vendor : [
-                    'test/polyfills.js', /* For reference to why this polyfill is needed see Issue #7951. The need for this should go away once the version of phantomjs gets upgraded to 2.0 */
                     'src/thirdparty/jquery-2.1.3.min.js',
                     'src/thirdparty/CodeMirror/lib/codemirror.js',
                     'src/thirdparty/CodeMirror/lib/util/dialog.js',
