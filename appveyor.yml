@@ -7,10 +7,10 @@ cache:
   - '%APPDATA%\npm'
 
 install:
+  - git submodule update --init --recursive
   - ps: Install-Product node 6 x64
   - npm -g install npm@latest
   - set PATH=%APPDATA%\npm;%PATH%
-  - git submodule update --init
   - node --version
   - npm --version
   - npm install
