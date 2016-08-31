@@ -145,6 +145,14 @@ define(function (require, exports, module) {
             }
 
             if (currentTime >= nextTimeToSend) {
+
+                // Check if the app is not running in dev mode
+                var isDev = electron.remote.require("./utils").isDev;
+                if (isDev()) {
+                    result.reject();
+                    return;
+                }
+
                 // Bump up nextHealthDataSendTime now to avoid any chance of sending data again before 24 hours, e.g. if the server request fails
                 // or the code below crashes
                 PreferencesManager.setViewState("nextHealthDataSendTime", currentTime + ONE_DAY);
