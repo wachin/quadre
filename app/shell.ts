@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import { getLogger, setLoggerWindow, convertWindowsPathToUnixPath } from "./utils";
+import { getLogger, setLoggerWindow, convertWindowsPathToUnixPath, errToString } from "./utils";
 import * as path from "path";
 import * as utils from "./utils";
 import * as shellConfig from "./shell-config";
@@ -149,7 +149,11 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
     const win = openBracketsWindow();
-    new AutoUpdater(win);
+    try {
+        new AutoUpdater(win);
+    } catch (err) {
+        log.error(errToString(err));
+    }
     setLoggerWindow(win);
 });
 
