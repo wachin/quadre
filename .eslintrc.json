@@ -4,7 +4,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "no-bitwise": 0,
+        "no-bitwise": 2,
         "curly": 2,
         "eqeqeq": ["error", "always", {"null": "ignore"}],
         "guard-for-in": 0,
