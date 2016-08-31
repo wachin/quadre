@@ -19,7 +19,7 @@
         "brackets": "./dist/index.js"
     },
     "build": {
-        "appId": "com.electron.brackets",
+        "appId": "com.squirrel.brackets.BracketsElectron",
         "category": "public.app-category.developer-tools",
         "asar": false,
         "files": [],
