@@ -1,3 +1,6 @@
+import * as ConnectionManager from "./connection-manager";
+import { Connection } from "./connection-manager";
+
 export interface DomainDescription {
     domain: string;
     version: { major: number, minor: number };
@@ -26,9 +29,6 @@ export interface DomainCommandArgument {
     type: string;
     description?: string;
 }
-
-import * as ConnectionManager from "./connection-manager";
-import { Connection } from "./connection-manager";
 
 /**
  * @private
