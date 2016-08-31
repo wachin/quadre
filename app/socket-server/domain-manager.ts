@@ -1,5 +1,6 @@
 import * as ConnectionManager from "./connection-manager";
 import { Connection } from "./connection-manager";
+import { errToString } from "../utils";
 
 export interface DomainDescription {
     domain: string;
@@ -159,7 +160,7 @@ export const DomainManager = {
             if (command.isAsync) {
                 const callback = function (err: Error, result: any) {
                     if (err) {
-                        connection.sendCommandError(id, err.message, err.stack);
+                        connection.sendCommandError(id, err.message, errToString(err));
                     } else {
                         connection.sendCommandResponse(id, result);
                     }
@@ -173,7 +174,7 @@ export const DomainManager = {
                         command.commandFunction.apply(connection, parameters)
                     );
                 } catch (err) {
-                    connection.sendCommandError(id, err.message, err.stack);
+                    connection.sendCommandError(id, err.message, errToString(err));
                 }
             }
         } else {
