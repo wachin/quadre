@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import { getLogger, setLoggerWindow } from "./utils";
+import { getLogger, setLoggerWindow, convertWindowsPathToUnixPath } from "./utils";
 import * as path from "path";
 import * as utils from "./utils";
 import * as shellConfig from "./shell-config";
@@ -12,9 +12,10 @@ import * as SocketServer from "./socket-server"; // Implementation of Brackets' 
 
 const appInfo = require("./package.json");
 
-const log = getLogger("ipc-log");
+const log = getLogger("main");
+const ipclog = getLogger("ipc-log");
 ipcMain.on("log", function (event, ...args) {
-    log.info(...args);
+    ipclog.info(...args);
 });
 
 // Report crashes to electron server
@@ -64,7 +65,7 @@ SocketServer.start(function (err: Error, port: number) {
 export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {
 
     // compose path to brackets' index file
-    const indexPath = "file://" + path.resolve(__dirname, "www", "index.html");
+    const indexPath = "file:///" + convertWindowsPathToUnixPath(path.resolve(__dirname, "www", "index.html"));
 
     // build a query for brackets' window
     let queryString = "";
@@ -105,6 +106,7 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
     wins.push(win);
 
     // load the index.html of the app
+    log.info(`loading brackets window at ${indexUrl}`);
     win.loadURL(indexUrl);
     if (shellConfig.get("window.maximized")) {
         win.maximize();

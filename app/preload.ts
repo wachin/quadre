@@ -26,6 +26,7 @@ try {
         __dirname,
         appshell: require("./appshell/index")
     };
+    electron.ipcRenderer.send("log", "preload-fine");
 } catch (err) {
     electron.ipcRenderer.send("log", err.stack);
 }
