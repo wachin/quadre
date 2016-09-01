@@ -1,6 +1,6 @@
 import DomainManager from "./domain-manager";
 import * as WebSocket from "ws";
-import { errToMessage, errToString } from "../utils";
+import { errToMessage, errToString, getLogger } from "../utils";
 
 export interface ConnectionMessage {
     id: number;
@@ -24,6 +24,8 @@ export interface CommandError {
     message: string;
     stack: string;
 }
+
+const log = getLogger("connection-manager");
 
 /**
  * @private
@@ -102,9 +104,15 @@ export class Connection {
         let m: ConnectionMessage;
         try {
             m = JSON.parse(message);
-        } catch (parseError) {
-            this.sendError("Unable to parse message: " + message);
-            return;
+        } catch (ignoreErr) {
+            // try again with potentially missing `}`, this should be fixed when we get rid of websockets
+            try {
+                m = JSON.parse(message + "}");
+            } catch (err) {
+                log.error(`Error parsing message json: ${err.name}: ${err.message}`);
+                this.sendError("Unable to parse message: " + message);
+                return;
+            }
         }
 
         const validId = m.id != null;
