@@ -21,17 +21,15 @@
  *
  */
 
+declare const brackets: any;
+
 define(function (require, exports, module) {
     "use strict";
 
     var EventDispatcher = require("utils/EventDispatcher");
-
-
-    /**
-     * Connection attempts to make before failing
-     * @type {number}
-     */
-    var CONNECTION_ATTEMPTS = 10;
+    var fork            = node.require("child_process").fork;
+    var getLogger       = node.require("./utils").getLogger;
+    var log             = getLogger("node-connection");
 
     /**
      * Milliseconds to wait before a particular connection attempt is considered failed.
@@ -42,12 +40,6 @@ define(function (require, exports, module) {
      * @type {number}
      */
     var CONNECTION_TIMEOUT  = 10000; // 10 seconds
-
-    /**
-     * Milliseconds to wait before retrying connecting
-     * @type {number}
-     */
-    var RETRY_DELAY         = 500;   // 1/2 second
 
     /**
      * Maximum value of the command ID counter
@@ -69,52 +61,13 @@ define(function (require, exports, module) {
     }
 
     /**
-     * @private
-     * Helper function to attempt a single connection to the node server
-     */
-    function attemptSingleConnect() {
-        var deferred = $.Deferred();
-        var port = null;
-        var ws = null;
-        setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
-
-        brackets.app.getNodeState(function (err, nodePort) {
-            if (!err && nodePort && deferred.state() !== "rejected") {
-                port = nodePort;
-                ws = new WebSocket("ws://localhost:" + port);
-
-                // Expect ArrayBuffer objects from Node when receiving binary
-                // data instead of DOM Blobs, which are the default.
-                ws.binaryType = "arraybuffer";
-
-                // If the server port isn't open, we get a close event
-                // at some point in the future (and will not get an onopen
-                // event)
-                ws.onclose = function () {
-                    deferred.reject("WebSocket closed");
-                };
-
-                ws.onopen = function () {
-                    // If we successfully opened, remove the old onclose
-                    // handler (which was present to detect failure to
-                    // connect at all).
-                    ws.onclose = null;
-                    deferred.resolveWith(null, [ws, port]);
-                };
-            } else {
-                deferred.reject("brackets.app.getNodeState error: " + err);
-            }
-        });
-
-        return deferred.promise();
-    }
-
-    /**
      * Provides an interface for interacting with the node server.
      * @constructor
      */
     function NodeConnection() {
         this.domains = {};
+        this._messageHandlers = {};
+        this._tempMessageHandlers = [];
         this._registeredModules = [];
         this._pendingInterfaceRefreshDeferreds = [];
         this._pendingCommandDeferreds = [];
@@ -227,8 +180,10 @@ define(function (require, exports, module) {
         this._pendingInterfaceRefreshDeferreds = [];
         this._pendingCommandDeferreds = [];
 
-        this._ws = null;
-        this._port = null;
+        if (this._nodeProcess) {
+            this._nodeProcess.kill();
+            this._nodeProcess = null;
+        }
     };
 
     /**
@@ -246,81 +201,62 @@ define(function (require, exports, module) {
      *    connection succeeds/fails
      */
     NodeConnection.prototype.connect = function (autoReconnect) {
-        var self = this;
-        self._autoReconnect = autoReconnect;
+        this._autoReconnect = autoReconnect;
         var deferred = $.Deferred();
-        var attemptCount = 0;
-        var attemptTimestamp = null;
-
-        // Called after a successful connection to do final setup steps
-        function registerHandlersAndDomains(ws, port) {
-            // Called if we succeed at the final setup
-            function success() {
-                self._ws.onclose = function () {
-                    if (self._autoReconnect) {
-                        var $promise = self.connect(true);
-                        self.trigger("close", $promise);
-                    } else {
-                        self._cleanup();
-                        self.trigger("close");
-                    }
-                };
-                deferred.resolve();
-            }
-            // Called if we fail at the final setup
-            function fail(err) {
-                self._cleanup();
-                deferred.reject(err);
-            }
-
-            self._ws = ws;
-            self._port = port;
-            self._ws.onmessage = self._receive.bind(self);
-
-            // refresh the current domains, then re-register any
-            // "autoregister" modules
-            self._refreshInterface().then(
-                function () {
-                    if (self._registeredModules.length > 0) {
-                        self.loadDomains(self._registeredModules, false).then(
-                            success,
-                            fail
-                        );
-                    } else {
-                        success();
-                    }
-                },
-                fail
-            );
-        }
-
-        // Repeatedly tries to connect until we succeed or until we've
-        // failed CONNECTION_ATTEMPT times. After each attempt, waits
-        // at least RETRY_DELAY before trying again.
-        function doConnect() {
-            attemptCount++;
-            attemptTimestamp = new Date();
-            attemptSingleConnect().then(
-                registerHandlersAndDomains, // succeded
-                function () { // failed this attempt, possibly try again
-                    if (attemptCount < CONNECTION_ATTEMPTS) { //try again
-                        // Calculate how long we should wait before trying again
-                        var now = new Date();
-                        var delay = Math.max(
-                            RETRY_DELAY - (now - attemptTimestamp),
-                            1
-                        );
-                        setTimeout(doConnect, delay);
-                    } else { // too many attempts, give up
-                        deferred.reject("Max connection attempts reached");
-                    }
-                }
-            );
-        }
 
         // Start the connection process
-        self._cleanup();
-        doConnect();
+        this._cleanup();
+        const nodeProcessPath = node.require.resolve("./node/node-process-base.js");
+        this._nodeProcess = fork(nodeProcessPath);
+        this._nodeProcess.on('message', (obj) => {            
+            const type: string = obj.type;            
+            if (this._messageHandlers[type]) {
+                this._messageHandlers[type](obj);
+                return;
+            }
+            
+            const temp = this._tempMessageHandlers.find(x => x.type === type);
+            if (temp) {                
+                this._tempMessageHandlers.splice(this._tempMessageHandlers.indexOf(temp), 1);
+                temp.handler(obj);
+                return;
+            }
+            
+            log.warn(`unhandled message: ${JSON.stringify(obj)}`);
+        });
+
+        // Called if we succeed at the final setup
+        const success = () => {
+            this._ws.onclose = () => {
+                if (this._autoReconnect) {
+                    var $promise = this.connect(true);
+                    this.trigger("close", $promise);
+                } else {
+                    this._cleanup();
+                    this.trigger("close");
+                }
+            };
+            deferred.resolve();
+        };
+
+        // Called if we fail at the final setup
+        const fail = (err) => {
+            this._cleanup();
+            deferred.reject(err);
+        };
+
+        // refresh the current domains, then re-register any
+        // "autoregister" modules
+        this._refreshInterface().then(() => {
+            if (this._registeredModules.length > 0) {
+                this.loadDomains(this._registeredModules, false).then(
+                    success,
+                    fail
+                );
+            } else {
+                success();
+            }
+        }, fail);
 
         return deferred.promise();
     };
@@ -330,7 +266,7 @@ define(function (require, exports, module) {
      * @return {boolean} Whether the NodeConnection is connected.
      */
     NodeConnection.prototype.connected = function () {
-        return !!(this._ws && this._ws.readyState === WebSocket.OPEN);
+        return this._nodeProcess && this._nodeProcess.connected;
     };
 
     /**
@@ -565,9 +501,13 @@ define(function (require, exports, module) {
         }
 
         if (this.connected()) {
-            $.getJSON("http://localhost:" + this._port + "/api")
-                .done(refreshInterfaceCallback)
-                .fail(function (err) { deferred.reject(err); });
+            this._tempMessageHandlers.push({
+                type: "refresh-interface-callback",
+                handler: () => {
+                    debugger;
+                }
+            });            
+            this._nodeProcess.send({ type: "refresh-interface" });
         } else {
             deferred.reject("Attempted to call _refreshInterface when not connected.");
         }
