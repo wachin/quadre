@@ -4,6 +4,12 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/e1ib9s6nn5
 
 Mac, Linux: [![Build Status](https://travis-ci.org/zaggino/brackets-electron.svg?branch=master)](https://travis-ci.org/zaggino/brackets-electron)
 
+## how does this differ to regular brackets?
+
+Brackets-Electron `x.y.z` will follow `x.y` of Brackets releases, with `z` being reserved for patches and merges of latest features which are available in brackets master repository and planned to be released in the next version. This way you can preview the upcoming features without running brackets from source.
+
+- CEF shell is gone, it should improve experience mainly to Linux users
+
 ## how to hack
 
 run `npm run dev` in one terminal, `npm start` in the other, be sure to do the usual updates (git pull, git submodule update, npm install, etc) before.
