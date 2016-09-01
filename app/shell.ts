@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import { getLogger, setLoggerWindow, convertWindowsPathToUnixPath, errToString } from "./utils";
+import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath, errToString } from "./utils";
 import * as path from "path";
 import * as utils from "./utils";
 import * as shellConfig from "./shell-config";
@@ -13,6 +13,10 @@ import * as SocketServer from "./socket-server"; // Implementation of Brackets' 
 const appInfo = require("./package.json");
 
 const log = getLogger("main");
+process.on("uncaughtException", (err: Error) => {
+    log.error(`[uncaughtException] ${errToString(err)}`);
+});
+
 const ipclog = getLogger("ipc-log");
 ipcMain.on("log", function (event, ...args) {
     ipclog.info(...args);
@@ -164,7 +168,10 @@ export function getMainWindow() {
 export function restart(query: {} | string) {
     while (wins.length > 0) {
         const win = wins.shift();
-        if (win) { win.close(); }
+        if (win) {
+            unsetLoggerWindow(win);
+            win.close();
+        }
     }
     const win = openBracketsWindow(query);
     setLoggerWindow(win);

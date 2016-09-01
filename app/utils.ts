@@ -6,12 +6,18 @@ export function isDev() {
     return /(\/|\\)electron.exe$/i.test(app.getPath("exe"));
 }
 
-let mainWindow: Electron.BrowserWindow;
+let mainWindow: Electron.BrowserWindow | null;
 
 export function setLoggerWindow(win: Electron.BrowserWindow) {
     win.webContents.once("did-frame-finish-load", (event: any) => {
         mainWindow = win;
     });
+}
+
+export function unsetLoggerWindow(win: Electron.BrowserWindow) {
+    if (mainWindow === win) {
+        mainWindow = null;
+    }
 }
 
 const _console: any = {};
