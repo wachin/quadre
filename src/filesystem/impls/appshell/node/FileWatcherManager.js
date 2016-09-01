@@ -44,14 +44,10 @@ function setWatcherImpl(impl) {
  * @return {object} Can be consumed by new FileSystemStats(object); in Brackets
  */
 function normalizeStats(nodeFsStats) {
-    // current shell's stat method floors the mtime to the nearest thousand
-    // which causes problems when comparing timestamps
-    // so we have to round mtime to the nearest thousand too
-    var mtime = Math.floor(nodeFsStats.mtime.getTime() / 1000) * 1000;
-
     // from shell: If "filename" is a symlink,
     // realPath should be the actual path to the linked object
     // not implemented in shell yet
+    var mtime = nodeFsStats.mtime.getTime();
     return {
         isFile: nodeFsStats.isFile(),
         isDirectory: nodeFsStats.isDirectory(),
