@@ -239,7 +239,7 @@ define(function (require, exports, module) {
             var path = this.path;
             var prefFile = FileSystem.getFileForPath(path);
 
-            if (path) {
+            if (path && newData != null) {
                 try {
                     var text = JSON.stringify(newData, null, 4);
 
