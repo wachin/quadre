@@ -25,3 +25,7 @@ build_script:
   - npm run publish-win
 
 test: off
+
+branches:
+  only:
+    - master
