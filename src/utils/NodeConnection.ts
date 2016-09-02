@@ -67,7 +67,8 @@ define(function (require, exports, module) {
     function NodeConnection() {
         this.domains = {};
         this._messageHandlers = {
-            log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg)
+            log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
+            receive: ({ msg }) => this._receive(msg)
         };
         this._tempMessageHandlers = [];
         this._registeredModules = [];
@@ -342,7 +343,7 @@ define(function (require, exports, module) {
         if (this.connected()) {
 
             // Convert the message to a string
-            var messageString = null;
+            var messageString: string | null = null;
             if (typeof m === "string") {
                 messageString = m;
             } else {
@@ -372,38 +373,15 @@ define(function (require, exports, module) {
      * and dispatches it appropriately.
      * @param {WebSocket.Message} message Message object from WebSocket
      */
-    NodeConnection.prototype._receive = function (message) {
+    NodeConnection.prototype._receive = function (messageString) {
         var responseDeferred = null;
-        var data = message.data;
         var m;
 
-        if (message.data instanceof ArrayBuffer) {
-            // The first four bytes encode the command ID as an unsigned 32-bit integer
-            if (data.byteLength < 4) {
-                console.error("[NodeConnection] received malformed binary message");
-                return;
-            }
-
-            var header = data.slice(0, 4),
-                body = data.slice(4),
-                headerView = new Uint32Array(header),
-                id = headerView[0];
-
-            // Unpack the binary message into a commandResponse
-            m = {
-                type: "commandResponse",
-                message: {
-                    id: id,
-                    response: body
-                }
-            };
-        } else {
-            try {
-                m = JSON.parse(data);
-            } catch (e) {
-                console.error("[NodeConnection] received malformed message", message, e.message);
-                return;
-            }
+        try {
+            m = JSON.parse(messageString);
+        } catch (err) {
+            console.error("[NodeConnection] received malformed message", messageString, err.message);
+            return;
         }
 
         switch (m.type) {

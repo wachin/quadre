@@ -3,26 +3,35 @@
 import * as ConnectionManager from "./connection-manager";
 import DomainManager from "./domain-manager";
 
-export interface ConnectionMessage {
-    id: number;
-    domain: string;
-    command?: string;
-    event?: string;
-    parameters?: any[];
-}
-
-// emulate ws for now
-const EventEmitter = require('events');
-const ws = new EventEmitter();
-ConnectionManager.createConnection(ws);
-
-DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
-
+// logger
 const log = {
+    info: (msg: string) => {
+        process.send && process.send({ type: "log", level: "info", msg });
+    },
+    warn: (msg: string) => {
+        process.send && process.send({ type: "log", level: "warn", msg });
+    },
     error: (msg: string) => {
         process.send && process.send({ type: "log", level: "error", msg });
     }
 };
+console.log = (...args: any[]) => log.info(args.join(" "));
+console.warn = (...args: any[]) => log.warn(args.join(" "));
+console.error = (...args: any[]) => log.error(args.join(" "));
+
+// emulate ws for now
+const EventEmitter = require("events");
+const ws = new EventEmitter();
+ws.send = function (msg: any, options: any) {
+    if (options) {
+        log.warn(`ws.send options: ${options}`);
+    }
+    process.send && process.send({ type: "receive", msg });
+};
+ConnectionManager.createConnection(ws);
+
+// load the base domain
+DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
 
 const MessageHandlers: { [type: string]: (obj: any) => void } = {
     "refresh-interface": () => {
@@ -31,7 +40,7 @@ const MessageHandlers: { [type: string]: (obj: any) => void } = {
             spec: DomainManager.getDomainDescriptions()
         });
     },
-    "message": ({ message }) => {
+    message: ({ message }) => {
         ws.emit("message", message);
     }
 };
@@ -41,18 +50,10 @@ process.on("message", async function(obj: any) {
     if (MessageHandlers[type]) {
         MessageHandlers[type](obj);
     } else {
-        process.send && process.send({
-            type: "log",
-            level: "warn",
-            msg: `no handler for ${type}`
-        });
+        log.warn(`no handler for ${type}`);
     }
 });
 
 process.on("uncaughtException", (err: Error) => {
-    process.send && process.send({
-        type: "log",
-        level: "error",
-        msg: err.stack
-    });
+    log.error(`uncaughtException: ${err.stack}`);
 });
