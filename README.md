@@ -8,7 +8,9 @@ Mac, Linux: [![Build Status](https://travis-ci.org/zaggino/brackets-electron.svg
 
 Brackets-Electron `x.y.z` will follow `x.y` of Brackets releases, with `z` being reserved for patches and merges of latest features which are available in brackets master repository and planned to be released in the next version. This way you can preview the upcoming features without running brackets from source.
 
-- CEF shell is gone, it should improve experience mainly to Linux users
+- CEF shell is gone, improves experience mainly to Linux users
+- shell websocket server is gone, improves performance and stability for node domain code
+- node domains run in their own processes, improves perfomance as they don't block each other 
 
 ## how to hack
 
