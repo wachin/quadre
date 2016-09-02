@@ -2,6 +2,8 @@
 
 import DomainManager from "../socket-server/domain-manager";
 
+DomainManager.loadDomainModulesFromPaths(["../socket-server/BaseDomain"]);
+
 const MessageHandlers: { [type: string]: (obj: any) => void } = {
     "refresh-interface": () => {
         process.send && process.send({

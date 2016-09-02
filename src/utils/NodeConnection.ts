@@ -353,7 +353,7 @@ define(function (require, exports, module) {
             // If we succeded in making a string, try to send it
             if (messageString) {
                 try {
-                    this._ws.send(messageString);
+                    this._nodeProcess.send({ type: "message", message: messageString });
                 } catch (sendError) {
                     console.error("[NodeConnection] Error sending message: " + sendError.message);
                 }
