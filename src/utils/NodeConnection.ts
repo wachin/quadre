@@ -233,7 +233,7 @@ define(function (require, exports, module) {
 
         // Called if we succeed at the final setup
         const success = () => {
-            this._ws.onclose = () => {
+            this._nodeProcess.on("disconnect", () => {
                 if (this._autoReconnect) {
                     var $promise = this.connect(true);
                     this.trigger("close", $promise);
@@ -241,7 +241,7 @@ define(function (require, exports, module) {
                     this._cleanup();
                     this.trigger("close");
                 }
-            };
+            });
             deferred.resolve();
         };
 
@@ -255,10 +255,7 @@ define(function (require, exports, module) {
         // "autoregister" modules
         this._refreshInterface().then(() => {
             if (this._registeredModules.length > 0) {
-                this.loadDomains(this._registeredModules, false).then(
-                    success,
-                    fail
-                );
+                this.loadDomains(this._registeredModules, false).then(success, fail);
             } else {
                 success();
             }
