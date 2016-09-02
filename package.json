@@ -24,7 +24,6 @@
         "asar": false,
         "files": [],
         "npmRebuild": true,
-        "nodeGypRebuild": true,
         "win": {
             "iconUrl": "https://raw.githubusercontent.com/zaggino/brackets-electron/master/build/icon.ico"
         }
