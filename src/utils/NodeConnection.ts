@@ -509,10 +509,8 @@ define(function (require, exports, module) {
         if (this.connected()) {
             this._tempMessageHandlers.push({
                 type: "refresh-interface-callback",
-                handler: () => {
-                    debugger;
-                }
-            });            
+                handler: ({ spec }) => refreshInterfaceCallback(spec)
+            });
             this._nodeProcess.send({ type: "refresh-interface" });
         } else {
             deferred.reject("Attempted to call _refreshInterface when not connected.");
