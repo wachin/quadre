@@ -5,10 +5,10 @@ branches:
 platform:
   - x64
 
-cache:
-  - node_modules
-  - '%USERPROFILE%\.electron'
-  - '%APPDATA%\npm'
+#cache:
+#  - node_modules
+#  - '%USERPROFILE%\.electron'
+#  - '%APPDATA%\npm'
 
 install:
   - git submodule update --init --recursive
