@@ -187,8 +187,11 @@ define(function (require, exports, module) {
         this._pendingCommandDeferreds = [];
 
         if (this._nodeProcess) {
-            this._nodeProcess.kill();
-            this._nodeProcess = null;
+            try {
+                this._nodeProcess.kill();
+            } finally {
+                this._nodeProcess = null;
+            }
         }
     };
 
