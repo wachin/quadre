@@ -1,3 +1,7 @@
+branches:
+  only:
+    - master
+
 language: c
 
 matrix:
@@ -31,8 +35,8 @@ install:
 - npm -g install npm@latest
 - node --version
 - npm --version
-- npm install
 - npm prune
+- npm install
 
 script:
 - node --version
@@ -43,7 +47,3 @@ script:
   else
     npm run publish-linux;
   fi
-
-branches:
-  only:
-    - master

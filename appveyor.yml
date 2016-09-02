@@ -1,3 +1,7 @@
+branches:
+  only:
+    - master
+
 platform:
   - x64
 
@@ -13,8 +17,8 @@ install:
   - set PATH=%APPDATA%\npm;%PATH%
   - node --version
   - npm --version
-  - npm install
   - npm prune
+  - npm install
 
 before_build:
   - node --version
@@ -25,7 +29,3 @@ build_script:
   - npm run publish-win
 
 test: off
-
-branches:
-  only:
-    - master
