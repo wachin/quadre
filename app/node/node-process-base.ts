@@ -1,7 +1,7 @@
 /* eslint-env node */
 
-import * as ConnectionManager from "../socket-server/connection-manager";
-import DomainManager from "../socket-server/domain-manager";
+import * as ConnectionManager from "./connection-manager";
+import DomainManager from "./domain-manager";
 
 export interface ConnectionMessage {
     id: number;
@@ -16,7 +16,7 @@ const EventEmitter = require('events');
 const ws = new EventEmitter();
 ConnectionManager.createConnection(ws);
 
-DomainManager.loadDomainModulesFromPaths(["../socket-server/BaseDomain"]);
+DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
 
 const log = {
     error: (msg: string) => {
