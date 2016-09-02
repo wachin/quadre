@@ -66,13 +66,19 @@ define(function (require, exports, module) {
      */
     function NodeConnection() {
         this.domains = {};
-        this._messageHandlers = {};
+        this._messageHandlers = {
+            log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg)
+        };
         this._tempMessageHandlers = [];
         this._registeredModules = [];
         this._pendingInterfaceRefreshDeferreds = [];
         this._pendingCommandDeferreds = [];
     }
     EventDispatcher.makeEventDispatcher(NodeConnection.prototype);
+
+    NodeConnection.prototype.getName = function () {
+        return this._nodeProcess.pid;
+    };
 
     /**
      * @type {Object}
