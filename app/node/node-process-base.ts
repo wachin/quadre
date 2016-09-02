@@ -1,8 +1,28 @@
 /* eslint-env node */
 
+import * as ConnectionManager from "../socket-server/connection-manager";
 import DomainManager from "../socket-server/domain-manager";
 
+export interface ConnectionMessage {
+    id: number;
+    domain: string;
+    command?: string;
+    event?: string;
+    parameters?: any[];
+}
+
+// emulate ws for now
+const EventEmitter = require('events');
+const ws = new EventEmitter();
+ConnectionManager.createConnection(ws);
+
 DomainManager.loadDomainModulesFromPaths(["../socket-server/BaseDomain"]);
+
+const log = {
+    error: (msg: string) => {
+        process.send && process.send({ type: "log", level: "error", msg });
+    }
+};
 
 const MessageHandlers: { [type: string]: (obj: any) => void } = {
     "refresh-interface": () => {
@@ -10,6 +30,9 @@ const MessageHandlers: { [type: string]: (obj: any) => void } = {
             type: "refresh-interface-callback",
             spec: DomainManager.getDomainDescriptions()
         });
+    },
+    "message": ({ message }) => {
+        ws.emit("message", message);
     }
 };
 
