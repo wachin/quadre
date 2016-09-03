@@ -280,6 +280,7 @@ define(function (require, exports, module) {
     NodeConnection.prototype.loadDomains = function (paths, autoReload) {
         var deferred = $.Deferred();
         setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
+
         var pathArray = paths;
         if (!Array.isArray(paths)) {
             pathArray = [paths];
@@ -441,22 +442,17 @@ define(function (require, exports, module) {
 
     NodeConnection.prototype._ensureBaseIsLoaded = function () {
         const deferred = $.Deferred();
+        setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
         if (this.connected()) {
             const self = this;
-            let timeout = CONNECTION_TIMEOUT;
-            const step = 10;
             function resolveIfLoaded() {
-                timeout -= step;
-                if (timeout <= 0) {
-                    return deferred.reject("_ensureBaseIsLoaded timed out");
-                }
                 if (self.domains.base && self.domains.base.loadDomainModulesFromPaths) {
                     deferred.resolve();
                 } else {
-                    setTimeout(resolveIfLoaded, step);
+                    setTimeout(resolveIfLoaded, 10);
                 }
             }
-            setTimeout(resolveIfLoaded, step);
+            setTimeout(resolveIfLoaded, 10);
         } else {
             deferred.reject("Attempted to call _ensureBaseIsLoaded when not connected.");
         }
