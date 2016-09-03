@@ -63,7 +63,7 @@ module.exports = function (grunt) {
     
     grunt.registerTask("npm-install-extensions", "Install node_modules for default extensions which have package.json defined", function () {
         var _done = this.async();
-        glob("src/extensions/**/package.json", function (err, files) {
+        glob("src/+(extensibility|extensions|LiveDevelopment)/**/package.json", function (err, files) {
             if (err) {
                 grunt.log.error(err);
                 return _done(false);

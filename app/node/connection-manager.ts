@@ -1,5 +1,4 @@
 import DomainManager from "./domain-manager";
-import * as WebSocket from "ws";
 import { errToMessage, errToString, getLogger } from "../utils";
 
 export interface ConnectionMessage {
