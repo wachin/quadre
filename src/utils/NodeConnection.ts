@@ -64,6 +64,7 @@ define(function (require, exports, module) {
      */
     function NodeConnection() {
         this.domains = {};
+        this.registeredDomains = {};
         this._messageHandlers = {
             log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
             receive: ({ msg }) => this._receive(msg),
@@ -286,6 +287,15 @@ define(function (require, exports, module) {
             pathArray = [paths];
         }
 
+        pathArray.forEach(path => {
+            if (this.registeredDomains[path]) {
+                throw new Error(`Domain path already registered: ${path}`);
+            }
+            this.registeredDomains[path] = {
+                loaded: false
+            };
+        });
+
         if (autoReload) {
             Array.prototype.push.apply(this._registeredModules, pathArray);
         }
@@ -366,12 +376,13 @@ define(function (require, exports, module) {
         switch (m.type) {
         case "event":
             if (m.message.domain === "base" && m.message.event === "newDomains") {
-                this._nodeProcess.send({ type: "refreshInterface" });
+                const newDomainPaths: string[] = m.message.parameters;
+                newDomainPaths.forEach((newDomainPath: string) => {
+                    this.registeredDomains[newDomainPath].loaded = true;
+                });
             }
-
             // Event type "domain:event"
-            EventDispatcher.triggerWithArray(this, m.message.domain + ":" + m.message.event,
-                                             m.message.parameters);
+            EventDispatcher.triggerWithArray(this, m.message.domain + ":" + m.message.event, m.message.parameters);
             break;
         case "commandResponse":
             responseDeferred = this._pendingCommandDeferreds[m.message.id];

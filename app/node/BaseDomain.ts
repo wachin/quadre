@@ -38,7 +38,7 @@ function cmdLoadDomainModulesFromPaths(paths: string[]): boolean {
     if (_domainManager) {
         const success = _domainManager.loadDomainModulesFromPaths(paths);
         if (success) {
-            _domainManager.emitEvent("base", "newDomains");
+            _domainManager.emitEvent("base", "newDomains", paths);
         }
         return success;
     } else {
