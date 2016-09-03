@@ -264,6 +264,7 @@ export const DomainManager = {
                 throw new Error(`domain at ${path} didn't return an object with 'init' property`);
             }
         });
+        this.emitEvent("base", "newDomains", paths);
         return true; // if we fail, an exception will be thrown
     },
 

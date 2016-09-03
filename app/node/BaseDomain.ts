@@ -36,11 +36,7 @@ function cmdRestartNode() {
  */
 function cmdLoadDomainModulesFromPaths(paths: string[]): boolean {
     if (_domainManager) {
-        const success = _domainManager.loadDomainModulesFromPaths(paths);
-        if (success) {
-            _domainManager.emitEvent("base", "newDomains", paths);
-        }
-        return success;
+        return _domainManager.loadDomainModulesFromPaths(paths);
     } else {
         return false;
     }

@@ -58,13 +58,35 @@ define(function (require, exports, module) {
         deferred.always(function () { clearTimeout(timer); });
     }
 
+    function waitFor(condition, delay = CONNECTION_TIMEOUT) {
+        const deferred = $.Deferred();
+        // setup timeout timer
+        const timer = setTimeout(() => {
+            log.warn(`waitFor timed out`);
+            deferred.reject("timeout");
+        }, delay);
+        deferred.always(() => clearTimeout(timer));
+        // periodically check condition
+        function doCheck() {
+            if (condition()) {
+                deferred.resolve();
+            } else {
+                setTimeout(doCheck, 10);
+            }
+        }
+        doCheck();
+        return deferred.promise();
+    }
+
     /**
      * Provides an interface for interacting with the node server.
      * @constructor
      */
     function NodeConnection() {
         this.domains = {};
-        this.registeredDomains = {};
+        this.registeredDomains = {
+            "./BaseDomain": { loaded: false }
+        };
         this._messageHandlers = {
             log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
             receive: ({ msg }) => this._receive(msg),
@@ -238,7 +260,7 @@ define(function (require, exports, module) {
         // refresh the current domains, then re-register any
         // "autoregister" modules
 
-        this._ensureBaseIsLoaded().then(() => {
+        waitFor(() => this.connected() && this.registeredDomains["./BaseDomain"].loaded === true).then(() => {
             if (this._registeredModules.length > 0) {
                 this.loadDomains(this._registeredModules, false).then(success, fail);
             } else {
@@ -315,6 +337,13 @@ define(function (require, exports, module) {
                     deferred.reject("Unable to load one of the modules: " + pathArray + (reason ? ", reason: " + reason : ""));
                 }
             );
+            waitFor(() => {
+                const loadedCount = pathArray
+                    .map(path => this.registeredDomains[path].loaded)
+                    .filter(x => x === true)
+                    .length;
+                return loadedCount === pathArray.length;
+            }).then(deferred.resolve);
         } else {
             deferred.reject("this.domains.base is undefined");
         }
@@ -449,25 +478,6 @@ define(function (require, exports, module) {
                 self.domainEvents[domainKey][eventKey] = parameters;
             });
         });
-    };
-
-    NodeConnection.prototype._ensureBaseIsLoaded = function () {
-        const deferred = $.Deferred();
-        setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
-        if (this.connected()) {
-            const self = this;
-            function resolveIfLoaded() {
-                if (self.domains.base && self.domains.base.loadDomainModulesFromPaths) {
-                    deferred.resolve();
-                } else {
-                    setTimeout(resolveIfLoaded, 10);
-                }
-            }
-            setTimeout(resolveIfLoaded, 10);
-        } else {
-            deferred.reject("Attempted to call _ensureBaseIsLoaded when not connected.");
-        }
-        return deferred.promise();
     };
 
     module.exports = NodeConnection;
