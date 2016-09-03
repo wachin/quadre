@@ -26,6 +26,10 @@ before_build:
   - npm run test
 
 build_script:
-  - npm run publish-win
+  - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
+      npm run publish-win
+    ) ELSE (
+      npm run dist
+    )
 
 test: off
