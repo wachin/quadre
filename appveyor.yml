@@ -15,7 +15,6 @@ install:
   - ps: Install-Product node 6 x64
   - npm -g install npm@latest
   - set PATH=%APPDATA%\npm;%PATH%
-  - set
   - node --version
   - npm --version
   - npm prune
