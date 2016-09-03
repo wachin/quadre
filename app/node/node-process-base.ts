@@ -34,9 +34,9 @@ ConnectionManager.createConnection(ws);
 DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
 
 const MessageHandlers: { [type: string]: (obj: any) => void } = {
-    "refresh-interface": () => {
+    refreshInterface: () => {
         process.send && process.send({
-            type: "refresh-interface-callback",
+            type: "refreshInterface",
             spec: DomainManager.getDomainDescriptions()
         });
     },

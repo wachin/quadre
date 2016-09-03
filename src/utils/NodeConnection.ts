@@ -68,11 +68,10 @@ define(function (require, exports, module) {
         this.domains = {};
         this._messageHandlers = {
             log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
-            receive: ({ msg }) => this._receive(msg)
+            receive: ({ msg }) => this._receive(msg),
+            refreshInterface: ({ spec }) => this.refreshInterfaceCallback(spec)
         };
-        this._tempMessageHandlers = [];
         this._registeredModules = [];
-        this._pendingInterfaceRefreshDeferreds = [];
         this._pendingCommandDeferreds = [];
     }
     EventDispatcher.makeEventDispatcher(NodeConnection.prototype);
@@ -134,14 +133,6 @@ define(function (require, exports, module) {
     /**
      * @private
      * @type {Array.<jQuery.Deferred>}
-     * List of deferred objects that should be resolved pending
-     * a successful refresh of the API
-     */
-    NodeConnection.prototype._pendingInterfaceRefreshDeferreds = null;
-
-    /**
-     * @private
-     * @type {Array.<jQuery.Deferred>}
      * Array (indexed on command ID) of deferred objects that should be
      * resolved/rejected with the response of commands.
      */
@@ -179,12 +170,10 @@ define(function (require, exports, module) {
                 this._ws.close();
             } catch (e) { }
         }
-        var failedDeferreds = this._pendingInterfaceRefreshDeferreds
-            .concat(this._pendingCommandDeferreds);
+        var failedDeferreds = this._pendingCommandDeferreds;
         failedDeferreds.forEach(function (d) {
             d.reject("cleanup");
         });
-        this._pendingInterfaceRefreshDeferreds = [];
         this._pendingCommandDeferreds = [];
 
         if (this._nodeProcess) {
@@ -224,14 +213,6 @@ define(function (require, exports, module) {
                 this._messageHandlers[type](obj);
                 return;
             }
-            
-            const temp = this._tempMessageHandlers.find(x => x.type === type);
-            if (temp) {                
-                this._tempMessageHandlers.splice(this._tempMessageHandlers.indexOf(temp), 1);
-                temp.handler(obj);
-                return;
-            }
-            
             log.warn(`unhandled message: ${JSON.stringify(obj)}`);
         });
 
@@ -257,13 +238,15 @@ define(function (require, exports, module) {
 
         // refresh the current domains, then re-register any
         // "autoregister" modules
-        this._refreshInterface().then(() => {
-            if (this._registeredModules.length > 0) {
-                this.loadDomains(this._registeredModules, false).then(success, fail);
-            } else {
-                success();
-            }
-        }, fail);
+
+        // TODO: we shouldn't have to call this
+        this._nodeProcess.send({ type: "refreshInterface" });
+
+        if (this._registeredModules.length > 0) {
+            this.loadDomains(this._registeredModules, false).then(success, fail);
+        } else {
+            success();
+        }
 
         return deferred.promise();
     };
@@ -324,8 +307,6 @@ define(function (require, exports, module) {
                     deferred.reject("Unable to load one of the modules: " + pathArray + (reason ? ", reason: " + reason : ""));
                 }
             );
-
-            this._pendingInterfaceRefreshDeferreds.push(deferred);
         } else {
             deferred.reject("this.domains.base is undefined");
         }
@@ -387,7 +368,7 @@ define(function (require, exports, module) {
         switch (m.type) {
         case "event":
             if (m.message.domain === "base" && m.message.event === "newDomains") {
-                this._refreshInterface();
+                this._nodeProcess.send({ type: "refreshInterface" });
             }
 
             // Event type "domain:event"
@@ -426,6 +407,43 @@ define(function (require, exports, module) {
         }
     };
 
+    NodeConnection.prototype.refreshInterfaceCallback = function (spec) {
+        function makeCommandFunction(domainName, commandName) {
+            return function () {
+                var deferred = $.Deferred();
+                var parameters = Array.prototype.slice.call(arguments, 0);
+                var id = self._getNextCommandID();
+                self._pendingCommandDeferreds[id] = deferred;
+                self._send({
+                    id: id,
+                    domain: domainName,
+                    command: commandName,
+                    parameters: parameters
+                });
+                return deferred;
+            };
+        }
+
+        // TODO: Don't replace the domain object every time. Instead, merge.
+        self.domains = {};
+        self.domainEvents = {};
+        Object.keys(spec).forEach(function (domainKey) {
+            var domainSpec = spec[domainKey];
+            self.domains[domainKey] = {};
+            Object.keys(domainSpec.commands).forEach(function (commandKey) {
+                var commandSpec = domainSpec.commands[commandKey];
+                self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
+            });
+            self.domainEvents[domainKey] = {};
+            Object.keys(domainSpec.events).forEach(function (eventKey) {
+                var eventSpec = domainSpec.events[eventKey];
+                var parameters = eventSpec.parameters;
+                self.domainEvents[domainKey][eventKey] = parameters;
+            });
+        });
+        deferred.resolve();
+    };
+
     /**
      * @private
      * Helper function for refreshing the interface in the "domain" property.
@@ -434,66 +452,13 @@ define(function (require, exports, module) {
      */
     NodeConnection.prototype._refreshInterface = function () {
         var deferred = $.Deferred();
-        var self = this;
-
-        var pendingDeferreds = this._pendingInterfaceRefreshDeferreds;
-        this._pendingInterfaceRefreshDeferreds = [];
-        deferred.then(
-            function () {
-                pendingDeferreds.forEach(function (d) { d.resolve(); });
-            },
-            function (err) {
-                pendingDeferreds.forEach(function (d) { d.reject(err); });
-            }
-        );
-
-        function refreshInterfaceCallback(spec) {
-            function makeCommandFunction(domainName, commandName) {
-                return function () {
-                    var deferred = $.Deferred();
-                    var parameters = Array.prototype.slice.call(arguments, 0);
-                    var id = self._getNextCommandID();
-                    self._pendingCommandDeferreds[id] = deferred;
-                    self._send({
-                        id: id,
-                        domain: domainName,
-                        command: commandName,
-                        parameters: parameters
-                    });
-                    return deferred;
-                };
-            }
-
-            // TODO: Don't replace the domain object every time. Instead, merge.
-            self.domains = {};
-            self.domainEvents = {};
-            Object.keys(spec).forEach(function (domainKey) {
-                var domainSpec = spec[domainKey];
-                self.domains[domainKey] = {};
-                Object.keys(domainSpec.commands).forEach(function (commandKey) {
-                    var commandSpec = domainSpec.commands[commandKey];
-                    self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
-                });
-                self.domainEvents[domainKey] = {};
-                Object.keys(domainSpec.events).forEach(function (eventKey) {
-                    var eventSpec = domainSpec.events[eventKey];
-                    var parameters = eventSpec.parameters;
-                    self.domainEvents[domainKey][eventKey] = parameters;
-                });
-            });
-            deferred.resolve();
-        }
-
         if (this.connected()) {
-            this._tempMessageHandlers.push({
-                type: "refresh-interface-callback",
-                handler: ({ spec }) => refreshInterfaceCallback(spec)
-            });
-            this._nodeProcess.send({ type: "refresh-interface" });
+            // TODO: we shouldn't have to call this, it should send message automatically
+            this._nodeProcess.send({ type: "refreshInterface" });
+            deferred.resolve();
         } else {
             deferred.reject("Attempted to call _refreshInterface when not connected.");
         }
-
         return deferred.promise();
     };
 
