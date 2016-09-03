@@ -85,6 +85,10 @@ export const DomainManager = {
                 commands: {},
                 events: {}
             };
+            process.send && process.send({
+                type: "refreshInterface",
+                spec: this.getDomainDescriptions()
+            });
         } else {
             console.error("[DomainManager] Domain " + domainName + " already registered");
         }
@@ -129,6 +133,10 @@ export const DomainManager = {
                 parameters: parameters,
                 returns: returns
             };
+            process.send && process.send({
+                type: "refreshInterface",
+                spec: this.getDomainDescriptions()
+            });
         } else {
             throw new Error("Command " + domainName + "." +
                 commandName + " already registered");
@@ -198,6 +206,10 @@ export const DomainManager = {
             _domains[domainName].events[eventName] = {
                 parameters: parameters
             };
+            process.send && process.send({
+                type: "refreshInterface",
+                spec: this.getDomainDescriptions()
+            });
         } else {
             console.error("[DomainManager] Event " + domainName + "." +
                 eventName + " already registered");

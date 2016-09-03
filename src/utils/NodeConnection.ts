@@ -237,14 +237,13 @@ define(function (require, exports, module) {
         // refresh the current domains, then re-register any
         // "autoregister" modules
 
-        // TODO: we shouldn't have to call this
-        this._nodeProcess.send({ type: "refreshInterface" });
-
-        if (this._registeredModules.length > 0) {
-            this.loadDomains(this._registeredModules, false).then(success, fail);
-        } else {
-            success();
-        }
+        this._ensureBaseIsLoaded().then(() => {
+            if (this._registeredModules.length > 0) {
+                this.loadDomains(this._registeredModules, false).then(success, fail);
+            } else {
+                success();
+            }
+        });
 
         return deferred.promise();
     };
@@ -440,20 +439,19 @@ define(function (require, exports, module) {
         });
     };
 
-    /**
-     * @private
-     * Helper function for refreshing the interface in the "domain" property.
-     * Automatically called when the connection receives a base:newDomains
-     * event from the server, and also called at connection time.
-     */
-    NodeConnection.prototype._refreshInterface = function () {
-        var deferred = $.Deferred();
+    NodeConnection.prototype._ensureBaseIsLoaded = function () {
+        const deferred = $.Deferred();
         if (this.connected()) {
-            // TODO: we shouldn't have to call this, it should send message automatically
-            this._nodeProcess.send({ type: "refreshInterface" });
-            deferred.resolve();
+            function resolveIfLoaded() {
+                if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
+                    deferred.resolve();
+                } else {
+                    setTimeout(resolveIfLoaded, 1);
+                }
+            }
+            setTimeout(resolveIfLoaded, 1);
         } else {
-            deferred.reject("Attempted to call _refreshInterface when not connected.");
+            deferred.reject("Attempted to call _ensureBaseIsLoaded when not connected.");
         }
         return deferred.promise();
     };
