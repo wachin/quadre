@@ -23,8 +23,6 @@
 
 import * as lodash from "lodash";
 
-declare const brackets: any;
-
 /**
  *  Utilities functions for displaying update notifications
  *
@@ -34,6 +32,9 @@ define(function (require, exports, module) {
     const _: typeof lodash = node.require("lodash");
     const getLogger = node.require("./utils").getLogger;
     const log = getLogger("UpdateNotification");
+
+    const brackets = (window as any).brackets;
+    const electron = (window as any).electron;
 
     const Dialogs              = require("widgets/Dialogs");
     const DefaultDialogs       = require("widgets/DefaultDialogs");
@@ -134,7 +135,7 @@ define(function (require, exports, module) {
         // Last time the versionInfoURL was fetched
         let lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
 
-        const result = new $.Deferred();
+        const result = $.Deferred();
         let fetchData = false;
         let data;
 
@@ -291,7 +292,7 @@ define(function (require, exports, module) {
         // the update notification icon and saving prefs).
         let oldValues;
         let usingOverrides = false; // true if any of the values are overridden.
-        const result = new $.Deferred();
+        const result = $.Deferred();
         let versionInfoUrl;
 
         if (_testValues) {
@@ -316,7 +317,7 @@ define(function (require, exports, module) {
         }
 
         _getUpdateInformation(force || usingOverrides, usingOverrides, versionInfoUrl)
-            .done(function (allUpdates) {
+            .done(function (allUpdates: Array<any> = []) {
 
                 const semver = node.require("semver");
                 const currentVersion = node.require("./package.json").version;

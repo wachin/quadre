@@ -21,8 +21,6 @@
  *
  */
 
-declare const brackets: any;
-
 define(function (require, exports, module) {
     "use strict";
 
@@ -355,7 +353,7 @@ define(function (require, exports, module) {
      * @param {WebSocket.Message} message Message object from WebSocket
      */
     NodeConnection.prototype._receive = function (messageString) {
-        var responseDeferred = null;
+        var responseDeferred: JQueryDeferred<any> | null = null;
         var m;
 
         try {
@@ -408,6 +406,8 @@ define(function (require, exports, module) {
     };
 
     NodeConnection.prototype.refreshInterfaceCallback = function (spec) {
+        const self = this;
+        // TODO: move to prototype
         function makeCommandFunction(domainName, commandName) {
             return function () {
                 var deferred = $.Deferred();
@@ -423,15 +423,12 @@ define(function (require, exports, module) {
                 return deferred;
             };
         }
-
-        // TODO: Don't replace the domain object every time. Instead, merge.
         self.domains = {};
         self.domainEvents = {};
         Object.keys(spec).forEach(function (domainKey) {
             var domainSpec = spec[domainKey];
             self.domains[domainKey] = {};
             Object.keys(domainSpec.commands).forEach(function (commandKey) {
-                var commandSpec = domainSpec.commands[commandKey];
                 self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
             });
             self.domainEvents[domainKey] = {};
@@ -441,7 +438,6 @@ define(function (require, exports, module) {
                 self.domainEvents[domainKey][eventKey] = parameters;
             });
         });
-        deferred.resolve();
     };
 
     /**
@@ -460,15 +456,6 @@ define(function (require, exports, module) {
             deferred.reject("Attempted to call _refreshInterface when not connected.");
         }
         return deferred.promise();
-    };
-
-    /**
-     * @private
-     * Get the default timeout value
-     * @return {number} Timeout value in milliseconds
-     */
-    NodeConnection._getConnectionTimeout = function () {
-        return CONNECTION_TIMEOUT;
     };
 
     module.exports = NodeConnection;

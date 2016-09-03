@@ -21,9 +21,6 @@
  *
  */
 
-declare const $: any;
-declare const electron: any;
-
  /**
   * This is JavaScript API exposed to the native shell when Brackets is run in a native shell rather than a browser.
   */
@@ -34,6 +31,7 @@ define(function (require, exports, module) {
     const AppInit        = require("utils/AppInit");
     const CommandManager = require("command/CommandManager");
     const Commands       = require("command/Commands");
+    const electron       = (window as any).electron;
 
     let appReady = false; // Set to true after app is fully initialized
 
