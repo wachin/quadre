@@ -442,8 +442,9 @@ define(function (require, exports, module) {
     NodeConnection.prototype._ensureBaseIsLoaded = function () {
         const deferred = $.Deferred();
         if (this.connected()) {
+            var self = this;
             function resolveIfLoaded() {
-                if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
+                if (self.domains.base && self.domains.base.loadDomainModulesFromPaths) {
                     deferred.resolve();
                 } else {
                     setTimeout(resolveIfLoaded, 1);
