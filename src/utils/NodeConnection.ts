@@ -146,7 +146,7 @@ define((require, exports, module) => {
 
         // Start the connection process
         this._cleanup();
-        const nodeProcessPath = node.require.resolve("./node/node-process-base.js");
+        const nodeProcessPath = node.require.resolve("./node-process/base.js");
         this._nodeProcess = fork(nodeProcessPath);
         this._nodeProcess.on("message", (obj) => {
             const type: string = obj.type;
