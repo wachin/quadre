@@ -1,23 +1,8 @@
 /* eslint-env node */
 
+import { log } from "./logging";
 import * as ConnectionManager from "./connection-manager";
 import DomainManager from "./domain-manager";
-
-// logger
-const log = {
-    info: (msg: string) => {
-        process.send && process.send({ type: "log", level: "info", msg });
-    },
-    warn: (msg: string) => {
-        process.send && process.send({ type: "log", level: "warn", msg });
-    },
-    error: (msg: string) => {
-        process.send && process.send({ type: "log", level: "error", msg });
-    }
-};
-console.log = (...args: any[]) => log.info(args.join(" "));
-console.warn = (...args: any[]) => log.warn(args.join(" "));
-console.error = (...args: any[]) => log.error(args.join(" "));
 
 // emulate ws for now
 const EventEmitter = require("events");
