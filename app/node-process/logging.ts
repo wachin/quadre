@@ -12,5 +12,6 @@ export const log = {
     }
 };
 console.log = (...args: any[]) => log.info(args.join(" "));
+console.info = (...args: any[]) => log.info(args.join(" "));
 console.warn = (...args: any[]) => log.warn(args.join(" "));
 console.error = (...args: any[]) => log.error(args.join(" "));
