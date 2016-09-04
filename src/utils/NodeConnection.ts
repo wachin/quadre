@@ -1,61 +1,18 @@
-/*
- * Copyright (c) 2013 - present Adobe Systems Incorporated. All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- *
- */
-
-define(function (require, exports, module) {
+define((require, exports, module) => {
     "use strict";
 
-    var EventDispatcher = require("utils/EventDispatcher");
-    var fork            = node.require("child_process").fork;
-    var getLogger       = node.require("./utils").getLogger;
-    var log             = getLogger("node-connection");
+    const EventDispatcher = require("utils/EventDispatcher");
+    const fork            = node.require("child_process").fork;
+    const getLogger       = node.require("./utils").getLogger;
+    const path            = node.require("path");
+    const log             = getLogger("node-connection");
 
-    /**
-     * Milliseconds to wait before a particular connection attempt is considered failed.
-     * NOTE: It's okay for the connection timeout to be long because the
-     * expected behavior of WebSockets is to send a "close" event as soon
-     * as they realize they can't connect. So, we should rarely hit the
-     * connection timeout even if we try to connect to a port that isn't open.
-     * @type {number}
-     */
-    var CONNECTION_TIMEOUT  = 10000; // 10 seconds
+    const CONNECTION_TIMEOUT = 10000; // 10 seconds
+    const MAX_COUNTER_VALUE = 4294967295; // 2^32 - 1
 
-    /**
-     * Maximum value of the command ID counter
-     * @type  {number}
-     */
-    var MAX_COUNTER_VALUE = 4294967295; // 2^32 - 1
-
-    /**
-     * @private
-     * Helper function to auto-reject a deferred after a given amount of time.
-     * If the deferred is resolved/rejected manually, then the timeout is
-     * automatically cleared.
-     */
     function setDeferredTimeout(deferred, delay) {
-        var timer = setTimeout(function () {
-            deferred.reject("timeout");
-        }, delay);
-        deferred.always(function () { clearTimeout(timer); });
+        const timer = setTimeout(() => deferred.reject("timeout"), delay);
+        deferred.always(() => clearTimeout(timer));
     }
 
     function waitFor(condition, delay = CONNECTION_TIMEOUT) {
@@ -68,60 +25,53 @@ define(function (require, exports, module) {
         deferred.always(() => clearTimeout(timer));
         // periodically check condition
         function doCheck() {
-            if (condition()) {
-                deferred.resolve();
-            } else {
-                setTimeout(doCheck, 10);
-            }
+            return condition() ? deferred.resolve() : setTimeout(doCheck, 10);
         }
         doCheck();
         return deferred.promise();
     }
 
-    /**
-     * Provides an interface for interacting with the node server.
-     * @constructor
-     */
+    // TODO: refactor to class
     function NodeConnection() {
         this.domains = {};
         this.registeredDomains = {
+            // TODO: remove BaseDomain concept
             "./BaseDomain": { loaded: false }
         };
+        this._nodeProcess = null;
+        this._pendingCommandDeferreds = [];
         this._messageHandlers = {
             log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
             receive: ({ msg }) => this._receive(msg),
             refreshInterface: ({ spec }) => this.refreshInterfaceCallback(spec)
         };
-        this._registeredModules = [];
-        this._pendingCommandDeferreds = [];
     }
     EventDispatcher.makeEventDispatcher(NodeConnection.prototype);
 
     NodeConnection.prototype.getName = function () {
-        return this._nodeProcess.pid;
+        const domainPaths = Object.keys(this.registeredDomains);
+        return domainPaths.length > 1 ?
+            domainPaths.map(p => path.basename(p)).join(",") :
+            this._nodeProcess.pid;
     };
 
-    /**
-     * @type {Object}
-     * Exposes the domains registered with the server. This object will
-     * have a property for each registered domain. Each of those properties
-     * will be an object containing properties for all the commands in that
-     * domain. So, myConnection.base.enableDebugger would point to the function
-     * to call to enable the debugger.
-     *
-     * This object is automatically replaced every time the API changes (based
-     * on the base:newDomains event from the server). Therefore, code that
-     * uses this object should not keep their own pointer to the domain property.
-     */
-    NodeConnection.prototype.domains = null;
+    NodeConnection.prototype._cleanup = function () {
+        // shut down the old process if there is one
+        if (this._nodeProcess) {
+            try {
+                this._nodeProcess.kill();
+            } finally {
+                this._nodeProcess = null;
+            }
+        }
 
-    /**
-     * @private
-     * @type {Array.<string>}
-     * List of module pathnames that should be re-registered if there is
-     * a disconnection/connection (i.e. if the server died).
-     */
-    NodeConnection.prototype._registeredModules = null;
+        // clear out the domains, since we may get different ones on the next connection
+        this.domains = {};
+
+        // reject all the commands that are to be resolved
+        this._pendingCommandDeferreds.forEach((d) => d.reject("cleanup"));
+        this._pendingCommandDeferreds = [];
+    };
 
     /**
      * @private
@@ -177,36 +127,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @private
-     * Helper function to do cleanup work when a connection fails
-     */
-    NodeConnection.prototype._cleanup = function () {
-        // clear out the domains, since we may get different ones
-        // on the next connection
-        this.domains = {};
-
-        // shut down the old connection if there is one
-        if (this._ws && this._ws.readyState !== WebSocket.CLOSED) {
-            try {
-                this._ws.close();
-            } catch (e) { }
-        }
-        var failedDeferreds = this._pendingCommandDeferreds;
-        failedDeferreds.forEach(function (d) {
-            d.reject("cleanup");
-        });
-        this._pendingCommandDeferreds = [];
-
-        if (this._nodeProcess) {
-            try {
-                this._nodeProcess.kill();
-            } finally {
-                this._nodeProcess = null;
-            }
-        }
-    };
-
-    /**
      * Connect to the node server. After connecting, the NodeConnection
      * object will trigger a "close" event when the underlying socket
      * is closed. If the connection is set to autoReconnect, then the
@@ -222,14 +142,14 @@ define(function (require, exports, module) {
      */
     NodeConnection.prototype.connect = function (autoReconnect) {
         this._autoReconnect = autoReconnect;
-        var deferred = $.Deferred();
+        const deferred = $.Deferred();
 
         // Start the connection process
         this._cleanup();
         const nodeProcessPath = node.require.resolve("./node/node-process-base.js");
         this._nodeProcess = fork(nodeProcessPath);
-        this._nodeProcess.on('message', (obj) => {            
-            const type: string = obj.type;            
+        this._nodeProcess.on("message", (obj) => {
+            const type: string = obj.type;
             if (this._messageHandlers[type]) {
                 this._messageHandlers[type](obj);
                 return;
@@ -240,11 +160,10 @@ define(function (require, exports, module) {
         // Called if we succeed at the final setup
         const success = () => {
             this._nodeProcess.on("disconnect", () => {
+                this._cleanup();
                 if (this._autoReconnect) {
-                    var $promise = this.connect(true);
-                    this.trigger("close", $promise);
+                    this.trigger("close", this.connect(true));
                 } else {
-                    this._cleanup();
                     this.trigger("close");
                 }
             });
@@ -260,12 +179,13 @@ define(function (require, exports, module) {
         // refresh the current domains, then re-register any
         // "autoregister" modules
 
+        // TODO: we shouldn't need to wait for BaseDomain, remove the concept
         waitFor(() => this.connected() && this.registeredDomains["./BaseDomain"].loaded === true).then(() => {
-            if (this._registeredModules.length > 0) {
-                this.loadDomains(this._registeredModules, false).then(success, fail);
-            } else {
+            const toReload = Object.keys(this.registeredDomains)
+                .filter(path => this.registeredDomains[path].autoReload === true);
+            return toReload.length > 0 ?
+                this._loadDomains(toReload).then(success, fail) :
                 success();
-            }
         });
 
         return deferred.promise();
@@ -290,38 +210,11 @@ define(function (require, exports, module) {
         this._cleanup();
     };
 
-    /**
-     * Load domains into the server by path
-     * @param {Array.<string>} List of absolute paths to load
-     * @param {boolean} autoReload Whether to auto-reload the domains if the server
-     *    fails and restarts. Note that the reload is initiated by the
-     *    client, so it will only happen after the client reconnects.
-     * @return {jQuery.Promise} Promise that resolves after the load has
-     *    succeeded and the new API is availale at NodeConnection.domains,
-     *    or that rejects on failure.
-     */
-    NodeConnection.prototype.loadDomains = function (paths, autoReload) {
+    NodeConnection.prototype._loadDomains = function (pathArray) {
         var deferred = $.Deferred();
         setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
 
-        var pathArray = paths;
-        if (!Array.isArray(paths)) {
-            pathArray = [paths];
-        }
-
-        pathArray.forEach(path => {
-            if (this.registeredDomains[path]) {
-                throw new Error(`Domain path already registered: ${path}`);
-            }
-            this.registeredDomains[path] = {
-                loaded: false
-            };
-        });
-
-        if (autoReload) {
-            Array.prototype.push.apply(this._registeredModules, pathArray);
-        }
-
+        // TODO: shouldn't need this, should call _loadDomains
         if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
             this.domains.base.loadDomainModulesFromPaths(pathArray).then(
                 function (success) { // command call succeeded
@@ -349,6 +242,22 @@ define(function (require, exports, module) {
         }
 
         return deferred.promise();
+    };
+
+    NodeConnection.prototype.loadDomains = function (paths: string | Array<string>, autoReload: boolean) {
+        const pathArray: Array<string> = Array.isArray(paths) ? paths : [paths];
+
+        pathArray.forEach(path => {
+            if (this.registeredDomains[path]) {
+                throw new Error(`Domain path already registered: ${path}`);
+            }
+            this.registeredDomains[path] = {
+                loaded: false,
+                autoReload
+            };
+        });
+
+        return this._loadDomains(pathArray);
     };
 
     /**
