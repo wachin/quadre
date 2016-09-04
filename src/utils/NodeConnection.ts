@@ -10,19 +10,14 @@ define((require, exports, module) => {
     const CONNECTION_TIMEOUT = 10000; // 10 seconds
     const MAX_COUNTER_VALUE = 4294967295; // 2^32 - 1
 
-    function setDeferredTimeout(deferred, delay) {
+    function setDeferredTimeout(deferred, delay = CONNECTION_TIMEOUT) {
         const timer = setTimeout(() => deferred.reject("timeout"), delay);
         deferred.always(() => clearTimeout(timer));
     }
 
     function waitFor(condition, delay = CONNECTION_TIMEOUT) {
         const deferred = $.Deferred();
-        // setup timeout timer
-        const timer = setTimeout(() => {
-            log.warn(`waitFor timed out`);
-            deferred.reject("timeout");
-        }, delay);
-        deferred.always(() => clearTimeout(timer));
+        setDeferredTimeout(deferred, delay);
         // periodically check condition
         function doCheck() {
             return condition() ? deferred.resolve() : setTimeout(doCheck, 10);
@@ -31,21 +26,27 @@ define((require, exports, module) => {
         return deferred.promise();
     }
 
-    // TODO: refactor to class
-    function NodeConnection() {
-        this.domains = {};
-        this.registeredDomains = {
-            // TODO: remove BaseDomain concept
-            "./BaseDomain": { loaded: false }
-        };
-        this._nodeProcess = null;
-        this._pendingCommandDeferreds = [];
-        this._messageHandlers = {
-            log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
-            receive: ({ msg }) => this._receive(msg),
-            refreshInterface: ({ spec }) => this.refreshInterfaceCallback(spec)
-        };
+    class NodeConnection {
+
+        private domains: any; // TODO: better define structure // TODO: underscore
+        private registeredDomains: { [domainPath: string]: { loaded: boolean } }; // TODO: underscore
+        private _nodeProcess: any; // TODO: ChildProcess;
+        private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
+
+        constructor() {
+
+            this.domains = {};
+            this.registeredDomains = {
+                // TODO: remove BaseDomain concept
+                "./BaseDomain": { loaded: false }
+            };
+            this._nodeProcess = null;
+            this._pendingCommandDeferreds = [];
+
+        }
+
     }
+
     EventDispatcher.makeEventDispatcher(NodeConnection.prototype);
 
     NodeConnection.prototype.getName = function () {
@@ -149,12 +150,20 @@ define((require, exports, module) => {
         const nodeProcessPath = node.require.resolve("./node-process/base.js");
         this._nodeProcess = fork(nodeProcessPath);
         this._nodeProcess.on("message", (obj) => {
+
+            // TODO: rewrite all of this
             const type: string = obj.type;
-            if (this._messageHandlers[type]) {
-                this._messageHandlers[type](obj);
+            const _messageHandlers = {
+                log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
+                receive: ({ msg }) => this._receive(msg),
+                refreshInterface: ({ spec }) => this.refreshInterfaceCallback(spec)
+            };
+            if (_messageHandlers[type]) {
+                _messageHandlers[type](obj);
                 return;
             }
             log.warn(`unhandled message: ${JSON.stringify(obj)}`);
+
         });
 
         // Called if we succeed at the final setup
