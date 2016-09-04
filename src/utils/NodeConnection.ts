@@ -1,3 +1,5 @@
+import * as cp from "child_process";
+
 define((require, exports, module) => {
     "use strict";
 
@@ -30,7 +32,7 @@ define((require, exports, module) => {
 
         private domains: any; // TODO: better define structure // TODO: underscore
         private registeredDomains: { [domainPath: string]: { loaded: boolean } }; // TODO: underscore
-        private _nodeProcess: any; // TODO: ChildProcess;
+        private _nodeProcess: cp.ChildProcess | null;
         private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
 
         constructor() {

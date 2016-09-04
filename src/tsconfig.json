@@ -16,6 +16,7 @@
         "strictNullChecks": true
     },
     "include": [
-        "./**/*"
+        "./**/*",
+        "../node_modules/@types/**/*"
     ]
 }

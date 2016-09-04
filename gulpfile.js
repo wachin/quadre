@@ -27,7 +27,7 @@ gulp.task('sync-tsconfigs', () => {
             noImplicitAny: false,
             noImplicitReturns: false
         },
-        include: ['./**/*']
+        include: ['./**/*', '../node_modules/@types/**/*']
     }, tsconfigJSON), null, 4) + '\n');
 });
 
