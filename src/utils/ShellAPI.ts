@@ -13,7 +13,7 @@ define(function (require, exports, module) {
      * The native function BracketsShellAPI::DispatchBracketsJSCommand calls this function in order to enable
      * calling Brackets commands from the native shell.
      */
-    electron.ipcRenderer.on("executeCommand", function (evt, eventName) {
+    electron.ipcRenderer.on("executeCommand", function (evt: any, eventName: string) {
         // Temporary fix for #2616 - don't execute the command if a modal dialog is open.
         // This should really be fixed with proper menu enabling.
         if ($(".modal.instance").length || !appReady) {
@@ -32,11 +32,11 @@ define(function (require, exports, module) {
         return (promise && promise.state() === "rejected") ? false : true;
     });
 
-    electron.ipcRenderer.on("console-msg", function (evt, method, ...args) {
-        console[method]("[shell]", ...args);
+    electron.ipcRenderer.on("console-msg", function (evt: any, method: string, ...args: string[]) {
+        (console as any)[method]("[shell]", ...args);
     });
 
-    electron.ipcRenderer.on("notify", function (evt, title, message) {
+    electron.ipcRenderer.on("notify", function (evt: any, title: string, message: string) {
         window.alert(`${title}\n\n${message}`);
     });
 

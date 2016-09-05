@@ -1,5 +1,8 @@
+/* eslint-disable */
+
 // needed for requirejs modules
-declare const define: any;
+type RequireJSModuleDefinition = (require: any, exports: any, module: any) => void;
+declare const define: (fn: RequireJSModuleDefinition) => void;
 
 // these are globals from /app/preload.ts
 declare const appshell: any;

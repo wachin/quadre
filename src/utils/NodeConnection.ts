@@ -1,4 +1,6 @@
 import * as cp from "child_process";
+import NodeConnectionMessage from "../types/NodeConnectionMessage";
+import NodeConnectionInterfaceSpec from "../types/NodeConnectionInterfaceSpec";
 
 define((require, exports, module) => {
 
@@ -11,12 +13,12 @@ define((require, exports, module) => {
     const CONNECTION_TIMEOUT = 10000; // 10 seconds
     const MAX_COUNTER_VALUE = 4294967295; // 2^32 - 1
 
-    function setDeferredTimeout(deferred, delay = CONNECTION_TIMEOUT) {
+    function setDeferredTimeout(deferred: JQueryDeferred<any>, delay = CONNECTION_TIMEOUT) {
         const timer = setTimeout(() => deferred.reject("timeout"), delay);
         deferred.always(() => clearTimeout(timer));
     }
 
-    function waitFor(condition, delay = CONNECTION_TIMEOUT) {
+    function waitFor(condition: Function, delay = CONNECTION_TIMEOUT) {
         const deferred = $.Deferred();
         setDeferredTimeout(deferred, delay);
         // periodically check condition
@@ -30,10 +32,10 @@ define((require, exports, module) => {
     class NodeConnection {
 
         /* eslint-disable */
+        public domains: any; // TODO: better define structure
+        public domainEvents: any; // TODO: better define structure
         private _autoReconnect: boolean;
         private _commandCount: number;
-        private _domains: any; // TODO: better define structure
-        private _domainEvents: any; // TODO: better define structure
         private _name: string;
         private _nodeProcess: cp.ChildProcess | null;
         private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
@@ -45,8 +47,8 @@ define((require, exports, module) => {
 
         constructor() {
 
-            this._domains = {};
-            this._domainEvents = {};
+            this.domains = {};
+            this.domainEvents = {};
             this._registeredDomains = {
                 // TODO: remove BaseDomain concept
                 "./BaseDomain": { loaded: false, autoReload: false }
@@ -63,7 +65,7 @@ define((require, exports, module) => {
             return this._name;
         }
 
-        public connect(autoReconnect) {
+        public connect(autoReconnect: boolean = false) {
             this._autoReconnect = autoReconnect;
             const deferred = $.Deferred();
 
@@ -77,20 +79,22 @@ define((require, exports, module) => {
                 throw new Error(`Unable to fork ${nodeProcessPath}`);
             }
 
-            this._nodeProcess.on("message", (obj) => {
+            this._nodeProcess.on("message", (obj: any) => {
 
-                // TODO: rewrite all of this
-                const type: string = obj.type;
-                const _messageHandlers = {
-                    log: ({ level, msg }) => log[level](`[node-process-${this.getName()}]`, msg),
-                    receive: ({ msg }) => this._receive(msg),
-                    refreshInterface: ({ spec }) => this._refreshInterfaceCallback(spec)
-                };
-                if (_messageHandlers[type]) {
-                    _messageHandlers[type](obj);
-                    return;
+                const _type: string = obj.type;
+                switch (_type) {
+                    case "log":
+                        log[obj.level](`[node-process-${this.getName()}]`, obj.msg);
+                        break;
+                    case "receive":
+                        this._receive(obj.msg);
+                        break;
+                    case "refreshInterface":
+                        this._refreshInterfaceCallback(obj.spec);
+                        break;
+                    default:
+                        log.warn(`unhandled message: ${JSON.stringify(obj)}`);
                 }
-                log.warn(`unhandled message: ${JSON.stringify(obj)}`);
 
             });
 
@@ -111,7 +115,7 @@ define((require, exports, module) => {
             };
 
             // Called if we fail at the final setup
-            const fail = (err) => {
+            const fail = (err: Error) => {
                 this._cleanup();
                 deferred.reject(err);
             };
@@ -180,7 +184,7 @@ define((require, exports, module) => {
             }
 
             // clear out the domains, since we may get different ones on the next connection
-            this._domains = {};
+            this.domains = {};
 
             // reject all the commands that are to be resolved
             this._pendingCommandDeferreds.forEach((d) => d.reject("cleanup"));
@@ -189,20 +193,20 @@ define((require, exports, module) => {
             this._refreshName();
         }
 
-        private _getNextCommandID() {
+        private _getNextCommandID(): number {
             return this._commandCount > MAX_COUNTER_VALUE ?
                 this._commandCount = 0 :
                 this._commandCount++;
         }
 
-        private _loadDomains(pathArray) {
+        private _loadDomains(pathArray: string[]) {
             const deferred = $.Deferred();
             setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
 
             // TODO: shouldn't need this, should call _loadDomains
-            if (this._domains.base && this._domains.base.loadDomainModulesFromPaths) {
-                this._domains.base.loadDomainModulesFromPaths(pathArray).then(
-                    function (success) { // command call succeeded
+            if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
+                this.domains.base.loadDomainModulesFromPaths(pathArray).then(
+                    function (success: boolean) { // command call succeeded
                         if (!success) {
                             // response from commmand call was "false" so we know
                             // the actual load failed.
@@ -211,7 +215,7 @@ define((require, exports, module) => {
                         // if the load succeeded, we wait for the API refresh to
                         // resolve the deferred.
                     },
-                    function (reason) { // command call failed
+                    function (reason: string) { // command call failed
                         deferred.reject(
                             "Unable to load one of the modules: " + pathArray + (reason ? ", reason: " + reason : "")
                         );
@@ -225,13 +229,13 @@ define((require, exports, module) => {
                     return loadedCount === pathArray.length;
                 }).then(deferred.resolve);
             } else {
-                deferred.reject("this._domains.base is undefined");
+                deferred.reject("this.domains.base is undefined");
             }
 
             return deferred.promise();
         }
 
-        private _send(m) {
+        private _send(m: NodeConnectionMessage) {
             if (this._nodeProcess && this.connected()) {
 
                 // Convert the message to a string
@@ -259,66 +263,67 @@ define((require, exports, module) => {
             }
         }
 
-        private _receive(messageString) {
+        private _receive(messageString: string) {
             let responseDeferred: JQueryDeferred<any> | null = null;
-            let m;
+            let ipcMessage: any;
 
             try {
-                m = JSON.parse(messageString);
+                ipcMessage = JSON.parse(messageString);
             } catch (err) {
                 console.error("[NodeConnection] received malformed message", messageString, err.message);
                 return;
             }
 
-            switch (m.type) {
+            const message: NodeConnectionMessage = ipcMessage.message;
+
+            switch (ipcMessage.type) {
                 case "event":
-                    if (m.message.domain === "base" && m.message.event === "newDomains") {
-                        const newDomainPaths: string[] = m.message.parameters;
+                    if (message.domain === "base" && message.event === "newDomains") {
+                        const newDomainPaths: string[] = message.parameters;
                         newDomainPaths.forEach((newDomainPath: string) => {
                             this._registeredDomains[newDomainPath].loaded = true;
                         });
                     }
                     // Event type "domain:event"
                     EventDispatcher.triggerWithArray(
-                        this, m.message.domain + ":" + m.message.event, m.message.parameters
+                        this, message.domain + ":" + message.event, message.parameters
                     );
                     break;
                 case "commandResponse":
-                    responseDeferred = this._pendingCommandDeferreds[m.message.id];
+                    responseDeferred = this._pendingCommandDeferreds[message.id];
                     if (responseDeferred) {
-                        responseDeferred.resolveWith(this, [m.message.response]);
-                        delete this._pendingCommandDeferreds[m.message.id];
+                        responseDeferred.resolveWith(this, [message.response]);
+                        delete this._pendingCommandDeferreds[message.id];
                     }
                     break;
                 case "commandProgress":
-                    responseDeferred = this._pendingCommandDeferreds[m.message.id];
+                    responseDeferred = this._pendingCommandDeferreds[message.id];
                     if (responseDeferred) {
-                        responseDeferred.notifyWith(this, [m.message.message]);
+                        responseDeferred.notifyWith(this, [message.message]);
                     }
                     break;
                 case "commandError":
-                    responseDeferred = this._pendingCommandDeferreds[m.message.id];
+                    responseDeferred = this._pendingCommandDeferreds[message.id];
                     if (responseDeferred) {
                         responseDeferred.rejectWith(
                             this,
-                            [m.message.message, m.message.stack]
+                            [message.message, message.stack]
                         );
-                        delete this._pendingCommandDeferreds[m.message.id];
+                        delete this._pendingCommandDeferreds[message.id];
                     }
                     break;
                 case "error":
-                    console.error("[NodeConnection] received error: " +
-                                    m.message.message);
+                    console.error("[NodeConnection] received error: " + message.message);
                     break;
                 default:
-                    console.error("[NodeConnection] unknown event type: " + m.type);
+                    console.error("[NodeConnection] unknown event type: " + ipcMessage.type);
             }
         }
 
-        private _refreshInterfaceCallback(spec) {
+        private _refreshInterfaceCallback(spec: NodeConnectionInterfaceSpec) {
             const self = this;
             // TODO: move to prototype
-            function makeCommandFunction(domain, command) {
+            function makeCommandFunction(domain: string, command: string) {
                 return function () {
                     const deferred = $.Deferred();
                     const parameters = Array.prototype.slice.call(arguments, 0);
@@ -333,19 +338,19 @@ define((require, exports, module) => {
                     return deferred;
                 };
             }
-            this._domains = {};
-            this._domainEvents = {};
+            this.domains = {};
+            this.domainEvents = {};
             Object.keys(spec).forEach(function (domainKey) {
                 const domainSpec = spec[domainKey];
-                self._domains[domainKey] = {};
+                self.domains[domainKey] = {};
                 Object.keys(domainSpec.commands).forEach(function (commandKey) {
-                    self._domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
+                    self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
                 });
-                self._domainEvents[domainKey] = {};
+                self.domainEvents[domainKey] = {};
                 Object.keys(domainSpec.events).forEach(function (eventKey) {
                     const eventSpec = domainSpec.events[eventKey];
                     const parameters = eventSpec.parameters;
-                    self._domainEvents[domainKey][eventKey] = parameters;
+                    self.domainEvents[domainKey][eventKey] = parameters;
                 });
             });
         }

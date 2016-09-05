@@ -1,3 +1,5 @@
+import FileSystemStats from "../../../types/FileSystemStats";
+
 define(function (require, exports, module) {
     "use strict";
 
@@ -15,7 +17,7 @@ define(function (require, exports, module) {
      * Callback to notify FileSystem of watcher changes
      * @type {?function(string, FileSystemStats=)}
      */
-    let _changeCallback;
+    let _changeCallback: (path: string, stats: FileSystemStats) => void;
 
     /**
      * Callback to notify FileSystem if watchers stop working entirely
