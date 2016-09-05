@@ -16,7 +16,7 @@ ws.send = function (msg: any, options: any) {
 ConnectionManager.createConnection(ws);
 
 // load the base domain
-DomainManager.loadDomainModulesFromPaths(["./BaseDomain"]);
+DomainManager.loadDomainModulesFromPaths(["./BaseDomain"], false);
 
 const MessageHandlers: { [type: string]: (obj: any) => void } = {
     refreshInterface: () => {
@@ -41,4 +41,5 @@ process.on("message", async function(obj: any) {
 
 process.on("uncaughtException", (err: Error) => {
     log.error(`uncaughtException: ${err.stack}`);
+    process.exit(1);
 });

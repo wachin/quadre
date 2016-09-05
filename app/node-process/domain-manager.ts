@@ -152,7 +152,8 @@ export const DomainManager = {
      * @param {string} domainName The domain name.
      * @param {string} commandName The command name.
      * @param {Array} parameters The parameters to pass to the command function. If
-     *    the command is asynchronous, will be augmented with a callback function.
+     *    the command is asynchronous, will be augmented with a callback function
+     *    and progressCallback function
      *    (see description in registerCommand documentation)
      */
     executeCommand: function executeCommand(
@@ -173,7 +174,10 @@ export const DomainManager = {
                         connection.sendCommandResponse(id, result);
                     }
                 };
-                parameters.push(callback);
+                const progressCallback = function (msg) {
+                    connection.sendCommandProgress(id, msg);
+                };
+                parameters.push(callback, progressCallback);
                 command.commandFunction.apply(connection, parameters);
             } else { // synchronous command
                 try {
@@ -252,7 +256,7 @@ export const DomainManager = {
      *    should be absolute.
      * @return {boolean} Whether loading succeded. (Failure will throw an exception).
      */
-    loadDomainModulesFromPaths: function loadDomainModulesFromPaths(paths: string[]): boolean {
+    loadDomainModulesFromPaths: function loadDomainModulesFromPaths(paths: string[], notify: boolean = true): boolean {
         paths.forEach(path => {
             const m = require(path);
             if (m && m.init) {
@@ -264,7 +268,9 @@ export const DomainManager = {
                 throw new Error(`domain at ${path} didn't return an object with 'init' property`);
             }
         });
-        this.emitEvent("base", "newDomains", paths);
+        if (notify) {
+            this.emitEvent("base", "newDomains", paths);
+        }
         return true; // if we fail, an exception will be thrown
     },
 

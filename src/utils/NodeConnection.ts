@@ -7,7 +7,6 @@ define((require, exports, module) => {
     const EventDispatcher = require("utils/EventDispatcher");
     const fork            = node.require("child_process").fork;
     const getLogger       = node.require("./utils").getLogger;
-    const path            = node.require("path");
     const log             = getLogger("NodeConnection");
 
     const CONNECTION_TIMEOUT = 10000; // 10 seconds
@@ -49,10 +48,7 @@ define((require, exports, module) => {
 
             this.domains = {};
             this.domainEvents = {};
-            this._registeredDomains = {
-                // TODO: remove BaseDomain concept
-                "./BaseDomain": { loaded: false, autoReload: false }
-            };
+            this._registeredDomains = {};
             this._nodeProcess = null;
             this._pendingCommandDeferreds = [];
             this._name = "";
@@ -120,11 +116,12 @@ define((require, exports, module) => {
                 deferred.reject(err);
             };
 
-            // refresh the current domains, then re-register any
-            // "autoregister" modules
-
-            // TODO: we shouldn't need to wait for BaseDomain, remove the concept
-            waitFor(() => this.connected() && this._registeredDomains["./BaseDomain"].loaded === true).then(() => {
+            // refresh the current domains, then re-register any "autoregister" modules
+            waitFor(() =>
+                this.connected() &&
+                this.domains.base &&
+                typeof this.domains.base.loadDomainModulesFromPaths === "function"
+            ).then(() => {
                 const toReload = Object.keys(this._registeredDomains)
                     .filter(_path => this._registeredDomains[_path].autoReload === true);
                 return toReload.length > 0 ?
@@ -132,7 +129,6 @@ define((require, exports, module) => {
                     success();
             });
 
-            this._refreshName();
             return deferred.promise();
         }
 
@@ -158,17 +154,21 @@ define((require, exports, module) => {
                 };
             });
 
-            this._refreshName();
             return this._loadDomains(pathArray);
         }
 
         private _refreshName(): void {
-            const domainPaths = Object.keys(this._registeredDomains);
-            if (domainPaths.length > 1) {
-                this._name = domainPaths.map(p => path.basename(p)).join(",");
+            const domainNames = Object.keys(this.domains);
+            if (domainNames.length > 1) {
+                // remove "base"
+                const io = domainNames.indexOf("base");
+                if (io !== -1) { domainNames.splice(io, 1); }
+                this._name = domainNames.join(",");
+                return;
             }
             if (this._nodeProcess) {
                 this._name = this._nodeProcess.pid.toString();
+                return;
             }
             this._name = "";
         }
@@ -190,6 +190,7 @@ define((require, exports, module) => {
             this._pendingCommandDeferreds.forEach((d) => d.reject("cleanup"));
             this._pendingCommandDeferreds = [];
 
+            // need to call _refreshName because this.domains has been modified
             this._refreshName();
         }
 
@@ -203,7 +204,6 @@ define((require, exports, module) => {
             const deferred = $.Deferred();
             setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
 
-            // TODO: shouldn't need this, should call _loadDomains
             if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
                 this.domains.base.loadDomainModulesFromPaths(pathArray).then(
                     function (success: boolean) { // command call succeeded
@@ -322,7 +322,6 @@ define((require, exports, module) => {
 
         private _refreshInterfaceCallback(spec: NodeConnectionInterfaceSpec) {
             const self = this;
-            // TODO: move to prototype
             function makeCommandFunction(domain: string, command: string) {
                 return function () {
                     const deferred = $.Deferred();
@@ -353,6 +352,8 @@ define((require, exports, module) => {
                     self.domainEvents[domainKey][eventKey] = parameters;
                 });
             });
+            // need to call _refreshName because this.domains has been modified
+            this._refreshName();
         }
 
     }
