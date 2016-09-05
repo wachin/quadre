@@ -14,11 +14,5 @@
     "noUnusedLocals": true,
     "removeComments": true,
     "strictNullChecks": true
-  },
-  "exclude": [
-    "dist/**/*",
-    "dist-build/**/*",
-    "node_modules/**/*"
-  ]
+  }
 }
-

@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         _platform;
 
     function writeJSON(grunt, path, obj) {
-        grunt.file.write(path, JSON.stringify(obj, null, "    "));
+        grunt.file.write(path, JSON.stringify(obj, null, "    ") + "\n");
     }
 
     function resolve(relPath) {

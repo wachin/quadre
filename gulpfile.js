@@ -12,23 +12,6 @@ const exec = require("child_process").exec;
 const BASE_DIRS = ['app', 'src'];
 const DIST_DIRS = ['dist', 'dist/www'];
 
-gulp.task('sync-tsconfigs', () => {
-    const tsconfigJSON = require(path.resolve(__dirname, 'tsconfig.json'));
-    delete tsconfigJSON.exclude;
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[0], 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
-        compilerOptions: {
-            outDir: `../${DIST_DIRS[0]}`
-        },
-        include: ['./**/*']
-    }, tsconfigJSON), null, 4) + '\n');
-    fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[1], 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
-        compilerOptions: {
-            outDir: `../${DIST_DIRS[1]}`
-        },
-        include: ['./**/*', '../node_modules/@types/**/*']
-    }, tsconfigJSON), null, 4) + '\n');
-});
-
 gulp.task('fix-package-json-indent', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     fs.writeFileSync(path.resolve(__dirname, 'package.json'), JSON.stringify(packageJSON, null, 4) + '\n');
@@ -73,7 +56,7 @@ function copyJs(filePath, srcDir, distDir) {
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', ['sync-tsconfigs', 'fix-package-json-indent', 'copy-dist-package-json', 'write-dist-config-json'], (_cb) => {
+gulp.task('build', ['fix-package-json-indent', 'copy-dist-package-json', 'write-dist-config-json'], (_cb) => {
     const cb = _.after(BASE_DIRS.length, _cb);
     BASE_DIRS.forEach((srcDir, idx) => {
         gulp.src(`${srcDir}/**/!(*.ts|*.tsx)`)

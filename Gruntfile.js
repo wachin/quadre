@@ -320,11 +320,15 @@ module.exports = function (grunt) {
     });
 
     // task: install
-    grunt.registerTask('install', ['write-config', 'less', 'npm-install-extensions']);
+    grunt.registerTask('install', [
+        'write-config',
+        'sync-tsconfigs',
+        'less',
+        'npm-install-extensions'
+    ]);
 
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
-//    grunt.registerTask('test', ['eslint', 'jasmine', 'jasmine_node', 'nls-check']);
 
     // task: set-release
     // Update version number in package.json and rewrite src/config.json
