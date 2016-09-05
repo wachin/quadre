@@ -8,7 +8,7 @@ define((require, exports, module) => {
     const fork            = node.require("child_process").fork;
     const getLogger       = node.require("./utils").getLogger;
     const path            = node.require("path");
-    const log             = getLogger("node-connection");
+    const log             = getLogger("NodeConnection");
 
     const CONNECTION_TIMEOUT = 10000; // 10 seconds
     const MAX_COUNTER_VALUE = 4294967295; // 2^32 - 1
@@ -255,11 +255,11 @@ define((require, exports, module) => {
                     try {
                         this._nodeProcess.send({ type: "message", message: messageString });
                     } catch (sendError) {
-                        console.error("[NodeConnection] Error sending message: " + sendError.message);
+                        log.error(`Error sending message: ${sendError.message}`);
                     }
                 }
             } else {
-                console.error("[NodeConnection] Not connected to node, unable to send.");
+                log.error(`Not connected to node, unable to send`);
             }
         }
 
@@ -270,7 +270,7 @@ define((require, exports, module) => {
             try {
                 ipcMessage = JSON.parse(messageString);
             } catch (err) {
-                console.error("[NodeConnection] received malformed message", messageString, err.message);
+                log.error(`Received malformed message: ${messageString}`, err.message);
                 return;
             }
 
@@ -313,10 +313,10 @@ define((require, exports, module) => {
                     }
                     break;
                 case "error":
-                    console.error("[NodeConnection] received error: " + message.message);
+                    log.error(`Received error: ${message.message}`);
                     break;
                 default:
-                    console.error("[NodeConnection] unknown event type: " + ipcMessage.type);
+                    log.error(`Unknown event type: ${ipcMessage.type}`);
             }
         }
 
