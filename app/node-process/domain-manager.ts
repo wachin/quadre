@@ -1,7 +1,9 @@
-import * as ConnectionManager from "./connection-manager";
-import { Connection } from "./connection-manager";
+/* eslint-env node */
+
+import Connection from "./connection";
 import { errToMessage, errToString } from "../utils";
 
+/* eslint-disable */
 export interface DomainDescription {
     domain: string;
     version: { major: number, minor: number };
@@ -30,6 +32,7 @@ export interface DomainCommandArgument {
     type: string;
     description?: string;
 }
+/* eslint-enable */
 
 /**
  * @private
@@ -157,7 +160,7 @@ export const DomainManager = {
      *    (see description in registerCommand documentation)
      */
     executeCommand: function executeCommand(
-        connection: Connection,
+        connection: typeof Connection,
         id: number,
         domainName: string,
         commandName: string,
@@ -174,7 +177,7 @@ export const DomainManager = {
                         connection.sendCommandResponse(id, result);
                     }
                 };
-                const progressCallback = function (msg) {
+                const progressCallback = function (msg: any) {
                     connection.sendCommandProgress(id, msg);
                 };
                 parameters.push(callback, progressCallback);
@@ -234,7 +237,7 @@ export const DomainManager = {
      */
     emitEvent: function emitEvent(domainName: string, eventName: string, parameters?: any[]) {
         if (_domains[domainName] && _domains[domainName].events[eventName]) {
-            ConnectionManager.sendEventToAllConnections(
+            Connection.sendEventMessage(
                 _eventCount++,
                 domainName,
                 eventName,

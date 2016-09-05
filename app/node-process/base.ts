@@ -1,7 +1,7 @@
 /* eslint-env node */
 
 import { log } from "./logging";
-import * as ConnectionManager from "./connection-manager";
+import Connection from "./connection";
 import DomainManager from "./domain-manager";
 
 // emulate ws for now
@@ -13,7 +13,7 @@ ws.send = function (msg: any, options: any) {
     }
     process.send && process.send({ type: "receive", msg });
 };
-ConnectionManager.createConnection(ws);
+Connection.setEmitter(ws);
 
 // load the base domain
 DomainManager.loadDomainModulesFromPaths(["./BaseDomain"], false);
