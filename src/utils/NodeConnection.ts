@@ -31,7 +31,10 @@ define((require, exports, module) => {
 
         private domains: any; // TODO: better define structure // TODO: underscore
         private domainEvents: any; // TODO: better define structure // TODO: underscore
-        private registeredDomains: { [domainPath: string]: { loaded: boolean, autoReload: boolean } }; // TODO: underscore
+        private registeredDomains: { [domainPath: string]: { // TODO: underscore
+            loaded: boolean,
+            autoReload: boolean
+        } };
         private _nodeProcess: cp.ChildProcess | null;
         private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
         private _name: string;
@@ -117,7 +120,7 @@ define((require, exports, module) => {
             // TODO: we shouldn't need to wait for BaseDomain, remove the concept
             waitFor(() => this.connected() && this.registeredDomains["./BaseDomain"].loaded === true).then(() => {
                 const toReload = Object.keys(this.registeredDomains)
-                    .filter(path => this.registeredDomains[path].autoReload === true);
+                    .filter(_path => this.registeredDomains[_path].autoReload === true);
                 return toReload.length > 0 ?
                     this._loadDomains(toReload).then(success, fail) :
                     success();
@@ -139,11 +142,11 @@ define((require, exports, module) => {
         public loadDomains(paths: string | Array<string>, autoReload: boolean) {
             const pathArray: Array<string> = Array.isArray(paths) ? paths : [paths];
 
-            pathArray.forEach(path => {
-                if (this.registeredDomains[path]) {
-                    throw new Error(`Domain path already registered: ${path}`);
+            pathArray.forEach(_path => {
+                if (this.registeredDomains[_path]) {
+                    throw new Error(`Domain path already registered: ${_path}`);
                 }
-                this.registeredDomains[path] = {
+                this.registeredDomains[_path] = {
                     loaded: false,
                     autoReload
                 };
@@ -185,17 +188,13 @@ define((require, exports, module) => {
         }
 
         private _getNextCommandID() {
-            var nextID;
-            if (this._commandCount > MAX_COUNTER_VALUE) {
-                nextID = this._commandCount = 0;
-            } else {
-                nextID = this._commandCount++;
-            }
-            return nextID;
+            return this._commandCount > MAX_COUNTER_VALUE ?
+                this._commandCount = 0 :
+                this._commandCount++;
         }
 
         private _loadDomains(pathArray) {
-            var deferred = $.Deferred();
+            const deferred = $.Deferred();
             setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
 
             // TODO: shouldn't need this, should call _loadDomains
@@ -211,12 +210,14 @@ define((require, exports, module) => {
                         // resolve the deferred.
                     },
                     function (reason) { // command call failed
-                        deferred.reject("Unable to load one of the modules: " + pathArray + (reason ? ", reason: " + reason : ""));
+                        deferred.reject(
+                            "Unable to load one of the modules: " + pathArray + (reason ? ", reason: " + reason : "")
+                        );
                     }
                 );
                 waitFor(() => {
                     const loadedCount = pathArray
-                        .map(path => this.registeredDomains[path].loaded)
+                        .map(_path => this.registeredDomains[_path].loaded)
                         .filter(x => x === true)
                         .length;
                     return loadedCount === pathArray.length;
@@ -232,14 +233,14 @@ define((require, exports, module) => {
             if (this._nodeProcess && this.connected()) {
 
                 // Convert the message to a string
-                var messageString: string | null = null;
+                let messageString: string | null = null;
                 if (typeof m === "string") {
                     messageString = m;
                 } else {
                     try {
                         messageString = JSON.stringify(m);
                     } catch (stringifyError) {
-                        console.error("[NodeConnection] Unable to stringify message in order to send: " + stringifyError.message);
+                        log.error("Unable to stringify message in order to send: " + stringifyError.message);
                     }
                 }
 
@@ -257,8 +258,8 @@ define((require, exports, module) => {
         }
 
         private _receive(messageString) {
-            var responseDeferred: JQueryDeferred<any> | null = null;
-            var m;
+            let responseDeferred: JQueryDeferred<any> | null = null;
+            let m;
 
             try {
                 m = JSON.parse(messageString);
@@ -313,17 +314,17 @@ define((require, exports, module) => {
         private _refreshInterfaceCallback(spec) {
             const self = this;
             // TODO: move to prototype
-            function makeCommandFunction(domainName, commandName) {
+            function makeCommandFunction(domain, command) {
                 return function () {
-                    var deferred = $.Deferred();
-                    var parameters = Array.prototype.slice.call(arguments, 0);
-                    var id = self._getNextCommandID();
+                    const deferred = $.Deferred();
+                    const parameters = Array.prototype.slice.call(arguments, 0);
+                    const id = self._getNextCommandID();
                     self._pendingCommandDeferreds[id] = deferred;
                     self._send({
-                        id: id,
-                        domain: domainName,
-                        command: commandName,
-                        parameters: parameters
+                        id,
+                        domain,
+                        command,
+                        parameters
                     });
                     return deferred;
                 };
@@ -331,15 +332,15 @@ define((require, exports, module) => {
             this.domains = {};
             this.domainEvents = {};
             Object.keys(spec).forEach(function (domainKey) {
-                var domainSpec = spec[domainKey];
+                const domainSpec = spec[domainKey];
                 self.domains[domainKey] = {};
                 Object.keys(domainSpec.commands).forEach(function (commandKey) {
                     self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
                 });
                 self.domainEvents[domainKey] = {};
                 Object.keys(domainSpec.events).forEach(function (eventKey) {
-                    var eventSpec = domainSpec.events[eventKey];
-                    var parameters = eventSpec.parameters;
+                    const eventSpec = domainSpec.events[eventKey];
+                    const parameters = eventSpec.parameters;
                     self.domainEvents[domainKey][eventKey] = parameters;
                 });
             });
