@@ -29,23 +29,23 @@ define((require, exports, module) => {
 
     class NodeConnection {
 
-        private domains: any; // TODO: better define structure // TODO: underscore
-        private domainEvents: any; // TODO: better define structure // TODO: underscore
-        private registeredDomains: { [domainPath: string]: { // TODO: underscore
+        private _autoReconnect: boolean;
+        private _commandCount: number;
+        private _domains: any; // TODO: better define structure
+        private _domainEvents: any; // TODO: better define structure
+        private _name: string;
+        private _nodeProcess: cp.ChildProcess | null;
+        private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
+        private _registeredDomains: { [domainPath: string]: {
             loaded: boolean,
             autoReload: boolean
         } };
-        private _nodeProcess: cp.ChildProcess | null;
-        private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
-        private _name: string;
-        private _commandCount: number;
-        private _autoReconnect: boolean;
 
         constructor() {
 
-            this.domains = {};
-            this.domainEvents = {};
-            this.registeredDomains = {
+            this._domains = {};
+            this._domainEvents = {};
+            this._registeredDomains = {
                 // TODO: remove BaseDomain concept
                 "./BaseDomain": { loaded: false, autoReload: false }
             };
@@ -118,9 +118,9 @@ define((require, exports, module) => {
             // "autoregister" modules
 
             // TODO: we shouldn't need to wait for BaseDomain, remove the concept
-            waitFor(() => this.connected() && this.registeredDomains["./BaseDomain"].loaded === true).then(() => {
-                const toReload = Object.keys(this.registeredDomains)
-                    .filter(_path => this.registeredDomains[_path].autoReload === true);
+            waitFor(() => this.connected() && this._registeredDomains["./BaseDomain"].loaded === true).then(() => {
+                const toReload = Object.keys(this._registeredDomains)
+                    .filter(_path => this._registeredDomains[_path].autoReload === true);
                 return toReload.length > 0 ?
                     this._loadDomains(toReload).then(success, fail) :
                     success();
@@ -143,10 +143,10 @@ define((require, exports, module) => {
             const pathArray: Array<string> = Array.isArray(paths) ? paths : [paths];
 
             pathArray.forEach(_path => {
-                if (this.registeredDomains[_path]) {
+                if (this._registeredDomains[_path]) {
                     throw new Error(`Domain path already registered: ${_path}`);
                 }
-                this.registeredDomains[_path] = {
+                this._registeredDomains[_path] = {
                     loaded: false,
                     autoReload
                 };
@@ -157,7 +157,7 @@ define((require, exports, module) => {
         }
 
         private _refreshName(): void {
-            const domainPaths = Object.keys(this.registeredDomains);
+            const domainPaths = Object.keys(this._registeredDomains);
             if (domainPaths.length > 1) {
                 this._name = domainPaths.map(p => path.basename(p)).join(",");
             }
@@ -178,7 +178,7 @@ define((require, exports, module) => {
             }
 
             // clear out the domains, since we may get different ones on the next connection
-            this.domains = {};
+            this._domains = {};
 
             // reject all the commands that are to be resolved
             this._pendingCommandDeferreds.forEach((d) => d.reject("cleanup"));
@@ -198,8 +198,8 @@ define((require, exports, module) => {
             setDeferredTimeout(deferred, CONNECTION_TIMEOUT);
 
             // TODO: shouldn't need this, should call _loadDomains
-            if (this.domains.base && this.domains.base.loadDomainModulesFromPaths) {
-                this.domains.base.loadDomainModulesFromPaths(pathArray).then(
+            if (this._domains.base && this._domains.base.loadDomainModulesFromPaths) {
+                this._domains.base.loadDomainModulesFromPaths(pathArray).then(
                     function (success) { // command call succeeded
                         if (!success) {
                             // response from commmand call was "false" so we know
@@ -217,13 +217,13 @@ define((require, exports, module) => {
                 );
                 waitFor(() => {
                     const loadedCount = pathArray
-                        .map(_path => this.registeredDomains[_path].loaded)
+                        .map(_path => this._registeredDomains[_path].loaded)
                         .filter(x => x === true)
                         .length;
                     return loadedCount === pathArray.length;
                 }).then(deferred.resolve);
             } else {
-                deferred.reject("this.domains.base is undefined");
+                deferred.reject("this._domains.base is undefined");
             }
 
             return deferred.promise();
@@ -273,7 +273,7 @@ define((require, exports, module) => {
                 if (m.message.domain === "base" && m.message.event === "newDomains") {
                     const newDomainPaths: string[] = m.message.parameters;
                     newDomainPaths.forEach((newDomainPath: string) => {
-                        this.registeredDomains[newDomainPath].loaded = true;
+                        this._registeredDomains[newDomainPath].loaded = true;
                     });
                 }
                 // Event type "domain:event"
@@ -329,19 +329,19 @@ define((require, exports, module) => {
                     return deferred;
                 };
             }
-            this.domains = {};
-            this.domainEvents = {};
+            this._domains = {};
+            this._domainEvents = {};
             Object.keys(spec).forEach(function (domainKey) {
                 const domainSpec = spec[domainKey];
-                self.domains[domainKey] = {};
+                self._domains[domainKey] = {};
                 Object.keys(domainSpec.commands).forEach(function (commandKey) {
-                    self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
+                    self._domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);
                 });
-                self.domainEvents[domainKey] = {};
+                self._domainEvents[domainKey] = {};
                 Object.keys(domainSpec.events).forEach(function (eventKey) {
                     const eventSpec = domainSpec.events[eventKey];
                     const parameters = eventSpec.parameters;
-                    self.domainEvents[domainKey][eventKey] = parameters;
+                    self._domainEvents[domainKey][eventKey] = parameters;
                 });
             });
         }
