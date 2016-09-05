@@ -1,7 +1,6 @@
 import * as cp from "child_process";
 
 define((require, exports, module) => {
-    "use strict";
 
     const EventDispatcher = require("utils/EventDispatcher");
     const fork            = node.require("child_process").fork;
@@ -31,7 +30,8 @@ define((require, exports, module) => {
     class NodeConnection {
 
         private domains: any; // TODO: better define structure // TODO: underscore
-        private registeredDomains: { [domainPath: string]: { loaded: boolean } }; // TODO: underscore
+        private domainEvents: any; // TODO: better define structure // TODO: underscore
+        private registeredDomains: { [domainPath: string]: { loaded: boolean, autoReload: boolean } }; // TODO: underscore
         private _nodeProcess: cp.ChildProcess | null;
         private _pendingCommandDeferreds: Array<JQueryDeferred<any>>;
         private _name: string;
@@ -41,9 +41,10 @@ define((require, exports, module) => {
         constructor() {
 
             this.domains = {};
+            this.domainEvents = {};
             this.registeredDomains = {
                 // TODO: remove BaseDomain concept
-                "./BaseDomain": { loaded: false }
+                "./BaseDomain": { loaded: false, autoReload: false }
             };
             this._nodeProcess = null;
             this._pendingCommandDeferreds = [];
@@ -90,12 +91,15 @@ define((require, exports, module) => {
 
             // Called if we succeed at the final setup
             const success = () => {
+                if (this._nodeProcess == null) {
+                    throw new Error(`Unable to fork ${nodeProcessPath}`);
+                }
                 this._nodeProcess.on("disconnect", () => {
                     this._cleanup();
                     if (this._autoReconnect) {
-                        this.trigger("close", this.connect(true));
+                        (this as any).trigger("close", this.connect(true));
                     } else {
-                        this.trigger("close");
+                        (this as any).trigger("close");
                     }
                 });
                 deferred.resolve();
@@ -225,7 +229,7 @@ define((require, exports, module) => {
         }
 
         private _send(m) {
-            if (this.connected()) {
+            if (this._nodeProcess && this.connected()) {
 
                 // Convert the message to a string
                 var messageString: string | null = null;
@@ -324,8 +328,8 @@ define((require, exports, module) => {
                     return deferred;
                 };
             }
-            self.domains = {};
-            self.domainEvents = {};
+            this.domains = {};
+            this.domainEvents = {};
             Object.keys(spec).forEach(function (domainKey) {
                 var domainSpec = spec[domainKey];
                 self.domains[domainKey] = {};
