@@ -43,19 +43,22 @@ export const Connection = {
         type: string,
         message: ConnectionMessage | ConnectionErrorMessage | CommandResponse | CommandError
     ) {
-        if (this._ws && this._connected) {
-            try {
-                this._ws.send(JSON.stringify({ type, message }));
-            } catch (e) {
-                console.error("[Connection] Unable to stringify message: " + e.message);
-            }
+        try {
+            process.send && process.send({
+                type: "receive",
+                msg: JSON.stringify({ type, message })
+            });
+        } catch (e) {
+            console.error("[Connection] Unable to stringify message: " + e.message);
         }
     },
 
     _sendBinary: function _sendBinary(message: Buffer) {
-        if (this._ws && this._connected) {
-            this._ws.send(message, {binary: true, mask: false});
-        }
+        process.send && process.send({
+            type: "receive",
+            msg: message,
+            options: { binary: true, mask: false }
+        });
     },
 
     _receive: function _receive(message: string) {

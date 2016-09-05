@@ -7,12 +7,6 @@ import DomainManager from "./domain-manager";
 // emulate ws for now
 const EventEmitter = require("events");
 const ws = new EventEmitter();
-ws.send = function (msg: any, options: any) {
-    if (options) {
-        log.warn(`ws.send options: ${options}`);
-    }
-    process.send && process.send({ type: "receive", msg });
-};
 Connection.setEmitter(ws);
 
 // load the base domain
