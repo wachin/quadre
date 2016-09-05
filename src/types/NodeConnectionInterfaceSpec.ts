@@ -1,7 +1,18 @@
 /* eslint-disable */
 
-export interface NodeConnectionInterfaceSpec {
+export interface NodeConnectionCommandSpec {
 
 }
 
-export default NodeConnectionInterfaceSpec;
+export interface NodeConnectionEventSpec {
+    parameters: any[];
+}
+
+export interface NodeConnectionDomainSpec {
+    commands: { [commandName: string]: NodeConnectionCommandSpec };
+    events: { [eventName: string]: NodeConnectionEventSpec };
+}
+
+export interface NodeConnectionInterfaceSpec {
+    [domainName: string]: NodeConnectionDomainSpec;
+}

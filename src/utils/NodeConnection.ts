@@ -1,6 +1,6 @@
 import * as cp from "child_process";
-import NodeConnectionMessage from "../types/NodeConnectionMessage";
-import NodeConnectionInterfaceSpec from "../types/NodeConnectionInterfaceSpec";
+import { NodeConnectionRequestMessage, NodeConnectionResponseMessage } from "../types/NodeConnectionMessages";
+import { NodeConnectionInterfaceSpec, NodeConnectionDomainSpec } from "../types/NodeConnectionInterfaceSpec";
 
 define((require, exports, module) => {
 
@@ -235,7 +235,7 @@ define((require, exports, module) => {
             return deferred.promise();
         }
 
-        private _send(m: NodeConnectionMessage) {
+        private _send(m: NodeConnectionRequestMessage) {
             if (this._nodeProcess && this.connected()) {
 
                 // Convert the message to a string
@@ -274,7 +274,7 @@ define((require, exports, module) => {
                 return;
             }
 
-            const message: NodeConnectionMessage = ipcMessage.message;
+            const message: NodeConnectionResponseMessage = ipcMessage.message;
 
             switch (ipcMessage.type) {
                 case "event":
@@ -341,7 +341,7 @@ define((require, exports, module) => {
             this.domains = {};
             this.domainEvents = {};
             Object.keys(spec).forEach(function (domainKey) {
-                const domainSpec = spec[domainKey];
+                const domainSpec: NodeConnectionDomainSpec = spec[domainKey];
                 self.domains[domainKey] = {};
                 Object.keys(domainSpec.commands).forEach(function (commandKey) {
                     self.domains[domainKey][commandKey] = makeCommandFunction(domainKey, commandKey);

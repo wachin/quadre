@@ -53,10 +53,10 @@
         "eol-last": 0
     },
     "globals": {
-        "Promise": false,
-        "node": false,
-
+        "appshell": false,
         "brackets": false,
+        "node": false,
+        "Promise": false,
 
         "require": false,
         "define": false,

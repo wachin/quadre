@@ -1,7 +1,6 @@
-import FileSystemStats from "../../../types/FileSystemStats";
+import FileSystemStatsType from "../../../types/FileSystemStats";
 
 define(function (require, exports, module) {
-    "use strict";
 
     const FileUtils       = require("file/FileUtils");
     const FileSystemStats = require("filesystem/FileSystemStats");
@@ -17,23 +16,23 @@ define(function (require, exports, module) {
      * Callback to notify FileSystem of watcher changes
      * @type {?function(string, FileSystemStats=)}
      */
-    let _changeCallback: (path: string, stats: FileSystemStats) => void;
+    let _changeCallback: Function | null;
 
     /**
      * Callback to notify FileSystem if watchers stop working entirely
      * @type {?function()}
      */
-    let _offlineCallback;
+    let _offlineCallback: Function | null;
 
     /** Timeout used to batch up file watcher changes (setTimeout() return value) */
-    let _changeTimeout;
+    let _changeTimeout: number | null;
 
     /**
      * Pending file watcher changes - map from fullPath to flag indicating whether we need to pass stats
      * to _changeCallback() for this path.
      * @type {!Object.<string, boolean>}
      */
-    let _pendingChanges = {};
+    let _pendingChanges: { [path: string]: FileSystemStatsType | null } = {};
 
     const _bracketsPath = FileUtils.getNativeBracketsDirectoryPath();
     const _modulePath   = FileUtils.getNativeModuleDirectoryPath(module);
@@ -42,7 +41,7 @@ define(function (require, exports, module) {
     const _nodeDomain   = new NodeDomain("fileWatcher", _domainPath);
 
     // If the connection closes, notify the FileSystem that watchers have gone offline.
-    _nodeDomain.connection.on("close", function (event, promise) {
+    _nodeDomain.connection.on("close", (event: any, reconnectPromise?: JQueryPromise<any>) => {
         if (_offlineCallback) {
             _offlineCallback();
         }
@@ -55,16 +54,15 @@ define(function (require, exports, module) {
      * @param {object} stats Stats coming from the underlying watcher, if available
      * @private
      */
-    function _enqueueChange(changedPath, stats) {
+    function _enqueueChange(changedPath: string, stats: FileSystemStatsType | null) {
         _pendingChanges[changedPath] = stats;
         if (!_changeTimeout) {
-            _changeTimeout = window.setTimeout(function () {
+            _changeTimeout = window.setTimeout(() => {
                 if (_changeCallback) {
-                    Object.keys(_pendingChanges).forEach(function (path) {
+                    for (const path of Object.keys(_pendingChanges)) {
                         _changeCallback(path, _pendingChanges[path]);
-                    });
+                    }
                 }
-
                 _changeTimeout = null;
                 _pendingChanges = {};
             }, FILE_WATCHER_BATCH_TIMEOUT);
@@ -81,25 +79,25 @@ define(function (require, exports, module) {
      * @param {object} statsObj Object that can be used to construct FileSystemStats
      * @private
      */
-    function _fileWatcherChange(evt, event, parentDirPath, entryName, statsObj) {
+    function _fileWatcherChange(evt: any, event: string, parentDirPath: string, entryName: string, statsObj: any) {
         switch (event) {
-        case "changed":
-            // an existing file/directory was modified; stats are passed if available
-            let fsStats;
-            if (statsObj) {
-                fsStats = new FileSystemStats(statsObj);
-            } else {
-                console.warn("FileWatcherDomain was expected to deliver stats for changed event!");
-            }
-            _enqueueChange(parentDirPath + entryName, fsStats);
-            break;
-        case "created":
-        case "deleted":
-            // file/directory was created/deleted; fire change on parent to reload contents
-            _enqueueChange(parentDirPath, null);
-            break;
-        default:
-            console.error("Unexpected 'change' event:", event);
+            case "changed":
+                // an existing file/directory was modified; stats are passed if available
+                let fsStats: FileSystemStatsType | null = null;
+                if (statsObj) {
+                    fsStats = new FileSystemStats(statsObj);
+                } else {
+                    console.warn("FileWatcherDomain was expected to deliver stats for changed event!");
+                }
+                _enqueueChange(parentDirPath + entryName, fsStats);
+                break;
+            case "created":
+            case "deleted":
+                // file/directory was created/deleted; fire change on parent to reload contents
+                _enqueueChange(parentDirPath, null);
+                break;
+            default:
+                console.error("Unexpected 'change' event:", event);
         }
     }
 
@@ -113,7 +111,7 @@ define(function (require, exports, module) {
      * @return {?string} A FileSystemError string, or null if there was no error code.
      * @private
      */
-    function _mapError(err) {
+    function _mapError(err: NodeJS.ErrnoException | null): string | NodeJS.ErrnoException | null {
         if (!err) {
             return null;
         }
@@ -150,11 +148,9 @@ define(function (require, exports, module) {
      * @return {function(?string)} A callback that expects a FileSystemError string
      * @private
      */
-    function _wrap(cb) {
-        return function (err) {
-            const args = Array.prototype.slice.call(arguments);
-            args[0] = _mapError(args[0]);
-            cb.apply(null, args);
+    function _wrap(cb: Function) {
+        return function (err: NodeJS.ErrnoException | null, ...rest: any[]) {
+            cb(_mapError(err), ...rest);
         };
     }
 
@@ -170,7 +166,14 @@ define(function (require, exports, module) {
      * @param {Array.<string>=} fileTypes
      * @param {function(?string, Array.<string>=)} callback
      */
-    function showOpenDialog(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, callback) {
+    function showOpenDialog(
+        allowMultipleSelection: boolean,
+        chooseDirectories: boolean,
+        title: string,
+        initialPath: string,
+        fileTypes: string[],
+        callback: Function
+    ) {
         appshell.fs.showOpenDialog(
             allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, _wrap(callback)
         );
@@ -186,7 +189,12 @@ define(function (require, exports, module) {
      * @param {string} proposedNewFilename
      * @param {function(?string, string=)} callback
      */
-    function showSaveDialog(title, initialPath, proposedNewFilename, callback) {
+    function showSaveDialog(
+        title: string,
+        initialPath: string,
+        proposedNewFilename: string,
+        callback: Function
+    ) {
         appshell.fs.showSaveDialog(title, initialPath, proposedNewFilename, _wrap(callback));
     }
 
@@ -198,8 +206,8 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(?string, FileSystemStats=)} callback
      */
-    function stat(path, callback) {
-        appshell.fs.lstat(path, function (err, stats) {
+    function stat(path: string, callback: Function) {
+        appshell.fs.lstat(path, function (err: NodeJS.ErrnoException, stats: any) {
             if (err) {
                 callback(_mapError(err));
             } else {
@@ -234,8 +242,8 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(?string, boolean)} callback
      */
-    function exists(path, callback) {
-        stat(path, function (err) {
+    function exists(path: string, callback: Function) {
+        stat(path, function (err: NodeJS.ErrnoException) {
             if (err) {
                 if (err === FileSystemError.NOT_FOUND) {
                     callback(null, false);
@@ -260,8 +268,8 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(?string, Array.<FileSystemEntry>=, Array.<string|FileSystemStats>=)} callback
      */
-    function readdir(path, callback) {
-        appshell.fs.readdir(path, function (err, contents) {
+    function readdir(path: string, callback: Function) {
+        appshell.fs.readdir(path, function (err: NodeJS.ErrnoException, contents: string[]) {
             if (err) {
                 callback(_mapError(err));
                 return;
@@ -275,7 +283,7 @@ define(function (require, exports, module) {
 
             const stats: any[] = [];
             contents.forEach(function (val, idx) {
-                stat(path + "/" + val, function (err2, stat) {
+                stat(path + "/" + val, function (err2: NodeJS.ErrnoException, stat: any) {
                     stats[idx] = err2 || stat;
                     count--;
                     if (count <= 0) {
@@ -296,16 +304,16 @@ define(function (require, exports, module) {
      * @param {number=} mode The base-eight mode of the newly created directory.
      * @param {function(?string, FileSystemStats=)=} callback
      */
-    function mkdir(path, mode, callback) {
+    function mkdir(path: string, mode: number, callback: Function) {
         if (typeof mode === "function") {
             callback = mode;
             mode = parseInt("0755", 8);
         }
-        appshell.fs.mkdir(path, mode, function (err) {
+        appshell.fs.mkdir(path, mode, function (err: NodeJS.ErrnoException) {
             if (err) {
                 callback(_mapError(err));
             } else {
-                stat(path, function (err2, stat) {
+                stat(path, function (err2: NodeJS.ErrnoException, stat: any) {
                     callback(err2, stat);
                 });
             }
@@ -320,7 +328,7 @@ define(function (require, exports, module) {
      * @param {string} newPath
      * @param {function(?string)=} callback
      */
-    function rename(oldPath, newPath, callback) {
+    function rename(oldPath: string, newPath: string, callback: Function) {
         appshell.fs.rename(oldPath, newPath, _wrap(callback));
     }
 
@@ -340,16 +348,16 @@ define(function (require, exports, module) {
      * @param {{encoding: string=, stat: FileSystemStats=}} options
      * @param {function(?string, string=, FileSystemStats=)} callback
      */
-    function readFile(path, options, callback) {
+    function readFile(path: string, options: { encoding: string, stat: any }, callback: Function) {
         const encoding = options.encoding || "utf8";
 
         // callback to be executed when the call to stat completes
         //  or immediately if a stat object was passed as an argument
-        function doReadFile(stat) {
+        function doReadFile(stat: any) {
             if (stat.size > (FileUtils.MAX_FILE_SIZE)) {
                 callback(FileSystemError.EXCEEDS_MAX_FILE_SIZE);
             } else {
-                appshell.fs.readTextFile(path, encoding, function (_err, _data) {
+                appshell.fs.readTextFile(path, encoding, function (_err: NodeJS.ErrnoException, _data: string) {
                     if (_err) {
                         callback(_mapError(_err));
                     } else {
@@ -362,7 +370,7 @@ define(function (require, exports, module) {
         if (options.stat) {
             doReadFile(options.stat);
         } else {
-            exports.stat(path, function (_err, _stat) {
+            exports.stat(path, function (_err: NodeJS.ErrnoException, _stat: any) {
                 if (_err) {
                     callback(_err);
                 } else {
@@ -388,29 +396,34 @@ define(function (require, exports, module) {
      * @param {{encoding : string=, mode : number=, expectedHash : object=, expectedContents : string=}} options
      * @param {function(?string, FileSystemStats=, boolean)} callback
      */
-    function writeFile(path, data, options, callback) {
+    function writeFile(
+        path: string,
+        data: string,
+        options: { encoding: string, mode: number, expectedHash: string, expectedContents: string },
+        callback: Function
+    ) {
         const encoding = options.encoding || "utf8";
 
-        function _finishWrite(created) {
-            appshell.fs.writeFile(path, data, encoding, function (err) {
+        function _finishWrite(created: boolean) {
+            appshell.fs.writeFile(path, data, encoding, function (err: NodeJS.ErrnoException) {
                 if (err) {
                     callback(_mapError(err));
                 } else {
-                    stat(path, function (err2, stat) {
+                    stat(path, function (err2: NodeJS.ErrnoException, stat: any) {
                         callback(err2, stat, created);
                     });
                 }
             });
         }
 
-        stat(path, function (err, stats) {
+        stat(path, function (err: NodeJS.ErrnoException, stats: any) {
             if (err) {
                 switch (err) {
-                case FileSystemError.NOT_FOUND:
-                    _finishWrite(true);
-                    break;
-                default:
-                    callback(err);
+                    case FileSystemError.NOT_FOUND:
+                        _finishWrite(true);
+                        break;
+                    default:
+                        callback(err);
                 }
                 return;
             }
@@ -419,7 +432,7 @@ define(function (require, exports, module) {
                 console.error("Blind write attempted: ", path, stats._hash, options.expectedHash);
 
                 if (options.hasOwnProperty("expectedContents")) {
-                    appshell.fs.readTextFile(path, encoding, function (_err, _data) {
+                    appshell.fs.readTextFile(path, encoding, function (_err: NodeJS.ErrnoException, _data: string) {
                         if (_err || _data !== options.expectedContents) {
                             callback(FileSystemError.CONTENTS_MODIFIED);
                             return;
@@ -446,8 +459,8 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(string)=} callback
      */
-    function unlink(path, callback) {
-        appshell.fs.remove(path, function (err) {
+    function unlink(path: string, callback: Function) {
+        appshell.fs.remove(path, function (err: NodeJS.ErrnoException) {
             callback(_mapError(err));
         });
     }
@@ -460,8 +473,8 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(string)=} callback
      */
-    function moveToTrash(path, callback) {
-        appshell.fs.moveToTrash(path, function (err) {
+    function moveToTrash(path: string, callback: Function) {
+        appshell.fs.moveToTrash(path, function (err: NodeJS.ErrnoException) {
             callback(_mapError(err));
         });
     }
@@ -482,7 +495,7 @@ define(function (require, exports, module) {
      * @param {function(?string, FileSystemStats=)} changeCallback
      * @param {function()=} offlineCallback
      */
-    function initWatchers(changeCallback, offlineCallback) {
+    function initWatchers(changeCallback: Function, offlineCallback: Function) {
         _changeCallback = changeCallback;
         _offlineCallback = offlineCallback;
     }
@@ -499,8 +512,12 @@ define(function (require, exports, module) {
      * @param {Array<string>} ignored
      * @param {function(?string)=} callback
      */
-    function watchPath(path, ignored, callback) {
-        appshell.fs.isNetworkDrive(path, function (err, isNetworkDrive) {
+    function watchPath(
+        path: string,
+        ignored: string[],
+        callback: Function
+    ) {
+        appshell.fs.isNetworkDrive(path, function (err: NodeJS.ErrnoException, isNetworkDrive: boolean) {
             if (err || isNetworkDrive) {
                 if (isNetworkDrive) {
                     callback(FileSystemError.NETWORK_DRIVE_NOT_SUPPORTED);
@@ -524,7 +541,11 @@ define(function (require, exports, module) {
      * @param {Array<string>} ignored
      * @param {function(?string)=} callback
      */
-    function unwatchPath(path, ignored, callback) {
+    function unwatchPath(
+        path: string,
+        ignored: string[],
+        callback: Function
+    ) {
         _nodeDomain.exec("unwatchPath", path)
             .then(callback, callback);
     }
@@ -536,7 +557,7 @@ define(function (require, exports, module) {
      *
      * @param {function(?string)=} callback
      */
-    function unwatchAll(callback) {
+    function unwatchAll(callback: Function) {
         _nodeDomain.exec("unwatchAll")
             .then(callback, callback);
     }

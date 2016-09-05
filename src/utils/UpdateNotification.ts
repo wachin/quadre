@@ -7,9 +7,6 @@ define(function (require, exports, module) {
     const getLogger = node.require("./utils").getLogger;
     const log = getLogger("UpdateNotification");
 
-    const brackets = (window as any).brackets;
-    const electron = (window as any).electron;
-
     const Dialogs              = require("widgets/Dialogs");
     const DefaultDialogs       = require("widgets/DefaultDialogs");
     const ExtensionManager     = require("extensibility/ExtensionManager");
@@ -105,7 +102,11 @@ define(function (require, exports, module) {
      * for quick fetching later.
      * _versionInfoUrl is used for unit testing.
      */
-    function _getUpdateInformation(force: boolean, dontCache: boolean, _versionInfoUrl?: string) {
+    function _getUpdateInformation(
+        force: boolean,
+        dontCache: boolean,
+        _versionInfoUrl?: string
+    ): JQueryPromise<UpdateFeedInfo> {
         // Last time the versionInfoURL was fetched
         let lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
 
@@ -291,7 +292,7 @@ define(function (require, exports, module) {
         }
 
         _getUpdateInformation(force || usingOverrides, usingOverrides, versionInfoUrl)
-            .done(function (allUpdates: Array<any> = []) {
+            .done(function (allUpdates: UpdateFeedInfo = []) {
 
                 const semver = node.require("semver");
                 const currentVersion = node.require("./package.json").version;
