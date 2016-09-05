@@ -23,9 +23,7 @@ gulp.task('sync-tsconfigs', () => {
     }, tsconfigJSON), null, 4) + '\n');
     fs.writeFileSync(path.resolve(__dirname, BASE_DIRS[1], 'tsconfig.json'), JSON.stringify(_.defaultsDeep({
         compilerOptions: {
-            outDir: `../${DIST_DIRS[1]}`,
-            noImplicitAny: false,
-            noImplicitReturns: false
+            outDir: `../${DIST_DIRS[1]}`
         },
         include: ['./**/*', '../node_modules/@types/**/*']
     }, tsconfigJSON), null, 4) + '\n');
