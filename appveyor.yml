@@ -29,7 +29,7 @@ build_script:
   - IF "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
       npm run publish-win
     ) ELSE (
-      npm run dist
+      npm run pack
     )
 
 test: off

@@ -7,7 +7,6 @@ import { remote, shell } from "electron";
 
 const app = remote.app;
 const REMOTE_DEBUGGING_PORT = 9234; // TODO: this is hardcoded in brackets-shell
-const shellState = remote.require("./shell-state");
 const startupTime = process.hrtime();
 
 export const ERR_NOT_FOUND = "NOTFOUND";
@@ -66,14 +65,6 @@ export function getElapsedMilliseconds() {
     const diff = process.hrtime(startupTime);
     // diff = [ seconds, nanoseconds ]
     return diff[0] * 1000 + diff[1] / 1000000;
-};
-
-export function getNodeState(callback: (errCode: string, port: number) => void) {
-    process.nextTick(function () {
-        const errorCode = exports[shellState.get("socketServer.state")];
-        const port = shellState.get("socketServer.port");
-        callback(errorCode, port);
-    });
 };
 
 export function getPendingFilesToOpen(callback: (err?: Error, filePaths?: string[]) => void) {

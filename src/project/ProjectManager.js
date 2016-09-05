@@ -769,7 +769,7 @@ define(function (require, exports, module) {
             FileSystem.off("rename", _fileSystemRename);
 
             FileSystem.unwatch(model.projectRoot, function (err) {
-                if (err) {
+                if (err && err !== "RootNotBeingWatched") {
                     console.error("Error unwatching project root: ", model.projectRoot.fullPath, err);
                     result.reject(err);
                 } else {

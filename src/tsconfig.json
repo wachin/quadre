@@ -1,8 +1,6 @@
 {
     "compilerOptions": {
         "outDir": "../dist/www",
-        "noImplicitAny": false,
-        "noImplicitReturns": false,
         "rootDir": ".",
         "sourceMap": true,
         "target": "es6",
@@ -11,11 +9,14 @@
         "forceConsistentCasingInFileNames": true,
         "newLine": "lf",
         "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
         "noUnusedLocals": true,
         "removeComments": true,
         "strictNullChecks": true
     },
     "include": [
-        "./**/*"
+        "./**/*",
+        "../node_modules/@types/**/*"
     ]
 }

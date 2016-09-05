@@ -1,34 +1,6 @@
-/*
- * Copyright (c) 2012 - present Adobe Systems Incorporated. All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- *
- */
-
 import * as lodash from "lodash";
+import UpdateFeedInfo from "../types/UpdateFeedInfo";
 
-declare const brackets: any;
-
-/**
- *  Utilities functions for displaying update notifications
- *
- */
 define(function (require, exports, module) {
 
     const _: typeof lodash = node.require("lodash");
@@ -98,7 +70,7 @@ define(function (require, exports, module) {
      */
     let _addedClickHandler = false;
 
-    function transformAtomFeed(obj: any): Array<any> {
+    function transformAtomFeed(obj: any): UpdateFeedInfo {
         const currentVersion = node.require("./package.json").version;
         const GH = `https://github.com/zaggino/brackets-electron`;
 
@@ -130,13 +102,17 @@ define(function (require, exports, module) {
      * for quick fetching later.
      * _versionInfoUrl is used for unit testing.
      */
-    function _getUpdateInformation(force, dontCache, _versionInfoUrl) {
+    function _getUpdateInformation(
+        force: boolean,
+        dontCache: boolean,
+        _versionInfoUrl?: string
+    ): JQueryPromise<UpdateFeedInfo> {
         // Last time the versionInfoURL was fetched
         let lastInfoURLFetchTime = PreferencesManager.getViewState("lastInfoURLFetchTime");
 
-        const result = new $.Deferred();
+        const result = $.Deferred();
         let fetchData = false;
-        let data;
+        let data: UpdateFeedInfo;
 
         // If force is true, always fetch
         if (force) {
@@ -166,7 +142,7 @@ define(function (require, exports, module) {
                 cache: false
             }).done(async function (_response, _textStatus, jqXHR) {
 
-                let jsData;
+                let jsData: any;
                 try {
                     jsData = await parseXml(jqXHR.responseText);
                 } catch (err) {
@@ -210,9 +186,9 @@ define(function (require, exports, module) {
     /**
      * Show a dialog that shows the update
      */
-    function _showUpdateNotificationDialog(updates) {
+    function _showUpdateNotificationDialog(updates: UpdateFeedInfo): void {
         Dialogs.showModalDialogUsingTemplate(Mustache.render(UpdateDialogTemplate, Strings))
-            .done(function (id) {
+            .done(function (id: string) {
                 if (id === Dialogs.DIALOG_BTN_DOWNLOAD) {
                     // The first entry in the updates array has the latest download link
                     NativeApp.openURLInDefaultBrowser(updates[0].downloadURL);
@@ -223,7 +199,7 @@ define(function (require, exports, module) {
         const $dlg        = $(".update-dialog.instance");
         const $updateList = $dlg.find(".update-info");
 
-        updates.Strings = Strings;
+        (updates as any).Strings = Strings;
         $updateList.html(Mustache.render(UpdateListTemplate, updates));
     }
 
@@ -279,7 +255,7 @@ define(function (require, exports, module) {
      * @param {Object} _testValues This should only be used for testing purposes. See comments for details.
      * @return {$.Promise} jQuery Promise object that is resolved or rejected after the update check is complete.
      */
-    function checkForUpdate(force?, _testValues?) {
+    function checkForUpdate(force: boolean = false, _testValues?: any) {
         // This is the last version we notified the user about. If checkForUpdate()
         // is called with "false", only show the update notification dialog if there
         // is an update newer than this one. This value is saved in preferences.
@@ -289,10 +265,10 @@ define(function (require, exports, module) {
         // in the object temporarily override the local values. This should *only* be used for testing.
         // If any overrides are set, permanent changes are not made (including showing
         // the update notification icon and saving prefs).
-        let oldValues;
+        let oldValues: any;
         let usingOverrides = false; // true if any of the values are overridden.
-        const result = new $.Deferred();
-        let versionInfoUrl;
+        const result = $.Deferred();
+        let versionInfoUrl: string | undefined;
 
         if (_testValues) {
             oldValues = {};
@@ -316,7 +292,7 @@ define(function (require, exports, module) {
         }
 
         _getUpdateInformation(force || usingOverrides, usingOverrides, versionInfoUrl)
-            .done(function (allUpdates) {
+            .done(function (allUpdates: UpdateFeedInfo = []) {
 
                 const semver = node.require("semver");
                 const currentVersion = node.require("./package.json").version;
