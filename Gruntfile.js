@@ -319,14 +319,6 @@ module.exports = function (grunt) {
         }
     });
 
-    // task: install
-    grunt.registerTask('install', [
-        'write-config',
-        'sync-tsconfigs',
-        'less',
-        'npm-install-extensions'
-    ]);
-
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
 
@@ -334,8 +326,27 @@ module.exports = function (grunt) {
     // Update version number in package.json and rewrite src/config.json
     grunt.registerTask('set-release', ['update-release-number', 'write-config']);
 
-    // task: build
+    // task: dep-change - run when you modify dependencies in package.json
+    grunt.registerTask('dep-change', [
+        'npm-shrinkwrap'
+    ]);
+
+    // task: install
+    grunt.registerTask('install', [
+        'write-config',
+        'sync-tsconfigs',
+        'less'
+    ]);
+
+    // task: build - build stuff into dist folder
     grunt.registerTask('build', [
+        'npm-install',
+        'npm-install-extensions'
+    ]);
+
+    // task: optimize - optimize contents of dist folder
+    grunt.registerTask('optimize', [
+        'build',
         'eslint:src',
         'jasmine',
         'clean',
@@ -348,7 +359,6 @@ module.exports = function (grunt) {
         /*'cssmin',*/
         /*'uglify',*/
         'copy',
-        'npm-install',
         'cleanempty',
         'usemin',
         'build-config'

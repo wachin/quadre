@@ -47,13 +47,25 @@ module.exports = function (grunt) {
     }
 
     grunt.registerTask("npm-install", "Install node_modules to the dist folder so it gets bundled with release", function () {
-        var npmShrinkwrapJSON = grunt.file.readJSON("npm-shrinkwrap.json");
+        const npmShrinkwrapJSON = grunt.file.readJSON("npm-shrinkwrap.json");
         common.writeJSON(grunt, "dist/npm-shrinkwrap.json", npmShrinkwrapJSON);
 
-        var packageJSON = grunt.file.readJSON("package.json");
-        delete packageJSON.devDependencies;
-        delete packageJSON.scripts; // we don't want to run post-install scripts in dist folder
-        common.writeJSON(grunt, "dist/package.json", packageJSON);
+        const packageJSON = grunt.file.readJSON("package.json");
+        const appJson = _.pick(packageJSON, [
+            'name',
+            'productName',
+            'description',
+            'author',
+            'license',
+            'homepage',
+            'version',
+            'apiVersion',
+            'issues',
+            'repository',
+            'dependencies',
+            'optionalDependencies'
+        ]);
+        common.writeJSON(grunt, "dist/package.json", appJson);
 
         var done = this.async();
         runNpmInstall("dist", function (err) {
@@ -63,7 +75,7 @@ module.exports = function (grunt) {
     
     grunt.registerTask("npm-install-extensions", "Install node_modules for default extensions which have package.json defined", function () {
         var _done = this.async();
-        glob("src/+(extensibility|extensions|LiveDevelopment)/**/package.json", function (err, files) {
+        glob("dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json", function (err, files) {
             if (err) {
                 grunt.log.error(err);
                 return _done(false);

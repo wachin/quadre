@@ -17,28 +17,6 @@ gulp.task('fix-package-json-indent', () => {
     fs.writeFileSync(path.resolve(__dirname, 'package.json'), JSON.stringify(packageJSON, null, 4) + '\n');
 });
 
-gulp.task('copy-dist-package-json', () => {
-    const packageJSON = require(path.resolve(__dirname, 'package.json'));
-    const appJson = _.pick(packageJSON, [
-        'name',
-        'productName',
-        'description',
-        'author',
-        'license',
-        'homepage',
-        'version',
-        'apiVersion',
-        'issues',
-        'repository',
-        'dependencies',
-        'optionalDependencies'
-    ]);
-    const appJsonStr = JSON.stringify(appJson, null, 4);
-    const dir = path.resolve(__dirname, DIST_DIRS[0]);
-    fs.ensureDirSync(dir);
-    fs.writeFileSync(path.resolve(dir, 'package.json'), appJsonStr + '\n');
-});
-
 gulp.task('write-dist-config-json', () => {
     const packageJSON = require(path.resolve(__dirname, 'package.json'));
     const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
@@ -56,7 +34,7 @@ function copyJs(filePath, srcDir, distDir) {
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', ['fix-package-json-indent', 'copy-dist-package-json', 'write-dist-config-json'], (_cb) => {
+gulp.task('build', ['fix-package-json-indent', 'write-dist-config-json'], (_cb) => {
     const cb = _.after(BASE_DIRS.length, _cb);
     BASE_DIRS.forEach((srcDir, idx) => {
         gulp.src(`${srcDir}/**/!(*.ts|*.tsx)`)
