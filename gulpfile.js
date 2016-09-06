@@ -3,28 +3,12 @@
 "use strict";
 
 const _ = require('lodash');
-const fs = require('fs-extra');
 const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
-const exec = require("child_process").exec;
 
 const BASE_DIRS = ['app', 'src'];
 const DIST_DIRS = ['dist', 'dist/www'];
-
-gulp.task('fix-package-json-indent', () => {
-    const packageJSON = require(path.resolve(__dirname, 'package.json'));
-    fs.writeFileSync(path.resolve(__dirname, 'package.json'), JSON.stringify(packageJSON, null, 4) + '\n');
-});
-
-gulp.task('write-dist-config-json', () => {
-    const packageJSON = require(path.resolve(__dirname, 'package.json'));
-    const appConfigJSON = require(path.resolve(__dirname, 'src', 'brackets.config.json'));
-    const appConfigStr = JSON.stringify(_.defaults({}, appConfigJSON, packageJSON), null, 4);
-    const dir = path.resolve(__dirname, DIST_DIRS[1]);
-    fs.ensureDirSync(dir);
-    fs.writeFileSync(path.resolve(dir, 'config.json'), appConfigStr + '\n');
-});
 
 function copyJs(filePath, srcDir, distDir) {
     const relative = path.relative(path.join(__dirname, srcDir), filePath);
@@ -34,7 +18,7 @@ function copyJs(filePath, srcDir, distDir) {
         .pipe(gulp.dest(to));
 }
 
-gulp.task('build', ['fix-package-json-indent', 'write-dist-config-json'], (_cb) => {
+gulp.task('copy-src-dist', (_cb) => {
     const cb = _.after(BASE_DIRS.length, _cb);
     BASE_DIRS.forEach((srcDir, idx) => {
         gulp.src(`${srcDir}/**/!(*.ts|*.tsx)`)
@@ -43,25 +27,7 @@ gulp.task('build', ['fix-package-json-indent', 'write-dist-config-json'], (_cb) 
     });
 });
 
-function runNpmInstall(where, callback) {
-    console.log("running npm install --production in " + where);
-    exec('npm install --production', { cwd: './' + where }, function (err, stdout, stderr) {
-        if (err) {
-            console.error(stderr);
-        } else {
-            console.log(stdout || "finished npm install in " + where);
-        }
-        return err ? callback(stderr) : callback(null, stdout);
-    });
-}
-
-gulp.task('npm-install-dist', ['build'], (cb) => {
-    runNpmInstall("dist", function (err) {
-        return err ? cb(err) : cb(null);
-    });
-});
-
-gulp.task('watch', ['npm-install-dist'], () => {
+gulp.task('watch', () => {
     BASE_DIRS.forEach((srcDir, idx) => {
         watch(`${srcDir}/**/!(*.ts|*.tsx)`, file => {
             copyJs(file.path, srcDir, DIST_DIRS[idx]);
@@ -69,5 +35,3 @@ gulp.task('watch', ['npm-install-dist'], () => {
         });
     });
 });
-
-gulp.task('default', ['npm-install-dist']);
