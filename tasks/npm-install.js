@@ -40,7 +40,8 @@ module.exports = function (grunt) {
             if (err) {
                 grunt.log.error(stderr);
             } else {
-                grunt.log.writeln(stdout || "finished npm install in " + where);
+                if (stdout) { grunt.log.writeln(stdout); }
+                grunt.log.writeln("finished npm install --production in " + where);
             }
             return err ? callback(stderr) : callback(null, stdout);
         });
