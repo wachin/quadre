@@ -22,7 +22,7 @@
  */
 
 /*eslint-env node */
-/*jslint node: true */
+
 "use strict";
 
 module.exports = function (grunt) {
@@ -33,13 +33,11 @@ module.exports = function (grunt) {
     grunt.registerTask("write-config", "Merge package.json and src/brackets.config.json into src/config.json", function () {
         var packageJSON = grunt.file.readJSON("package.json"),
             appConfigJSON = grunt.file.readJSON("src/brackets.config.json");
-
         Object.keys(packageJSON).forEach(function (key) {
             if (appConfigJSON[key] === undefined) {
                 appConfigJSON[key] = packageJSON[key];
             }
         });
-
         common.writeJSON(grunt, "src/config.json", appConfigJSON);
     });
 
@@ -49,13 +47,10 @@ module.exports = function (grunt) {
             distConfig = grunt.file.readJSON("src/config.json");
 
         build.getGitInfo(process.cwd()).then(function (gitInfo) {
-            distConfig.version = distConfig.version.substr(0, distConfig.version.lastIndexOf("-") + 1) + gitInfo.commits;
             distConfig.repository.SHA = gitInfo.sha;
             distConfig.repository.branch = gitInfo.branch;
             distConfig.config.build_timestamp = new Date().toString().split('(')[0].trim();
-
-            common.writeJSON(grunt, "dist/config.json", distConfig);
-
+            common.writeJSON(grunt, "dist/www/config.json", distConfig);
             done();
         }, function (err) {
             grunt.log.writeln(err);

@@ -334,8 +334,7 @@ module.exports = function (grunt) {
     // task: install
     grunt.registerTask('install', [
         'write-config',
-        'sync-tsconfigs',
-        'less'
+        'sync-tsconfigs'
     ]);
 
     // task: build - build stuff into dist folder
@@ -346,21 +345,20 @@ module.exports = function (grunt) {
 
     // task: optimize - optimize contents of dist folder
     grunt.registerTask('optimize', [
-        'build',
-        'eslint:src',
-        'jasmine',
-        'clean',
-        'less',
-        'targethtml',
-        'useminPrepare',
-        'htmlmin',
-        'requirejs',
-        'concat',
-        /*'cssmin',*/
-        /*'uglify',*/
-        'copy',
-        'cleanempty',
-        'usemin',
+        // 'eslint:src',
+        // 'jasmine',
+        // 'clean',
+        // 'less',
+        // 'targethtml',
+        // 'useminPrepare',
+        // 'htmlmin',
+        // 'requirejs',
+        // 'concat',
+        // 'cssmin',
+        // 'uglify',
+        // 'copy',
+        // 'cleanempty',
+        // 'usemin',
         'build-config'
     ]);
 
