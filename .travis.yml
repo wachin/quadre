@@ -32,6 +32,7 @@ before_install:
 install:
 - nvm install 6.5
 - npm -g install npm@latest
+- npm -g install phantomjs@latest
 - node --version
 - npm --version
 - npm prune
