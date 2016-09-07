@@ -28,7 +28,7 @@
             "iconUrl": "https://raw.githubusercontent.com/zaggino/brackets-electron/master/build/icon.ico"
         },
         "linux": {
-            "category": "Development"
+            "category": "Utility;TextEditor;Development;IDE;"
         }
     },
     "directories": {
