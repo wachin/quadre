@@ -405,6 +405,12 @@ define(function (require, exports, module) {
         const encoding = options.encoding || "utf8";
 
         function _finishWrite(created: boolean) {
+            if (typeof data !== "string") {
+                return callback(new Error(`Can't write file, data has to be of type string: ${path}`));
+            }
+            if (/\0/.test(data)) {
+                return callback(new Error(`Can't write file, data contains null bytes: ${path}`));
+            }
             appshell.fs.writeFile(path, data, encoding, function (err: NodeJS.ErrnoException) {
                 if (err) {
                     callback(_mapError(err));
