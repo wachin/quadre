@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 import * as _ from "lodash";
 import { remote } from "electron";
 
@@ -11,4 +13,4 @@ delete fs.delete;
 fs.ensureDir(app.getExtensionsFolder());
 
 // this needs to be node-require style export
-module.exports = { app, fs };
+module.exports = { app, fs, inElectron: true };

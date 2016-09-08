@@ -1585,7 +1585,7 @@ define(function (require, exports, module) {
     function _disableCache() {
         var result = new $.Deferred();
 
-        if (brackets.inBrowser) {
+        if (brackets.inBrowser || brackets.inElectron) {
             result.resolve();
         } else {
             var port = brackets.app.getRemoteDebuggingPort ? brackets.app.getRemoteDebuggingPort() : 9234;

@@ -27,7 +27,7 @@ gulp.task('copy-src-dist', (_cb) => {
     });
 });
 
-gulp.task('watch', () => {
+gulp.task('watch', ['copy-src-dist'], () => {
     BASE_DIRS.forEach((srcDir, idx) => {
         watch(`${srcDir}/**/!(*.ts|*.tsx)`, file => {
             copyJs(file.path, srcDir, DIST_DIRS[idx]);
