@@ -1,7 +1,7 @@
 /* eslint-env node */
 
 import { app, BrowserWindow, ipcMain } from "electron";
-import AutoUpdater from "./auto-updater";
+// import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
 import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath, errToString } from "./utils";
 import * as path from "path";
