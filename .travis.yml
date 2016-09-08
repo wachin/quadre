@@ -38,8 +38,6 @@ install:
 - npm --version
 - npm prune
 - npm install
-- rm -rf ./node_modules/electron-prebuilt
-- npm install electron@1.3.5
 
 script:
 - node --version
