@@ -137,11 +137,13 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
     const win = openBracketsWindow();
+    /* NOTE: this is disabled because our builds are not signed
     try {
         new AutoUpdater(win);
     } catch (err) {
         log.error(errToString(err));
     }
+    */
     setLoggerWindow(win);
 });
 
