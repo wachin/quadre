@@ -38,10 +38,6 @@ install:
 - npm --version
 - npm prune
 - npm install
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    npm uninstall --save-dev electron;
-    npm install --save-dev electron-prebuilt@1.2.8;
-  fi
 
 script:
 - node --version
