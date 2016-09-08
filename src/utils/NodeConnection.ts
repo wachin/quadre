@@ -74,7 +74,12 @@ define((require, exports, module) => {
             if (this._nodeProcess == null) {
                 throw new Error(`Unable to fork ${nodeProcessPath}`);
             }
-
+            this._nodeProcess.on("error", (err: Error) => {
+                 log.error(`[node-process-${this.getName()}] error: ${err.stack}`);
+            });
+            this._nodeProcess.on("exit", (code: number, signal: string) => {
+                 log.error(`[node-process-${this.getName()}] exit code: ${code}, signal: ${signal}`);
+            });
             this._nodeProcess.on("message", (obj: any) => {
 
                 const _type: string = obj.type;
