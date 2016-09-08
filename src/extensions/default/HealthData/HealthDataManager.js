@@ -96,27 +96,31 @@ define(function (require, exports, module) {
 
         getHealthData().done(function (healthData) {
 
-            var url = brackets.config.healthDataServerURL,
+            var urls = brackets.config.healthDataServerURLs,
                 data = JSON.stringify(healthData);
 
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: data,
-                dataType: "text",
-                contentType: "text/plain"
-            })
-                .done(function () {
-                    result.resolve();
+            urls.forEach(url => {
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: data,
+                    dataType: "text",
+                    contentType: "text/plain"
                 })
-                .fail(function (jqXHR, status, errorThrown) {
-                    console.error("Error in sending Health Data. Response : " + jqXHR.responseText + ". Status : " + status + ". Error : " + errorThrown);
-                    result.reject();
-                });
-        })
-            .fail(function () {
-                result.reject();
+                    .done(function () {
+                        result.resolve();
+                    })
+                    .fail(function (jqXHR, status, errorThrown) {
+                        console.error("Error in sending Health Data. Response : " + jqXHR.responseText + ". Status : " + status + ". Error : " + errorThrown);
+                        result.reject();
+                    });
+
             });
+
+        }).fail(function () {
+            result.reject();
+        });
 
         return result.promise();
     }
