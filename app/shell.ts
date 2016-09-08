@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 // import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
-import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath, errToString } from "./utils";
+import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath } from "./utils";
 import * as path from "path";
 import * as shellConfig from "./shell-config";
 
@@ -11,7 +11,7 @@ const appInfo = require("./package.json");
 
 const log = getLogger("main");
 process.on("uncaughtException", (err: Error) => {
-    log.error(`[uncaughtException] ${errToString(err)}`);
+    log.error(`[uncaughtException] ${err.stack}`);
 });
 
 const ipclog = getLogger("ipc-log");
@@ -141,7 +141,7 @@ app.on("ready", function () {
     try {
         new AutoUpdater(win);
     } catch (err) {
-        log.error(errToString(err));
+        log.error(err.stack);
     }
     */
     setLoggerWindow(win);

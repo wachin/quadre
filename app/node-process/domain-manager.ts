@@ -1,7 +1,5 @@
 /* eslint-env node */
 
-import { errToMessage, errToString } from "../utils";
-
 /* eslint-disable */
 export interface DomainDescription {
     domain: string;
@@ -55,6 +53,24 @@ export interface CommandError {
     stack: string;
 }
 /* eslint-enable */
+
+export function errToMessage(err: Error): string {
+    let message = err.message;
+    if (message && err.name) {
+        message = err.name + ": " + message;
+    }
+    return message ? message : err.toString();
+}
+
+export function errToString(err: Error): string {
+    if (err.stack) {
+        return err.stack;
+    }
+    if (err.name && err.message) {
+        return err.name + ": " + err.message;
+    }
+    return err.toString();
+}
 
 /**
  * @private
