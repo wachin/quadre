@@ -7,8 +7,8 @@ const gulp = require('gulp');
 const path = require('path');
 const watch = require('gulp-watch');
 
-const BASE_DIRS = ['app', 'src'];
-const DIST_DIRS = ['dist', 'dist/www'];
+const BASE_DIRS = ['app', 'src', 'samples'];
+const DIST_DIRS = ['dist', 'dist/www', 'dist/samples'];
 
 function copyJs(filePath, srcDir, distDir) {
     const relative = path.relative(path.join(__dirname, srcDir), filePath);
