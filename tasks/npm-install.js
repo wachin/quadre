@@ -75,22 +75,29 @@ module.exports = function (grunt) {
     });
     
     grunt.registerTask("npm-install-extensions", "Install node_modules for default extensions which have package.json defined", function () {
-        var _done = this.async();
-        glob("dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json", function (err, files) {
-            if (err) {
-                grunt.log.error(err);
-                return _done(false);
-            }
-            files = files.filter(function (path) {
-                return path.indexOf("node_modules") === -1;
-            });
-            var done = _.after(files.length, _done);
-            files.forEach(function (file) {
-                runNpmInstall(path.dirname(file), function (err) {
-                    return err ? _done(false) : done();
+        var doneWithTask = this.async();
+        var globs = [
+            "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
+        ];
+        var doneWithGlob = _.after(globs.length, doneWithTask);
+        globs.forEach(g => {
+            glob(g, function (err, files) {
+                if (err) {
+                    grunt.log.error(err);
+                    return doneWithTask(false);
+                }
+                files = files.filter(function (path) {
+                    return path.indexOf("node_modules") === -1;
+                });
+                var doneWithFile = _.after(files.length, doneWithGlob);
+                files.forEach(function (file) {
+                    runNpmInstall(path.dirname(file), function (err) {
+                        return err ? doneWithTask(false) : doneWithFile();
+                    });
                 });
             });
         });
+
     });
 
 };

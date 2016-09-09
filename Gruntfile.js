@@ -340,7 +340,8 @@ module.exports = function (grunt) {
     // task: build - build stuff into dist folder
     grunt.registerTask('build', [
         'npm-install',
-        'npm-install-extensions'
+        'npm-install-extensions',
+        'webpack-browser-dependencies'
     ]);
 
     // task: optimize - optimize contents of dist folder
