@@ -46,8 +46,17 @@ const saveWindowPositionSync = _.partial(_saveWindowPosition, true);
 const saveWindowPosition = _.debounce(_.partial(_saveWindowPosition, false), 100);
 
 // Quit when all windows are closed.
+let windowAllClosed = false;
 app.on("window-all-closed", function () {
-    app.quit();
+    windowAllClosed = true;
+    setTimeout(app.quit, 500);
+});
+app.on("before-quit", function (event) {
+    if (!windowAllClosed) {
+        event.preventDefault();
+        const windows = BrowserWindow.getAllWindows();
+        windows.forEach(win => win.close());
+    }
 });
 
 export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {

@@ -1371,18 +1371,22 @@ define(function (require, exports, module) {
         return CommandManager.execute(Commands.FILE_CLOSE_ALL, { promptOnly: true })
             .done(function () {
                 _windowGoingAway = true;
+            
+                // window is going away, hide it from the user
+                browserWindow.hide();
 
-                // Give everyone a chance to save their state - but don't let any problems block
-                // us from quitting
+                // give everyone a chance to save their state - but don't let any problems block us from quitting
                 try {
                     ProjectManager.trigger("beforeAppClose");
                 } catch (ex) {
                     console.error(ex);
                 }
 
+                // save state, this will call async writeFile and needs a bit of time
                 PreferencesManager.savePreferences();
-
-                postCloseHandler();
+            
+                // setTimeout to make sure saving state got time to finish
+                setTimeout(postCloseHandler, 500);
             })
             .fail(function () {
                 _windowGoingAway = false;
@@ -1439,7 +1443,7 @@ define(function (require, exports, module) {
      */
     function handleFileCloseWindow(commandData) {
         return _handleWindowGoingAway(commandData, function () {
-            window.close();
+            browserWindow.close();
         });
     }
 
@@ -1459,7 +1463,7 @@ define(function (require, exports, module) {
     /** Closes the window, then quits the app */
     function handleFileQuit(commandData) {
         return _handleWindowGoingAway(commandData, function () {
-            brackets.app.quit();
+            browserWindow.close();
         });
     }
 

@@ -118,7 +118,8 @@ export function openURLInDefaultBrowser(
 };
 
 export function quit() {
-    app.quit();
+    // close current window, shell will quit when all windows are closed
+    remote.getCurrentWindow().close();
 };
 
 export function showDeveloperTools() {
