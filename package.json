@@ -1,7 +1,7 @@
 {
     "name": "brackets-electron",
     "productName": "Brackets-Electron",
-    "description": "An open source code editor for the web.",
+    "description": "Brackets-Electron",
     "author": "Brackets Team <brackets-dev@googlegroups.com>",
     "license": "MIT",
     "homepage": "http://brackets.io",

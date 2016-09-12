@@ -726,6 +726,24 @@ define(function (require, exports, module) {
      * first launch.
      */
     function getInitialProjectPath() {
+        var shellArgv = appshell.shell.getProcessArgv();
+        if (shellArgv.length > 1) {
+            try {
+                var path = _.last(shellArgv);
+                var stats = appshell.fs.statSync(path);
+                path = FileUtils.convertWindowsPathToUnixPath(path);
+                if (stats.isFile()) {
+                    exports.one("projectOpen", function () {
+                        FileViewController.openFileAndAddToWorkingSet(path);
+                    });
+                    return FileUtils.getDirectoryPath(path);
+                } else if (stats.isDirectory()) {
+                    return path.endsWith("/") ? path : path + "/";
+                }
+            } catch (err) {
+                /* nothing */
+            }
+        }
         return updateWelcomeProjectPath(PreferencesManager.getViewState("projectPath"));
     }
 
