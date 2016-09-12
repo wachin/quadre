@@ -530,7 +530,7 @@ define(function (require, exports, module) {
                         _nodeConnectionDeferred.resolve();
                     },
                     function () { // Failed to connect
-                        console.error("[Extensions] Failed to connect to node", arguments);
+                        console.error(`ExtensionManagerDomain failed to load: ${arguments}`);
                         _nodeConnectionDeferred.reject();
                     }
                 );

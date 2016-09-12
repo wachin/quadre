@@ -138,7 +138,7 @@ define(function (require, exports, module) {
      */
     function _markStart(id, time) {
         if (activeTests[id.id]) {
-            console.error("Recursive tests with the same id are not supported. Timer id: " + id.id);
+            console.warn("Recursive tests with the same id are not supported. Timer id: " + id.id);
         }
 
         activeTests[id.id] = { startTime: time };
