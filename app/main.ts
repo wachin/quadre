@@ -1,7 +1,7 @@
 /* eslint-env node */
 
 import { app, BrowserWindow, ipcMain } from "electron";
-// import AutoUpdater from "./auto-updater";
+import AutoUpdater from "./auto-updater";
 import * as _ from "lodash";
 import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath } from "./utils";
 import * as path from "path";
@@ -146,13 +146,11 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
     const win = openBracketsWindow();
-    /* NOTE: this is disabled because our builds are not signed
     try {
         new AutoUpdater(win);
     } catch (err) {
         log.error(err.stack);
     }
-    */
     setLoggerWindow(win);
 });
 
