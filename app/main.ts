@@ -156,10 +156,6 @@ app.on("ready", function () {
     setLoggerWindow(win);
 });
 
-export function getMainWindow() {
-    return wins[0];
-};
-
 export function restart(query: {} | string) {
     while (wins.length > 0) {
         const win = wins.shift();

@@ -3,7 +3,7 @@ interface MenuItemOptions extends Electron.MenuItemOptions {}
 import * as _ from "lodash";
 import * as assert from "assert";
 import { Menu } from "electron";
-import * as main from "../shell";
+import * as shell from "./shell";
 
 const menuTemplate: MenuItemOptions[] = [];
 
@@ -161,7 +161,7 @@ export function addMenuItem(
             type: isSeparator ? "separator" : "normal",
             id,
             label: title,
-            click: () => main.getMainWindow().webContents.send("executeCommand", id)
+            click: () => shell.getMainWindow().webContents.send("executeCommand", id)
         };
 
         if (key) {

@@ -5,6 +5,7 @@ import { remote } from "electron";
 
 const app = _.extend({}, require("./app"), remote.require("./appshell/app-menu"));
 const fs = _.extend({}, require("fs-extra"), require("./fs-additions"));
+const shell = remote.require("./appshell/shell");
 
 // prevent using this alias, rather use .remove
 delete fs.delete;
@@ -13,4 +14,4 @@ delete fs.delete;
 fs.ensureDir(app.getExtensionsFolder());
 
 // this needs to be node-require style export
-module.exports = { app, fs, inElectron: true };
+module.exports = { app, fs, shell, inElectron: true };
