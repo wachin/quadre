@@ -6,6 +6,7 @@ import * as _ from "lodash";
 import { getLogger, setLoggerWindow, unsetLoggerWindow, convertWindowsPathToUnixPath } from "./utils";
 import * as path from "path";
 import * as shellConfig from "./shell-config";
+import { readBracketsPreferences } from "./brackets-config";
 
 const appInfo = require("./package.json");
 
@@ -59,7 +60,7 @@ app.on("before-quit", function (event) {
     }
 });
 
-export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {
+export function openMainBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {
 
     // compose path to brackets' index file
     const indexPath = "file:///" + convertWindowsPathToUnixPath(path.resolve(__dirname, "www", "index.html"));
@@ -97,6 +98,23 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
             preload: path.resolve(__dirname, "preload.js")
         }
     };
+
+    const bracketsPreferences = readBracketsPreferences();
+
+    const blinkFeatures = _.get(bracketsPreferences, "shell.blinkFeatures");
+    if (typeof blinkFeatures === "string" && blinkFeatures.length > 0) {
+        _.set(winOptions, "webPreferences.blinkFeatures", blinkFeatures);
+    }
+
+    const disableBlinkFeatures = _.get(bracketsPreferences, "shell.disableBlinkFeatures");
+    if (typeof disableBlinkFeatures === "string" && disableBlinkFeatures.length > 0) {
+        _.set(winOptions, "webPreferences.disableBlinkFeatures", disableBlinkFeatures);
+    }
+
+    const smoothScrolling = _.get(bracketsPreferences, "shell.smoothScrolling", true);
+    if (smoothScrolling === false) {
+        app.commandLine.appendSwitch("disable-smooth-scrolling");
+    }
 
     // create the browser window
     const win = new BrowserWindow(winOptions);
@@ -145,7 +163,7 @@ export function openBracketsWindow(query: {} | string = {}): Electron.BrowserWin
 // This method will be called when Electron has done everything
 // initialization and ready for creating browser windows.
 app.on("ready", function () {
-    const win = openBracketsWindow();
+    const win = openMainBracketsWindow();
     try {
         new AutoUpdater(win);
     } catch (err) {
@@ -162,6 +180,6 @@ export function restart(query: {} | string) {
             win.close();
         }
     }
-    const win = openBracketsWindow(query);
+    const win = openMainBracketsWindow(query);
     setLoggerWindow(win);
 };

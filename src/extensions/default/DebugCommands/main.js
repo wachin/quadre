@@ -96,7 +96,7 @@ define(function (require, exports, module) {
     }
 
     // Implements the 'Run Tests' menu to bring up the Jasmine unit test window
-    var BracketsWindow = window.electron.remote.require("./brackets-window");
+    var BracketsWindow = window.electron.remote.require("./test-brackets-window");
     var TEST_WINDOW_ID = "brackets-test";
     function _runUnitTests(spec) {
         var queryString = spec ? "?spec=" + spec : "";

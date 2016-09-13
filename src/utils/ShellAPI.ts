@@ -8,10 +8,6 @@ define(function (require, exports, module) {
 
     let appReady = false; // Set to true after app is fully initialized
 
-    /**
-     * The native function BracketsShellAPI::DispatchBracketsJSCommand calls this function in order to enable
-     * calling Brackets commands from the native shell.
-     */
     electron.ipcRenderer.on("executeCommand", function (evt: any, eventName: string) {
         // Temporary fix for #2616 - don't execute the command if a modal dialog is open.
         // This should really be fixed with proper menu enabling.
