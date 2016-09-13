@@ -1626,8 +1626,12 @@ define(function (require, exports, module) {
         _isReloading = true;
 
         return CommandManager.execute(Commands.FILE_CLOSE_ALL, { promptOnly: true }).done(function () {
-            // Give everyone a chance to save their state - but don't let any problems block
-            // us from quitting
+            appshell.windowGoingAway = true;
+
+            // window is going away, hide it from the user
+            browserWindow.hide();
+
+            // Give everyone a chance to save their state - but don't let any problems block us from quitting
             try {
                 ProjectManager.trigger("beforeAppClose");
             } catch (ex) {
@@ -1647,7 +1651,7 @@ define(function (require, exports, module) {
                     href = href.substr(0, fragment);
                 }
 
-                electron.remote.require("./main").restart(href);
+                setTimeout(() => electron.remote.require("./main").restart(href), 500);
             });
         }).fail(function () {
             _isReloading = false;

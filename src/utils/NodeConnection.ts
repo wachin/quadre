@@ -75,10 +75,10 @@ define((require, exports, module) => {
                 throw new Error(`Unable to fork ${nodeProcessPath}`);
             }
             this._nodeProcess.on("error", (err: Error) => {
-                 log.error(`[node-process-${this.getName()}] error: ${err.stack}`);
+                log.error(`[node-process-${this.getName()}] error: ${err.stack}`);
             });
             this._nodeProcess.on("exit", (code: number, signal: string) => {
-                 log.error(`[node-process-${this.getName()}] exit code: ${code}, signal: ${signal}`);
+                log.error(`[node-process-${this.getName()}] exit code: ${code}, signal: ${signal}`);
             });
             this._nodeProcess.on("message", (obj: any) => {
 
@@ -109,7 +109,7 @@ define((require, exports, module) => {
                     if (this._autoReconnect) {
                         (this as any).trigger("close", this.connect(true));
                     } else {
-                        (this as any).trigger("close");
+                        (this as any).trigger("close", );
                     }
                 });
                 deferred.resolve();
@@ -175,7 +175,7 @@ define((require, exports, module) => {
                 this._name = this._nodeProcess.pid.toString();
                 return;
             }
-            this._name = "";
+            this._name = this._name || "";
         }
 
         private _cleanup(): void {

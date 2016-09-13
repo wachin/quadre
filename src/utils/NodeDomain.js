@@ -70,7 +70,8 @@ define(function (require, exports, module) {
         connection.on("close", function (event, promise) {
             this.connection.off(EVENT_NAMESPACE);
             this._domainLoaded = false;
-            this._connectionPromise = promise.then(this._load);
+            // in case of calling .disconnect() on connection, promise is undefined
+            this._connectionPromise = promise ? promise.then(this._load) : null;
         }.bind(this));
     }
     EventDispatcher.makeEventDispatcher(NodeDomain.prototype);
