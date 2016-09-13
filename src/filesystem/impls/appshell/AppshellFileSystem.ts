@@ -206,30 +206,41 @@ define(function (require, exports, module) {
      * @param {string} path
      * @param {function(?string, FileSystemStats=)} callback
      */
+    function _convertNodeStats(stats: any): FileSystemStatsType {
+        return new FileSystemStats({
+            isFile: stats.isFile(),
+            mtime: stats.mtime,
+            size: stats.size,
+            realPath: stats.realPath,
+            hash: stats.mtime.getTime()
+        });
+    }
     function stat(path: string, callback: Function) {
         appshell.fs.lstat(path, function (err: NodeJS.ErrnoException, stats: any) {
             if (err) {
-                callback(_mapError(err));
-            } else {
-                if (stats.isSymbolicLink()) {
-                    // TODO: Implement realPath. If "filename" is a symlink,
-                    // realPath should be the actual path to the linked object.
-                    return callback(new Error("realPath for symbolic link is not implemented in appshell.fs.stat"));
-                }
-
-                const options = {
-                    isFile: stats.isFile(),
-                    mtime: stats.mtime,
-                    size: stats.size,
-                    realPath: stats.realPath,
-                    hash: stats.mtime.getTime()
-                };
-
-                const fsStats = new FileSystemStats(options);
-
-                callback(null, fsStats);
+                return callback(_mapError(err));
             }
+            if (stats.isSymbolicLink()) {
+                // TODO: Implement realPath. If "filename" is a symlink,
+                // realPath should be the actual path to the linked object.
+                return callback(new Error("realPath for symbolic link is not implemented in appshell.fs.stat"));
+            }
+            callback(null, _convertNodeStats(stats));
         });
+    }
+    function statSync(path: string): FileSystemStatsType {
+        let stats: any;
+        try {
+            stats = appshell.fs.lstatSync(path);
+        } catch (err) {
+            throw _mapError(err);
+        }
+        if (stats.isSymbolicLink()) {
+            // TODO: Implement realPath. If "filename" is a symlink,
+            // realPath should be the actual path to the linked object.
+            throw new Error("realPath for symbolic link is not implemented in appshell.fs.stat");
+        }
+        return _convertNodeStats(stats);
     }
 
     /**
@@ -411,15 +422,25 @@ define(function (require, exports, module) {
             if (/\0/.test(data)) {
                 return callback(new Error(`Can't write file, data contains null bytes: ${path}`));
             }
-            appshell.fs.writeFile(path, data, encoding, function (err: NodeJS.ErrnoException) {
-                if (err) {
-                    callback(_mapError(err));
-                } else {
-                    stat(path, function (err2: NodeJS.ErrnoException, stat: any) {
-                        callback(err2, stat, created);
-                    });
+            // window is going to close, we need to use sync writes to avoid unfinished writes
+            if (appshell.windowGoingAway) {
+                try {
+                    appshell.fs.writeFileSync(path, data, encoding);
+                    return callback(null, statSync(path), created);
+                } catch (err) {
+                    return callback(_mapError(err));
                 }
-            });
+            } else {
+                appshell.fs.writeFile(path, data, encoding, function (err: NodeJS.ErrnoException) {
+                    if (err) {
+                        callback(_mapError(err));
+                    } else {
+                        stat(path, function (err2: NodeJS.ErrnoException, stat: any) {
+                            callback(err2, stat, created);
+                        });
+                    }
+                });
+            }
         }
 
         stat(path, function (err: NodeJS.ErrnoException, stats: any) {

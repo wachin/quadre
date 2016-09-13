@@ -1350,11 +1350,6 @@ define(function (require, exports, module) {
     }
 
     /**
-     * @private - tracks our closing state if we get called again
-     */
-    var _windowGoingAway = false;
-
-    /**
      * @private
      * Common implementation for close/quit/reload which all mostly
      * the same except for the final step
@@ -1363,14 +1358,14 @@ define(function (require, exports, module) {
      * @param {!function()} failHandler - called when the save fails to cancel closing the window
      */
     function _handleWindowGoingAway(commandData, postCloseHandler, failHandler) {
-        if (_windowGoingAway) {
+        if (appshell.windowGoingAway) {
             //if we get called back while we're closing, then just return
             return (new $.Deferred()).reject().promise();
         }
 
         return CommandManager.execute(Commands.FILE_CLOSE_ALL, { promptOnly: true })
             .done(function () {
-                _windowGoingAway = true;
+                appshell.windowGoingAway = true;
             
                 // window is going away, hide it from the user
                 browserWindow.hide();
@@ -1389,7 +1384,7 @@ define(function (require, exports, module) {
                 setTimeout(postCloseHandler, 500);
             })
             .fail(function () {
-                _windowGoingAway = false;
+                appshell.windowGoingAway = false;
                 if (failHandler) {
                     failHandler();
                 }
@@ -1401,7 +1396,7 @@ define(function (require, exports, module) {
      * Implementation for abortQuit callback to reset quit sequence settings
      */
     function handleAbortQuit() {
-        _windowGoingAway = false;
+        appshell.windowGoingAway = false;
     }
 
     /**
@@ -1420,12 +1415,12 @@ define(function (require, exports, module) {
     if (!window.isSpecRunner) {
         window.onbeforeunload = function () {
             // note: in electron, any non-void return value will cause abort
-            if (!_windowGoingAway) {
+            if (!appshell.windowGoingAway) {
                 return false;
             }
         };
         browserWindow.on("close", function (event) {
-            if (!_windowGoingAway) {
+            if (!appshell.windowGoingAway) {
                 // stop the event for now
                 event.preventDefault();
                 // call _handleWindowGoingAway and then actually close the window
@@ -1433,7 +1428,7 @@ define(function (require, exports, module) {
                     browserWindow.close();
                 });
             }
-            return _windowGoingAway;
+            return appshell.windowGoingAway;
         });
     }
 

@@ -14,4 +14,4 @@ delete fs.delete;
 fs.ensureDir(app.getExtensionsFolder());
 
 // this needs to be node-require style export
-module.exports = { app, fs, shell, inElectron: true };
+module.exports = { app, fs, shell, inElectron: true, windowGoingAway: false };
