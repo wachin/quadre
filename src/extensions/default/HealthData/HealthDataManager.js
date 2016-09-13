@@ -39,6 +39,7 @@ define(function (require, exports, module) {
     });
 
     var ONE_MINUTE = 60 * 1000,
+        ONE_HOUR = 60 * ONE_MINUTE,
         ONE_DAY = 24 * 60 * ONE_MINUTE,
         FIRST_LAUNCH_SEND_DELAY = 30 * ONE_MINUTE,
         timeoutVar;
@@ -167,16 +168,16 @@ define(function (require, exports, module) {
                         // Logged till now
                         HealthLogger.clearHealthData();
                         result.resolve();
+                        timeoutVar = setTimeout(checkHealthDataSend, ONE_DAY + ONE_MINUTE);
                     })
                     .fail(function () {
+                        PreferencesManager.setViewState("nextHealthDataSendTime", currentTime + ONE_HOUR);
                         result.reject();
-                    })
-                    .always(function () {
-                        timeoutVar = setTimeout(checkHealthDataSend, ONE_DAY);
+                        timeoutVar = setTimeout(checkHealthDataSend, ONE_HOUR + ONE_MINUTE);
                     });
 
             } else {
-                timeoutVar = setTimeout(checkHealthDataSend, nextTimeToSend - currentTime);
+                timeoutVar = setTimeout(checkHealthDataSend, nextTimeToSend - currentTime + ONE_MINUTE);
                 result.reject();
             }
         } else {
