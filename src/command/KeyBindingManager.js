@@ -974,7 +974,6 @@ define(function (require, exports, module) {
      * @param {Event} The keydown event to handle.
      */
     function _handleKeyEvent(event) {
-        debugger;
         var i, handled = false;
         for (i = _globalKeydownHooks.length - 1; i >= 0; i--) {
             if (_globalKeydownHooks[i](event)) {
