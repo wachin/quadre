@@ -565,7 +565,8 @@ define(function (require, exports, module) {
                 commandID = command;
                 command = CommandManager.get(commandID);
                 if (!command) {
-                    console.error("addMenuItem(): commandID not found: " + commandID);
+                    var err = new Error();
+                    console.error("addMenuItem(): commandID not found: " + commandID + " at " + err.stack);
                     return null;
                 }
                 name = command.getName();
