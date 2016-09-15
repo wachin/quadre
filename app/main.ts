@@ -48,10 +48,12 @@ const saveWindowPosition = _.debounce(_.partial(_saveWindowPosition, false), 100
 
 // Quit when all windows are closed.
 let windowAllClosed = false;
+
 app.on("window-all-closed", function () {
     windowAllClosed = true;
     setTimeout(app.quit, 500);
 });
+
 app.on("before-quit", function (event) {
     if (!windowAllClosed) {
         event.preventDefault();
@@ -59,6 +61,52 @@ app.on("before-quit", function (event) {
         windows.forEach(win => win.close());
     }
 });
+
+let fileToOpen: string | null = null;
+
+app.on("open-file", (evt: any, path: string) => {
+    const win = getMainBracketsWindow();
+    if (win) {
+        win.webContents.send("open-file", path);
+    } else {
+        // this was called before window was opened, we need to remember it
+        fileToOpen = path;
+    }
+});
+
+ipcMain.on("brackets-app-ready", () => {
+    if (fileToOpen) {
+        getMainBracketsWindow().webContents.send("open-file", fileToOpen);
+        fileToOpen = null;
+    }
+});
+
+app.on("ready", function () {
+    const win = openMainBracketsWindow();
+    try {
+        new AutoUpdater(win);
+    } catch (err) {
+        log.error(err.stack);
+    }
+    setLoggerWindow(win);
+});
+
+export function restart(query: {} | string) {
+    while (wins.length > 0) {
+        const win = wins.shift();
+        if (win) {
+            unsetLoggerWindow(win);
+            win.close();
+        }
+    }
+    // this should mirror stuff done in "ready" handler except for auto-updater
+    const win = openMainBracketsWindow(query);
+    setLoggerWindow(win);
+};
+
+export function getMainBracketsWindow(): Electron.BrowserWindow {
+    return wins[0];
+}
 
 export function openMainBracketsWindow(query: {} | string = {}): Electron.BrowserWindow {
 
@@ -159,27 +207,3 @@ export function openMainBracketsWindow(query: {} | string = {}): Electron.Browse
 
     return win;
 }
-
-// This method will be called when Electron has done everything
-// initialization and ready for creating browser windows.
-app.on("ready", function () {
-    const win = openMainBracketsWindow();
-    try {
-        new AutoUpdater(win);
-    } catch (err) {
-        log.error(err.stack);
-    }
-    setLoggerWindow(win);
-});
-
-export function restart(query: {} | string) {
-    while (wins.length > 0) {
-        const win = wins.shift();
-        if (win) {
-            unsetLoggerWindow(win);
-            win.close();
-        }
-    }
-    const win = openMainBracketsWindow(query);
-    setLoggerWindow(win);
-};

@@ -262,6 +262,9 @@ define(function (require, exports, module) {
         return _fileSelectionFocus;
     }
 
+    electron.ipcRenderer.on("open-file", function (evt, path) {
+        openFileAndAddToWorkingSet(path);
+    });
 
     EventDispatcher.makeEventDispatcher(exports);
 
