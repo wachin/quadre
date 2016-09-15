@@ -12,6 +12,18 @@ Brackets-Electron `x.y.z` will follow `x.y` of Brackets releases, with `z` being
 - shell websocket server is gone, improves performance and stability for node domain code
 - node domains run in their own processes, improves perfomance as they don't block each other 
 
+## how to build from master
+
+```
+git clone https://github.com/zaggino/brackets-electron
+cd brackets-electron
+git submodule update --init
+npm install
+npm run dist
+```
+
+You'll find runnable Brackets-Electron in `dist-build` directory.
+
 ## how to hack
 
 run `npm run dev` in one terminal, `npm start` in the other, be sure to do the usual updates (git pull, git submodule update, npm install, etc) before.
