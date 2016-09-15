@@ -18,7 +18,13 @@ export default class AppUpdater {
 
         const version = app.getVersion();
         const feedUrl = `https://${UPDATE_SERVER_HOST}/update/${os.platform()}/${version}`;
-        autoUpdater.setFeedURL(feedUrl);
+
+        try {
+            autoUpdater.setFeedURL(feedUrl);
+        } catch (err) {
+            log.info(`autoUpdater.setFeedURL failed: ${err}`);
+            return;
+        }
 
         autoUpdater.addListener("update-available", (event: any) => {
             log.info("A new update is available");

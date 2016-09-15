@@ -3,7 +3,7 @@
 import { app } from "electron";
 
 export function isDev() {
-    return /(\/|\\)electron.exe$/i.test(app.getPath("exe"));
+    return /(\/|\\)electron(.exe)?$/i.test(app.getPath("exe"));
 }
 
 let mainWindow: Electron.BrowserWindow | null;
