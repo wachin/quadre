@@ -19,7 +19,6 @@ install:
   - npm --version
   - npm prune
   - npm install
-  - npm rebuild
 
 before_build:
   - node --version
