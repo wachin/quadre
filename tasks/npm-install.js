@@ -21,8 +21,8 @@
  *
  */
 
-/*eslint-env node */
-/*jslint node: true */
+/* eslint-env node */
+
 "use strict";
 
 module.exports = function (grunt) {
@@ -32,18 +32,70 @@ module.exports = function (grunt) {
         build   = require("./build")(grunt),
         glob    = require("glob"),
         path    = require("path"),
-        exec    = require("child_process").exec;
+        exec    = require("child_process").exec,
+        _spawn  = require("child_process").spawn;
+    
+    function spawn(what, args, options, callback) {
+        var child = _spawn(what, args, options);
+        child.on("error", function (err) {
+            return callback(err, null, err.toString());
+        });
+        var stdout = [];
+        child.stdout.addListener("data", function (buffer) {
+            stdout.push(buffer);
+        });
+        var stderr = [];
+        child.stderr.addListener("data", function (buffer) {
+            stderr.push(buffer);
+        });
+        var exitCode;
+        child.addListener("exit", function (code) {
+            exitCode = code;
+        });
+        child.addListener("close", function () {
+            stderr = Buffer.concat(stderr);
+            stdout = Buffer.concat(stdout);
+            return callback(exitCode > 0 ? new Error(stderr) : null, stdout, stderr);
+        });
+        child.stdin.end();
+    }
     
     function runNpmInstall(where, callback) {
         grunt.log.writeln("running npm install --production in " + where);
         exec('npm install --production', { cwd: './' + where }, function (err, stdout, stderr) {
             if (err) {
                 grunt.log.error(stderr);
-            } else {
-                if (stdout) { grunt.log.writeln(stdout); }
-                grunt.log.writeln("finished npm install --production in " + where);
+                return callback(stderr);
             }
-            return err ? callback(stderr) : callback(null, stdout);
+            if (stdout) { grunt.log.writeln(stdout); }
+            grunt.log.writeln("finished npm install --production in " + where);
+            if (!stdout) {
+                // nothing done by npm, skip electron-rebuild
+                grunt.log.writeln("skipping electron-rebuild in " + where);
+                return callback(null);
+            }            
+            grunt.log.writeln("running electron-rebuild in " + where);
+            var npmRebuildPath = path.resolve(
+                __dirname,
+                '..',
+                'node_modules',
+                '.bin',
+                process.platform === 'win32' ? 'electron-rebuild.cmd' : 'electron-rebuild'
+            );
+            spawn(npmRebuildPath, [], { cwd: './' + where }, function (err, stdout, stderr) {
+                if (err) {
+                    if (stderr) {
+                        grunt.log.error(stderr);
+                    } else {
+                        grunt.log.error(err);
+                    }
+                    grunt.log.writeln("failed electron-rebuild in " + where);
+                    return callback(err);
+                }
+                if (stdout) { grunt.log.writeln(stdout); }
+                grunt.log.writeln("finished electron-rebuild in " + where);
+                callback(null);
+            });
         });
     }
 
@@ -79,12 +131,16 @@ module.exports = function (grunt) {
         var globs = [
             "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
         ];
-        var doneWithGlob = _.after(globs.length, doneWithTask);
+        var result;
+        var doneWithGlob = _.after(globs.length, () => {
+            doneWithTask(result);
+        });
         globs.forEach(g => {
             glob(g, function (err, files) {
                 if (err) {
                     grunt.log.error(err);
-                    return doneWithTask(false);
+                    result = false;
+                    return doneWithGlob();
                 }
                 files = files.filter(function (path) {
                     return path.indexOf("node_modules") === -1;
@@ -92,7 +148,10 @@ module.exports = function (grunt) {
                 var doneWithFile = _.after(files.length, doneWithGlob);
                 files.forEach(function (file) {
                     runNpmInstall(path.dirname(file), function (err) {
-                        return err ? doneWithTask(false) : doneWithFile();
+                        if (err) {
+                            result = false;
+                        }
+                        return doneWithFile();
                     });
                 });
             });

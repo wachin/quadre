@@ -41,7 +41,7 @@
         "output": "dist-build"
     },
     "scripts": {
-        "install": "sh ./pre-rebuild.sh && electron-rebuild && grunt install && npm run build",
+        "install": "sh ./pre-rebuild.sh && grunt install && npm run build",
         "build": "rimraf ./dist && gulp copy-src-dist && grunt build && tsc --project app && tsc --project src",
         "build-optimized": "npm run build && grunt optimize",
         "test": "npm run tslint",
@@ -81,9 +81,9 @@
         "@types/ws": "0.0.30",
         "concurrently": "2.2.0",
         "cross-spawn": "4.0.0",
+        "electron": "1.4.0",
         "electron-builder": "6.7.6",
-        "electron-packager": "8.0.0",
-        "electron-prebuilt": "1.2.8",
+        "electron-packager": "8.0.0",        
         "electron-rebuild": "1.2.1",
         "eslint": "3.5.0",
         "glob": "7.0.6",
