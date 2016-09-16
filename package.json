@@ -41,7 +41,7 @@
         "output": "dist-build"
     },
     "scripts": {
-        "install": "sh ./pre-rebuild.sh && grunt install && npm run build",
+        "install": "grunt install && npm run build",
         "build": "rimraf ./dist && gulp copy-src-dist && grunt build && tsc --project app && tsc --project src",
         "build-optimized": "npm run build && grunt optimize",
         "test": "npm run tslint",
