@@ -37,6 +37,7 @@ install:
 - npm --version
 - npm prune
 - npm install
+- npm rebuild
 
 script:
 - node --version
