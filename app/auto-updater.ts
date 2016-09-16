@@ -40,10 +40,12 @@ export default class AppUpdater {
             }
         );
         autoUpdater.addListener("error", (error: any) => {
-            if (error.message === "Can not find Squirrel") {
-                return;
-            }
-            log.error(error.stack ? error.stack : error.toString());
+            // auto-updater fails a lot because builds are not being signed yet, just ignore
+            //
+            // if (error.message === "Can not find Squirrel") {
+            //     return;
+            // }
+            // log.error(error.stack ? error.stack : error.toString());
         });
         autoUpdater.addListener("checking-for-update", (event: any) => {
             log.info("checking-for-update");
