@@ -73,8 +73,7 @@ module.exports = function (grunt) {
                 // nothing done by npm, skip electron-rebuild
                 grunt.log.writeln("skipping electron-rebuild in " + where);
                 return callback(null);
-            }            
-            grunt.log.writeln("running electron-rebuild in " + where);
+            }
             var npmRebuildPath = path.resolve(
                 __dirname,
                 '..',
@@ -82,7 +81,11 @@ module.exports = function (grunt) {
                 '.bin',
                 process.platform === 'win32' ? 'electron-rebuild.cmd' : 'electron-rebuild'
             );
-            spawn(npmRebuildPath, [], { cwd: './' + where }, function (err, stdout, stderr) {
+            var args = [
+                "-m=" + path.resolve(__dirname, '..', where)
+            ];
+            grunt.log.writeln("running electron-rebuild " + args.join(" "));
+            spawn(npmRebuildPath, args, { cwd: './' + where }, function (err, stdout, stderr) {
                 if (err) {
                     if (stderr) {
                         grunt.log.error(stderr);
