@@ -69,7 +69,7 @@ module.exports = function (grunt) {
             }
             if (stdout) { grunt.log.writeln(stdout); }
             grunt.log.writeln("finished npm install --production in " + where);
-            if (!stdout) {
+            if (!stdout || true) {
                 // nothing done by npm, skip electron-rebuild
                 grunt.log.writeln("skipping electron-rebuild in " + where);
                 return callback(null);
