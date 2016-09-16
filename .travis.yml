@@ -37,6 +37,7 @@ install:
 - npm --version
 - npm prune
 - npm install
+- npm install electron-prebuilt@1.4.0
 
 script:
 - node --version
