@@ -28,12 +28,14 @@
 define(function (require, exports, module) {
     "use strict";
 
+    var isDev = electron.remote.require("./utils").isDev();
+
     var PreferencesBase = require("./PreferencesBase"),
         Async           = require("utils/Async"),
 
         // The SETTINGS_FILENAME is used with a preceding "." within user projects
         SETTINGS_FILENAME = "brackets.json",
-        STATE_FILENAME    = "state.json",
+        STATE_FILENAME    = isDev ? "state-dev.json" : "state.json",
 
         // User-level preferences
         userPrefFile = brackets.app.getApplicationSupportDirectory() + "/" + SETTINGS_FILENAME;
