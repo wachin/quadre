@@ -112,7 +112,7 @@
         "q": "1.4.1",
         "rimraf": "2.5.4",
         "tslint": "3.15.1",
-        "typescript": "2.0.2",
+        "typescript": "2.0.3",
         "typescript-eslint-parser": "0.3.0",
         "webpack": "1.13.2",
         "xmldoc": "0.1.2"
