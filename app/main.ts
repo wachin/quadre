@@ -92,10 +92,10 @@ app.on("ready", function () {
 });
 
 app.on("gpu-process-crashed", function () {
-    restart("");
+    restart();
 });
 
-export function restart(query: {} | string) {
+export function restart(query: {} | string = {}) {
     while (wins.length > 0) {
         const win = wins.shift();
         if (win) {
