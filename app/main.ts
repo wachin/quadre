@@ -91,6 +91,10 @@ app.on("ready", function () {
     setLoggerWindow(win);
 });
 
+app.on("gpu-process-crashed", function () {
+    restart("");
+});
+
 export function restart(query: {} | string) {
     while (wins.length > 0) {
         const win = wins.shift();
