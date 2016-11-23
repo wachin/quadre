@@ -25,7 +25,11 @@
         "files": [],
         "npmRebuild": true,
         "win": {
-            "iconUrl": "https://raw.githubusercontent.com/zaggino/brackets-electron/master/build/icon.ico"
+            "iconUrl": "https://raw.githubusercontent.com/zaggino/brackets-electron/master/build/icon.ico",
+            "target": [
+                "nsis",
+                "squirrel"
+            ]
         },
         "linux": {
             "category": "Utility;TextEditor;Development;IDE;",
@@ -60,8 +64,8 @@
         "decompress-zip": "0.3.0",
         "fs-extra": "1.0.0",
         "isbinaryfile": "3.0.1",
-        "lodash": "4.16.6",
-        "request": "2.78.0",
+        "lodash": "4.17.2",
+        "request": "2.79.0",
         "requirejs": "2.3.2",
         "semver": "5.3.0",
         "strip-bom": "3.0.0",
@@ -73,19 +77,19 @@
         "fsevents": "1.0.15"
     },
     "devDependencies": {
-        "@types/electron": "1.4.25",
-        "@types/fs-extra": "0.0.34",
-        "@types/jquery": "2.0.33",
-        "@types/lodash": "4.14.38",
-        "@types/node": "6.0.46",
-        "@types/ws": "0.0.35",
+        "@types/electron": "1.4.27",
+        "@types/fs-extra": "0.0.35",
+        "@types/jquery": "2.0.34",
+        "@types/lodash": "4.14.40",
+        "@types/node": "6.0.50",
+        "@types/ws": "0.0.37",
         "concurrently": "3.1.0",
         "cross-spawn": "5.0.1",
-        "electron": "1.4.5",
-        "electron-builder": "7.23.2",
-        "electron-packager": "8.2.0",
-        "electron-rebuild": "1.3.0",
-        "eslint": "3.9.1",
+        "electron": "1.4.8",
+        "electron-builder": "8.6.0",
+        "electron-packager": "8.3.0",
+        "electron-rebuild": "1.4.0",
+        "eslint": "3.10.2",
         "glob": "7.1.1",
         "grunt": "0.4.5",
         "grunt-cleanempty": "1.0.3",
@@ -111,9 +115,9 @@
         "load-grunt-tasks": "3.5.2",
         "q": "1.4.1",
         "rimraf": "2.5.4",
-        "tslint": "3.15.1",
-        "typescript": "2.0.7",
-        "typescript-eslint-parser": "0.4.0",
+        "tslint": "4.0.1",
+        "typescript": "2.0.10",
+        "typescript-eslint-parser": "1.0.0",
         "webpack": "1.13.3",
         "xmldoc": "0.1.2"
     }
