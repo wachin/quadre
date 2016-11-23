@@ -128,7 +128,7 @@ define((require, exports, module) => {
                 typeof this.domains.base.loadDomainModulesFromPaths === "function"
             ).then(() => {
                 const toReload = Object.keys(this._registeredDomains)
-                    .filter(_path => this._registeredDomains[_path].autoReload === true);
+                    .filter((_path) => this._registeredDomains[_path].autoReload === true);
                 return toReload.length > 0 ?
                     this._loadDomains(toReload).then(success, fail) :
                     success();
@@ -146,10 +146,10 @@ define((require, exports, module) => {
             this._cleanup();
         }
 
-        public loadDomains(paths: string | Array<string>, autoReload: boolean) {
-            const pathArray: Array<string> = Array.isArray(paths) ? paths : [paths];
+        public loadDomains(paths: string | string[], autoReload: boolean) {
+            const pathArray: string[] = Array.isArray(paths) ? paths : [paths];
 
-            pathArray.forEach(_path => {
+            pathArray.forEach((_path) => {
                 if (this._registeredDomains[_path]) {
                     throw new Error(`Domain path already registered: ${_path}`);
                 }
@@ -228,8 +228,8 @@ define((require, exports, module) => {
                 );
                 waitFor(() => {
                     const loadedCount = pathArray
-                        .map(_path => this._registeredDomains[_path].loaded)
-                        .filter(x => x === true)
+                        .map((_path) => this._registeredDomains[_path].loaded)
+                        .filter((x) => x === true)
                         .length;
                     return loadedCount === pathArray.length;
                 }).then(deferred.resolve);

@@ -1,3 +1,5 @@
+/* globals Electron, process */
+
 interface MenuItemOptions extends Electron.MenuItemOptions {}
 
 import * as _ from "lodash";
@@ -39,7 +41,7 @@ function _deleteMenuItemById(id: string, where: MenuItemOptions[] = menuTemplate
     }
     const deleted = where.map(function (menuItem) {
         return menuItem.submenu ? _deleteMenuItemById(id, menuItem.submenu as MenuItemOptions[]) : null;
-    }).filter(x => x === true);
+    }).filter((x) => x === true);
     return deleted.length > 0 ? true : false;
 }
 

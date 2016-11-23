@@ -58,7 +58,7 @@ app.on("before-quit", function (event) {
     if (!windowAllClosed) {
         event.preventDefault();
         const windows = BrowserWindow.getAllWindows();
-        windows.forEach(win => win.close());
+        windows.forEach((win) => win.close());
     }
 });
 

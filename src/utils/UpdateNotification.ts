@@ -298,7 +298,7 @@ define(function (require, exports, module) {
                 const currentVersion = node.require("./package.json").version;
 
                 // Get all available updates
-                const availableUpdates = allUpdates.filter(x => semver.gt(x.versionString, currentVersion));
+                const availableUpdates = allUpdates.filter((x) => semver.gt(x.versionString, currentVersion));
 
                 // When running directly from GitHub source (as opposed to
                 // an installed build), _buildNumber is 0. In this case, if the

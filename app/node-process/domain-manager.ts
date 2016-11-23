@@ -288,7 +288,7 @@ export class DomainManager {
      * @return {boolean} Whether loading succeded. (Failure will throw an exception).
      */
     public loadDomainModulesFromPaths(paths: string[], notify: boolean = true): boolean {
-        paths.forEach(path => {
+        paths.forEach((path) => {
             const m = require(path);
             if (m && m.init) {
                 if (_initializedDomainModules.indexOf(m) < 0) {

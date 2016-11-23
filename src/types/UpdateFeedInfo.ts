@@ -6,9 +6,9 @@ export interface UpdateFeedInfoItem {
     dateString: string;
     releaseNotesURL: string;
     downloadURL: string;
-    newFeatures: Array<any>;
+    newFeatures: any[];
 }
 
-type UpdateFeedInfo = Array<UpdateFeedInfoItem>;
+type UpdateFeedInfo = UpdateFeedInfoItem[];
 
 export default UpdateFeedInfo;

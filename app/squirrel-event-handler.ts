@@ -8,7 +8,7 @@ import * as path from "path";
 const log = getLogger("squirrel-event-handler");
 
 function spawnUpdate(args: string[]): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
 
         const appFolder = path.resolve(process.execPath, "..");
         const rootAtomFolder = path.resolve(appFolder, "..");
@@ -21,7 +21,7 @@ function spawnUpdate(args: string[]): Promise<void> {
         spawn(updateDotExe, args, { detached: true })
             .on("close", resolve);
 
-    }).catch(err => log.error(err));
+    }).catch((err) => log.error(err));
 }
 
 // Optionally do things such as:
