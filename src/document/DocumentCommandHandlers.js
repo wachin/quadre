@@ -188,6 +188,14 @@ define(function (require, exports, module) {
             }
         }
 
+        if (brackets.platform === "mac") {
+            if (!currentDoc) {
+                browserWindow.setRepresentedFilename("");
+            } else if (!currentDoc.isDirty) {
+                browserWindow.setDocumentEdited(false);
+            }
+        }
+
         var projectRoot = ProjectManager.getProjectRoot();
         if (projectRoot) {
             var projectName = projectRoot.name;
@@ -196,8 +204,18 @@ define(function (require, exports, module) {
                 windowTitle = StringUtils.format(WINDOW_TITLE_STRING_DOC, _currentTitlePath, projectName, brackets.config.app_title);
                 // Display dirty dot when there are unsaved changes
                 if (currentDoc && currentDoc.isDirty) {
-                    windowTitle = "• " + windowTitle;
+                    if (brackets.platform === "mac") {
+                        browserWindow.setDocumentEdited(true);
+                    } else {
+                        windowTitle = "• " + windowTitle;
+                    }
                 }
+
+                // macOS have a proxy icon for document window in window title
+                if (brackets.platform === "mac") {
+                    browserWindow.setRepresentedFilename(currentDoc.file.fullPath);
+                }
+
             } else {
                 // A document is not open
                 windowTitle = StringUtils.format(WINDOW_TITLE_STRING_NO_DOC, projectName, brackets.config.app_title);
@@ -1366,7 +1384,7 @@ define(function (require, exports, module) {
         return CommandManager.execute(Commands.FILE_CLOSE_ALL, { promptOnly: true })
             .done(function () {
                 appshell.windowGoingAway = true;
-            
+
                 // window is going away, hide it from the user
                 browserWindow.hide();
 
@@ -1379,7 +1397,7 @@ define(function (require, exports, module) {
 
                 // save state, this will call async writeFile and needs a bit of time
                 PreferencesManager.savePreferences();
-            
+
                 // setTimeout to make sure saving state got time to finish
                 setTimeout(postCloseHandler, 500);
             })
