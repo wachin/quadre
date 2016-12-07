@@ -189,8 +189,11 @@ define(function (require, exports, module) {
         }
 
         if (brackets.platform === "mac") {
-            browserWindow.setDocumentEdited(false);
-            browserWindow.setRepresentedFilename("");
+            if (!currentDoc) {
+                browserWindow.setRepresentedFilename("");
+            } else if (!currentDoc.isDirty) {
+                browserWindow.setDocumentEdited(false);
+            }
         }
 
         var projectRoot = ProjectManager.getProjectRoot();
