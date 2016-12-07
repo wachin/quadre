@@ -164,7 +164,7 @@ export function openMainBracketsWindow(query: {} | string = {}): Electron.Browse
     }
 
     const smoothScrolling = _.get(bracketsPreferences, "shell.smoothScrolling", true);
-    if (smoothScrolling === false) {
+    if (!smoothScrolling) {
         app.commandLine.appendSwitch("disable-smooth-scrolling");
     }
 
