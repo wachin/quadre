@@ -64,6 +64,8 @@ module.exports = function (grunt) {
                         cwd: 'src/',
                         src: [
                             'nls/{,*/}*.js',
+                            'package.json',
+                            'npm-shrinkwrap.json',
                             'xorigin.js',
                             'dependencies.js',
                             'LiveDevelopment/launch.html',
@@ -275,11 +277,6 @@ module.exports = function (grunt) {
                 /* Keep in sync with test/SpecRunner.html dependencies */
                 vendor : [
                     'src/thirdparty/jquery-2.1.3.min.js',
-                    'src/thirdparty/CodeMirror/lib/codemirror.js',
-                    'src/thirdparty/CodeMirror/lib/util/dialog.js',
-                    'src/thirdparty/CodeMirror/lib/util/searchcursor.js',
-                    'src/thirdparty/CodeMirror/addon/edit/closetag.js',
-                    'src/thirdparty/CodeMirror/addon/selection/active-line.js',
                     'src/thirdparty/less-2.5.1.min.js'
                 ],
                 helpers : [
@@ -295,7 +292,19 @@ module.exports = function (grunt) {
                             'spec' : '../test/spec',
                             'text' : 'thirdparty/text/text',
                             'i18n' : 'thirdparty/i18n/i18n'
-                        }
+                        },
+                        map: {
+                            "*": {
+                                "thirdparty/CodeMirror2": "thirdparty/CodeMirror"
+                            }
+                        },
+                        packages: [
+                            {
+                                name: "thirdparty/CodeMirror",
+                                location: "node_modules/codemirror",
+                                main: "lib/codemirror"
+                            }
+                        ]
                     }
                 }
             }
@@ -318,6 +327,9 @@ module.exports = function (grunt) {
             linux: "<%= shell.repo %>/installer/linux/debian/package-root/opt/brackets/brackets"
         }
     });
+
+    // task: install
+    grunt.registerTask('install', ['write-config', 'less', 'npm-install-source']);
 
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);

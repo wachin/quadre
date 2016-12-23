@@ -41,12 +41,6 @@ define(function (require, exports, module) {
     // Data about available updates in the registry
     PreferencesManager.stateManager.definePreference("extensionUpdateInfo", "Array", []);
 
-    PreferencesManager.convertPreferences(module, {
-        lastNotifiedBuildNumber: "user",
-        lastInfoURLFetchTime: "user",
-        updateInfo: "user"
-    }, true);
-
     // URL to load version info from. By default this is loaded no more than once a day. If
     // you force an update check it is always loaded.
 
@@ -199,6 +193,9 @@ define(function (require, exports, module) {
         const $dlg        = $(".update-dialog.instance");
         const $updateList = $dlg.find(".update-info");
 
+        // Make the update notification icon clickable again
+        _addedClickHandler = false;
+
         (updates as any).Strings = Strings;
         $updateList.html(Mustache.render(UpdateListTemplate, updates));
     }
@@ -314,12 +311,14 @@ define(function (require, exports, module) {
                     const $updateNotification = $("#update-notification");
 
                     $updateNotification.css("display", "block");
-                    if (!_addedClickHandler) {
-                        _addedClickHandler = true;
-                        $updateNotification.on("click", function () {
+
+                    $updateNotification.on("click", function () {
+                        // Block the click until the Notification Dialog opens
+                        if (!_addedClickHandler) {
+                            _addedClickHandler = true;
                             checkForUpdate(true);
-                        });
-                    }
+                        }
+                    });
 
                     // Only show the update dialog if force = true, or if the user hasn't been
                     // alerted of this update
