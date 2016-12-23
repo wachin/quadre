@@ -4,7 +4,7 @@ interface MenuItemOptions extends Electron.MenuItemOptions {}
 
 import * as _ from "lodash";
 import * as assert from "assert";
-import { Menu } from "electron";
+import { globalShortcut, Menu } from "electron";
 import * as shell from "./shell";
 
 const menuTemplate: MenuItemOptions[] = [];
@@ -168,6 +168,7 @@ export function addMenuItem(
 
         if (key) {
             newObj.accelerator = key;
+            globalShortcut.register(newObj.accelerator, newObj.click as Function);
         }
 
         const parentObj = _findMenuItemById(parentId);
@@ -254,7 +255,11 @@ export function setMenuItemShortcut(
         }
         if (shortcut) {
             obj.accelerator = shortcut;
+            globalShortcut.register(obj.accelerator, obj.click as Function);
         } else {
+            if (obj.accelerator) {
+                globalShortcut.unregister(obj.accelerator);
+            }
             delete obj.accelerator;
         }
         _refreshMenu(callback.bind(null, null));
