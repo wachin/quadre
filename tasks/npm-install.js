@@ -102,7 +102,7 @@ module.exports = function (grunt) {
         });
     }
 
-    grunt.registerTask("npm-install", "Install node_modules to the dist folder so it gets bundled with release", function () {
+    grunt.registerTask("npm-install-dist", "Install node_modules to the dist folder so it gets bundled with release", function () {
         /*
         try {
             const npmShrinkwrapJSON = grunt.file.readJSON("src/npm-shrinkwrap.json");
@@ -110,6 +110,7 @@ module.exports = function (grunt) {
         } catch (err) {
             grunt.log.error(err);
         }
+        */
 
         const packageJSON = grunt.file.readJSON("package.json");
         const appJson = _.pick(packageJSON, [
@@ -126,22 +127,42 @@ module.exports = function (grunt) {
             'dependencies',
             'optionalDependencies'
         ]);
+
+        const packageJSONSrc = grunt.file.readJSON("src/package.json");
+        for (var key in packageJSONSrc.dependencies) {
+            if (!appJson.dependencies[key]) {
+                throw new Error(key + ' is missing from package.json dependencies!');
+            }
+        }
         common.writeJSON(grunt, "dist/package.json", appJson);
-        */
+
         var done = this.async();
         runNpmInstall("dist", function (err) {
-            return err ? done(false) : done();
+            if (err) {
+                return done(false);
+            }
+
+            // dist/www/node_modules
+            appJson.dependencies = {};
+            for (var key in packageJSONSrc.dependencies) {
+                appJson.dependencies[key] = packageJSON.dependencies[key];
+            }
+            common.writeJSON(grunt, "dist/www/package.json", appJson);
+
+            runNpmInstall("dist/www", function (err) {
+                return err ? done(false) : done();
+            });
         });
     });
 
     grunt.registerTask("npm-install-src", "Install node_modules to the src folder", function () {
         var done = this.async();
         runNpmInstall("src", function (err) {
-            return err ? done(false) : done();
+
         });
     });
     
-    grunt.registerTask("npm-install-extensions", "Install node_modules for default extensions which have package.json defined", function () {
+    function npmInstallExtensions(globs) {
         var doneWithTask = this.async();
         var globs = [
             "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
@@ -171,13 +192,20 @@ module.exports = function (grunt) {
                 });
             });
         });
+    }
 
+    grunt.registerTask("npm-install-extensions-src", "Install node_modules for default extensions which have package.json defined", function () {
+        var globs = [
+            "src/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
+        ];
+        return npmInstallExtensions.call(this, globs);
     });
 
-    grunt.registerTask(
-        "npm-install-source",
-        "Install node_modules for src folder and default extensions which have package.json defined",
-        ["npm-install-src", "npm-install-extensions"]
-    );
+    grunt.registerTask("npm-install-extensions-dist", "Install node_modules for default extensions which have package.json defined", function () {
+        var globs = [
+            "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
+        ];
+        return npmInstallExtensions.call(this, globs);
+    });
 
 };

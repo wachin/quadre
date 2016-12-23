@@ -329,7 +329,7 @@ module.exports = function (grunt) {
     });
 
     // task: install
-    grunt.registerTask('install', ['write-config', 'sync-tsconfigs', 'less', 'npm-install-source']);
+    grunt.registerTask('install', ['write-config', 'sync-tsconfigs', 'less', /*"npm-install-src", "npm-install-extensions-src"*/]);
 
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
@@ -345,8 +345,8 @@ module.exports = function (grunt) {
 
     // task: build - build stuff into dist folder
     grunt.registerTask('build', [
-        'npm-install',
-        'npm-install-extensions',
+        'npm-install-dist',
+        'npm-install-extensions-dist',
         'webpack-browser-dependencies'
     ]);
 
