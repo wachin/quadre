@@ -329,7 +329,7 @@ module.exports = function (grunt) {
     });
 
     // task: install
-    grunt.registerTask('install', ['write-config', 'less', 'npm-install-source']);
+    grunt.registerTask('install', ['write-config', 'sync-tsconfigs', 'less', 'npm-install-source']);
 
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
@@ -341,12 +341,6 @@ module.exports = function (grunt) {
     // task: dep-change - run when you modify dependencies in package.json
     grunt.registerTask('dep-change', [
         'npm-shrinkwrap'
-    ]);
-
-    // task: install
-    grunt.registerTask('install', [
-        'write-config',
-        'sync-tsconfigs'
     ]);
 
     // task: build - build stuff into dist folder
