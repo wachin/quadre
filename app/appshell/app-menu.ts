@@ -1,23 +1,47 @@
+/* eslint no-undef:0 */
 /* globals Electron, process */
 
 interface MenuItemOptions extends Electron.MenuItemOptions {}
 
 import * as _ from "lodash";
 import * as assert from "assert";
-import { globalShortcut, Menu } from "electron";
+import { app, globalShortcut, Menu } from "electron";
 import * as shell from "./shell";
 
 const menuTemplate: MenuItemOptions[] = [];
 
 export const ERR_NOT_FOUND = "NOTFOUND";
 
+app.on("browser-window-focus", function () {
+    _refreshMenu();
+});
+app.on("browser-window-blur", function () {
+    _refreshMenu();
+});
+
+function registerShortcuts(menuItem: MenuItemOptions) {
+    if (menuItem.accelerator) {
+        globalShortcut.register(menuItem.accelerator, menuItem.click as Function);
+    }
+    if (Array.isArray(menuItem.submenu)) {
+        menuItem.submenu.forEach((i) => registerShortcuts(i));
+    }
+}
+
 const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
+    globalShortcut.unregisterAll();
+    const mainWindow = shell.getMainWindow();
+    if (mainWindow.isFocused()) {
+        menuTemplate.forEach((menuItem) => registerShortcuts(menuItem));
+    }
 }, 100);
 
-function _refreshMenu(callback: () => void) {
+function _refreshMenu(callback?: () => void) {
     __refreshMenu();
-    process.nextTick(callback);
+    if (callback) {
+        process.nextTick(callback);
+    }
 }
 
 function _findMenuItemPosition(
@@ -168,7 +192,6 @@ export function addMenuItem(
 
         if (key) {
             newObj.accelerator = key;
-            globalShortcut.register(newObj.accelerator, newObj.click as Function);
         }
 
         const parentObj = _findMenuItemById(parentId);
@@ -255,11 +278,7 @@ export function setMenuItemShortcut(
         }
         if (shortcut) {
             obj.accelerator = shortcut;
-            globalShortcut.register(obj.accelerator, obj.click as Function);
         } else {
-            if (obj.accelerator) {
-                globalShortcut.unregister(obj.accelerator);
-            }
             delete obj.accelerator;
         }
         _refreshMenu(callback.bind(null, null));
