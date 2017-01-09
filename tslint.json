@@ -11,6 +11,7 @@
     "only-arrow-functions": false,
     "ordered-imports": false,
     "quotemark": [true, "double"],
+    "space-before-function-paren": [true, {"anonymous": "always", "named": "never", "asyncArrow": "always"}],
     "trailing-comma": [true, "never"],
     "variable-name": false
   }

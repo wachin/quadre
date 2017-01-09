@@ -55,7 +55,7 @@ export function readTextFile(filename: string, encoding: string, callback: (err:
     }
     // isbinaryfile check first because it checks first 1000 bytes of a file
     // so we don't load whole file if it's binary
-    isbinaryfile(filename, function(err: Error, isBinary: boolean) {
+    isbinaryfile(filename, function (err: Error, isBinary: boolean) {
         if (err) {
             return callback(err);
         }

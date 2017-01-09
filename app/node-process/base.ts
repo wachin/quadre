@@ -6,7 +6,7 @@ import DomainManager from "./domain-manager";
 // load the base domain
 DomainManager.loadDomainModulesFromPaths(["./BaseDomain"], false);
 
-process.on("message", async function(obj: any) {
+process.on("message", async function (obj: any) {
     const _type: string = obj.type;
     switch (_type) {
         case "message":

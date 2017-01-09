@@ -33,7 +33,7 @@ export function open(url: string | string[], id: string, options: Electron.Brows
             preload: path.resolve(__dirname, "preload.js")
         }
     });
-    win.on("closed", function() {
+    win.on("closed", function () {
         delete windows[id];
     });
     win.loadURL(resolveUrl(url));
