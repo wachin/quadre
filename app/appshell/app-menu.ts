@@ -19,9 +19,13 @@ app.on("browser-window-blur", function () {
     _refreshMenu();
 });
 
+const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
+
 function registerShortcuts(menuItem: MenuItemOptions) {
     if (menuItem.accelerator) {
-        globalShortcut.register(menuItem.accelerator, menuItem.click as Function);
+        if (null == systemShortcuts.find((x) => x === menuItem.accelerator)) {
+            globalShortcut.register(menuItem.accelerator, menuItem.click as Function);
+        }
     }
     if (Array.isArray(menuItem.submenu)) {
         menuItem.submenu.forEach((i) => registerShortcuts(i));
