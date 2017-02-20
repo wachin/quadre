@@ -120,8 +120,8 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        dest: 'src/thirdparty/CodeMirror',
-                        cwd: 'src/node_modules/codemirror',
+                        dest: 'dist/www/thirdparty/CodeMirror',
+                        cwd: 'dist/www/node_modules/codemirror',
                         src: [
                             'addon/{,*/}*',
                             'keymap/{,*/}*',
@@ -133,8 +133,8 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         flatten: true,
-                        dest: 'src/thirdparty',
-                        cwd: 'src/node_modules',
+                        dest: 'dist/www/thirdparty',
+                        cwd: 'dist/www/node_modules',
                         src: [
                             'less/dist/less.min.js'
                         ]
@@ -355,6 +355,7 @@ module.exports = function (grunt) {
     // task: build - build stuff into dist folder
     grunt.registerTask('build', [
         'npm-install-dist',
+        'copy:thirdparty',
         'npm-install-extensions-dist',
         'webpack-browser-dependencies'
     ]);
