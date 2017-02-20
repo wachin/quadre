@@ -128,12 +128,6 @@ module.exports = function (grunt) {
             'optionalDependencies'
         ]);
 
-        const packageJSONSrc = grunt.file.readJSON("src/package.json");
-        for (var key in packageJSONSrc.dependencies) {
-            if (!appJson.dependencies[key]) {
-                throw new Error(key + ' is missing from package.json dependencies!');
-            }
-        }
         common.writeJSON(grunt, "dist/package.json", appJson);
 
         var done = this.async();
@@ -143,9 +137,10 @@ module.exports = function (grunt) {
             }
 
             // dist/www/node_modules
+            const packageJSONSrc = grunt.file.readJSON("src/package.json");
             appJson.dependencies = {};
             for (var key in packageJSONSrc.dependencies) {
-                appJson.dependencies[key] = packageJSON.dependencies[key];
+                appJson.dependencies[key] = packageJSONSrc.dependencies[key];
             }
             common.writeJSON(grunt, "dist/www/package.json", appJson);
 

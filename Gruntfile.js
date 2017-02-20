@@ -64,11 +64,10 @@ module.exports = function (grunt) {
                         cwd: 'src/',
                         src: [
                             'nls/{,*/}*.js',
-                            'package.json',
-                            'npm-shrinkwrap.json',
                             'xorigin.js',
                             'dependencies.js',
                             'LiveDevelopment/launch.html',
+                            'LiveDevelopment/transports/**',
                             'LiveDevelopment/MultiBrowserImpl/transports/**',
                             'LiveDevelopment/MultiBrowserImpl/launchers/**'
                         ]
@@ -103,13 +102,7 @@ module.exports = function (grunt) {
                             '!extensions/default/*/thirdparty/**/*.htm{,l}',
                             'extensions/dev/*',
                             'extensions/samples/**/*',
-                            'thirdparty/CodeMirror/addon/{,*/}*',
-                            'thirdparty/CodeMirror/keymap/{,*/}*',
-                            'thirdparty/CodeMirror/lib/{,*/}*',
-                            'thirdparty/CodeMirror/mode/{,*/}*',
-                            '!thirdparty/CodeMirror/mode/**/*.html',
-                            '!thirdparty/CodeMirror/**/*test.js',
-                            'thirdparty/CodeMirror/theme/{,*/}*',
+                            'thirdparty/CodeMirror/**',
                             'thirdparty/i18n/*.js',
                             'thirdparty/text/*.js'
                         ]
@@ -120,6 +113,31 @@ module.exports = function (grunt) {
                         dest: 'dist/styles',
                         cwd: 'src/styles',
                         src: ['jsTreeTheme.css', 'fonts/{,*/}*.*', 'images/*', 'brackets.min.css*']
+                    }
+                ]
+            },
+            thirdparty: {
+                files: [
+                    {
+                        expand: true,
+                        dest: 'src/thirdparty/CodeMirror',
+                        cwd: 'src/node_modules/codemirror',
+                        src: [
+                            'addon/{,*/}*',
+                            'keymap/{,*/}*',
+                            'lib/{,*/}*',
+                            'mode/{,*/}*',
+                            'theme/{,*/}*',
+                        ]
+                    },
+                    {
+                        expand: true,
+                        flatten: true,
+                        dest: 'src/thirdparty',
+                        cwd: 'src/node_modules',
+                        src: [
+                            'less/dist/less.min.js'
+                        ]
                     }
                 ]
             }
@@ -276,8 +294,11 @@ module.exports = function (grunt) {
                 specs : '<%= meta.specs %>',
                 /* Keep in sync with test/SpecRunner.html dependencies */
                 vendor : [
+                    // For reference to why this polyfill is needed see Issue #7951.
+                    // The need for this should go away once the version of phantomjs gets upgraded to 2.0
+                    'test/polyfills.js',
                     'src/thirdparty/jquery-2.1.3.min.js',
-                    'src/thirdparty/less-2.5.1.min.js'
+                    'src/thirdparty/less.min.js'
                 ],
                 helpers : [
                     'test/spec/PhantomHelper.js'
@@ -292,19 +313,7 @@ module.exports = function (grunt) {
                             'spec' : '../test/spec',
                             'text' : 'thirdparty/text/text',
                             'i18n' : 'thirdparty/i18n/i18n'
-                        },
-                        map: {
-                            "*": {
-                                "thirdparty/CodeMirror2": "thirdparty/CodeMirror"
-                            }
-                        },
-                        packages: [
-                            {
-                                name: "thirdparty/CodeMirror",
-                                location: "node_modules/codemirror",
-                                main: "lib/codemirror"
-                            }
-                        ]
+                        }
                     }
                 }
             }

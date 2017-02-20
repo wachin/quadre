@@ -513,6 +513,7 @@ define({
     "INVALID_VERSION_NUMBER"               : "The package version number ({0}) is invalid.",
     "INVALID_BRACKETS_VERSION"             : "The {APP_NAME} compatibility string ({0}) is invalid.",
     "DISALLOWED_WORDS"                     : "The words ({1}) are not allowed in the {0} field.",
+    "NPM_INSTALL_FAILED"                   : "npm install command failed: {0}",
     "API_NOT_COMPATIBLE"                   : "The extension isn't compatible with this version of {APP_NAME}. It's installed in your disabled extensions folder.",
     "MISSING_MAIN"                         : "The package has no main.js file.",
     "EXTENSION_ALREADY_INSTALLED"          : "Installing this package will overwrite a previously installed extension. Overwrite the old extension?",
@@ -792,5 +793,6 @@ define({
     "DESCRIPTION_RECENT_FILES_NAV"                   : "Enable/disable navigation in recent files",
     "DESCRIPTION_SHELL_BLINK_FEATURES"               : "blinkFeatures option from electron BrowserWindow class",
     "DESCRIPTION_SHELL_DISABLE_BLINK_FEATURES"       : "disableBlinkFeatures option from electron BrowserWindow class",
-    "DESCRIPTION_SHELL_SMOOTH_SCROLLING"             : "Enable/disable smooth scrolling"
+    "DESCRIPTION_SHELL_SMOOTH_SCROLLING"             : "Enable/disable smooth scrolling",
+    "DESCRIPTION_LIVEDEV_WEBSOCKET_PORT"             : "Port on which WebSocket Server runs for Live Preview"
 });
