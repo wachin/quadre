@@ -6,7 +6,7 @@ interface MenuItemOptions extends Electron.MenuItemOptions {}
 
 import * as _ from "lodash";
 import * as assert from "assert";
-import { app, globalShortcut, Menu } from "electron";
+import { app, Menu } from "electron";
 import * as shell from "./shell";
 
 const menuTemplate: MenuItemOptions[] = [];
@@ -20,14 +20,16 @@ app.on("browser-window-blur", function () {
     _refreshMenu();
 });
 
-const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
+// const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
 
 function registerShortcuts(menuItem: MenuItemOptions) {
+    /* this shouldn't be used
     if (menuItem.accelerator) {
         if (null == systemShortcuts.find((x) => x === menuItem.accelerator)) {
             globalShortcut.register(menuItem.accelerator, menuItem.click as Function);
         }
     }
+    */
     if (Array.isArray(menuItem.submenu)) {
         menuItem.submenu.forEach((i) => registerShortcuts(i));
     }
@@ -35,7 +37,7 @@ function registerShortcuts(menuItem: MenuItemOptions) {
 
 const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
-    globalShortcut.unregisterAll();
+    // globalShortcut.unregisterAll();
     const mainWindow = shell.getMainWindow();
     if (mainWindow.isFocused()) {
         menuTemplate.forEach((menuItem) => registerShortcuts(menuItem));
