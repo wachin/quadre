@@ -21,8 +21,14 @@ app.on("browser-window-blur", function () {
     _refreshMenu();
 });
 
+// if overriden, these won't work in Brackets modal windows like Git commit
+const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
+
 function registerShortcuts(win: Electron.BrowserWindow, menuItem: MenuItemOptions) {
-    if (menuItem.accelerator) {
+    if (
+        menuItem.accelerator &&
+        systemShortcuts.find((x) => x === menuItem.accelerator) == null
+    ) {
         electronLocalshortcut.register(win, menuItem.accelerator, menuItem.click as Function);
     }
     if (Array.isArray(menuItem.submenu)) {
