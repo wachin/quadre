@@ -8,6 +8,7 @@ import * as _ from "lodash";
 import * as assert from "assert";
 import { app, Menu } from "electron";
 import * as shell from "./shell";
+import * as electronLocalshortcut from "electron-localshortcut";
 
 const menuTemplate: MenuItemOptions[] = [];
 
@@ -20,27 +21,21 @@ app.on("browser-window-blur", function () {
     _refreshMenu();
 });
 
-// const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
-
-function registerShortcuts(menuItem: MenuItemOptions) {
-    /* this shouldn't be used
+function registerShortcuts(win: Electron.BrowserWindow, menuItem: MenuItemOptions) {
     if (menuItem.accelerator) {
-        if (null == systemShortcuts.find((x) => x === menuItem.accelerator)) {
-            globalShortcut.register(menuItem.accelerator, menuItem.click as Function);
-        }
+        electronLocalshortcut.register(win, menuItem.accelerator, menuItem.click as Function);
     }
-    */
     if (Array.isArray(menuItem.submenu)) {
-        menuItem.submenu.forEach((i) => registerShortcuts(i));
+        menuItem.submenu.forEach((i) => registerShortcuts(win, i));
     }
 }
 
 const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
-    // globalShortcut.unregisterAll();
     const mainWindow = shell.getMainWindow();
+    electronLocalshortcut.unregisterAll(mainWindow);
     if (mainWindow.isFocused()) {
-        menuTemplate.forEach((menuItem) => registerShortcuts(menuItem));
+        menuTemplate.forEach((menuItem) => registerShortcuts(mainWindow, menuItem));
     }
 }, 100);
 

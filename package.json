@@ -46,6 +46,7 @@
         }
     },
     "scripts": {
+        "dep-change": "grunt dep-change",
         "install": "grunt install && npm run build",
         "build": "rimraf ./dist && gulp copy-src-dist && grunt build && tsc --project app && tsc --project src",
         "build-optimized": "npm run build && grunt optimize",
@@ -63,6 +64,7 @@
         "anymatch": "1.3.0",
         "chokidar": "1.6.1",
         "decompress-zip": "0.3.0",
+        "electron-localshortcut": "1.1.0",
         "fs-extra": "2.0.0",
         "isbinaryfile": "3.0.2",
         "lodash": "4.17.4",
