@@ -127,7 +127,7 @@ module.exports = function (grunt) {
                             'keymap/{,*/}*',
                             'lib/{,*/}*',
                             'mode/{,*/}*',
-                            'theme/{,*/}*',
+                            'theme/{,*/}*'
                         ]
                     },
                     {
@@ -147,7 +147,7 @@ module.exports = function (grunt) {
                 force: true,
                 files: false
             },
-            src: ['dist/**/*'],
+            src: ['dist/**/*']
         },
         less: {
             dist: {
@@ -338,14 +338,14 @@ module.exports = function (grunt) {
     });
 
     // task: install
-    grunt.registerTask('install', ['write-config', 'sync-tsconfigs', 'less', /*"npm-install-src", "npm-install-extensions-src"*/]);
+    grunt.registerTask('install', ['write-config:dist', 'sync-tsconfigs', 'less', /*'npm-install-source', 'pack-web-dependencies'*/]);
 
     // task: test
     grunt.registerTask('test', ['eslint', 'jasmine', 'nls-check']);
 
     // task: set-release
     // Update version number in package.json and rewrite src/config.json
-    grunt.registerTask('set-release', ['update-release-number', 'write-config']);
+    grunt.registerTask('set-release', ['update-release-number', 'write-config:dev']);
 
     // task: dep-change - run when you modify dependencies in package.json
     grunt.registerTask('dep-change', [
@@ -373,7 +373,7 @@ module.exports = function (grunt) {
         // 'concat',
         // 'cssmin',
         // 'uglify',
-        // 'copy',
+        // 'copy:dist',
         // 'cleanempty',
         // 'usemin',
         'build-config'

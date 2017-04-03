@@ -20,7 +20,6 @@
         "extension_registry"         : "https://s3.amazonaws.com/extend.brackets/registry.json",
         "extension_url"              : "https://s3.amazonaws.com/extend.brackets/{0}/{0}-{1}.zip",
         "linting.enabled_by_default" : true,
-        "build_timestamp"            : "",
-        "healthDataServerURLs"       : ["https://health.brackets.io/healthDataLog", "https://brackets-electron-data.herokuapp.com/api/health"]
+        "build_timestamp"            : ""
     }
 }
