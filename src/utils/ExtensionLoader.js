@@ -72,6 +72,13 @@ define(function (require, exports, module) {
     });
 
     /**
+     * Returns the full path to the default extensions directory.
+     */
+    function getDefaultExtensionPath() {
+        return FileUtils.getNativeBracketsDirectoryPath() + "/extensions/default";
+    }
+
+    /**
      * Returns the full path of the default user extensions directory. This is in the users
      * application support directory, which is typically
      * /Users/<user>/Application Support/Brackets/extensions/user on the mac, and
@@ -408,7 +415,11 @@ define(function (require, exports, module) {
             if (params.get("reloadWithoutUserExts") === "true") {
                 paths = ["default"];
             } else {
-                paths = ["default", "dev", getUserExtensionPath()];
+                paths = [
+                    getDefaultExtensionPath(),
+                    "dev",
+                    getUserExtensionPath()
+                ];
             }
         }
 
@@ -456,6 +467,7 @@ define(function (require, exports, module) {
 
     // public API
     exports.init = init;
+    exports.getDefaultExtensionPath = getDefaultExtensionPath;
     exports.getUserExtensionPath = getUserExtensionPath;
     exports.getRequireContextForExtension = getRequireContextForExtension;
     exports.loadExtension = loadExtension;
