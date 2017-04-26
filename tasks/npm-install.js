@@ -60,9 +60,20 @@ module.exports = function (grunt) {
         child.stdin.end();
     }
     
-    function runNpmInstall(where, callback) {
-        grunt.log.writeln("running npm install --production in " + where);
-        exec('npm install --production', { cwd: './' + where }, function (err, stdout, stderr) {
+    function runNpmInstall(where, productionMode, callback) {
+        if (typeof productionMode === "function") {
+            callback = productionMode;
+            productionMode = true;
+        }
+
+        var cmd = 'npm install';
+        if (productionMode) {
+            cmd += ' --production';
+        }
+
+        grunt.log.writeln("running " + cmd + " in " + where);
+
+        exec(cmd, { cwd: './' + where }, function (err, stdout, stderr) {
             if (err) {
                 grunt.log.error(stderr);
                 return callback(stderr);
@@ -157,32 +168,32 @@ module.exports = function (grunt) {
         });
     });
     
-    function npmInstallExtensions(globs) {
-        var doneWithTask = this.async();
-        var globs = [
-            "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
-        ];
-        var result;
-        var doneWithGlob = _.after(globs.length, () => {
-            doneWithTask(result);
-        });
-        globs.forEach(g => {
-            glob(g, function (err, files) {
-                if (err) {
-                    grunt.log.error(err);
-                    result = false;
-                    return doneWithGlob();
-                }
-                files = files.filter(function (path) {
-                    return path.indexOf("node_modules") === -1;
-                });
-                var doneWithFile = _.after(files.length, doneWithGlob);
-                files.forEach(function (file) {
-                    runNpmInstall(path.dirname(file), function (err) {
-                        if (err) {
-                            result = false;
-                        }
-                        return doneWithFile();
+    function npmInstallExtensions(globs, filterOutNodeModules = true, runProduction = true) {
+        return new Promise(function (resolve) {
+            var result;
+            var doneWithGlob = _.after(globs.length, () => {
+                resolve(result);
+            });
+            globs.forEach(g => {
+                glob(g, function (err, files) {
+                    if (err) {
+                        grunt.log.error(err);
+                        result = false;
+                        return doneWithGlob();
+                    }
+                    if (filterOutNodeModules) {
+                        files = files.filter(function (path) {
+                            return path.indexOf("node_modules") === -1;
+                        });
+                    }
+                    var doneWithFile = _.after(files.length, doneWithGlob);
+                    files.forEach(function (file) {
+                        runNpmInstall(path.dirname(file), runProduction, function (err) {
+                            if (err) {
+                                result = false;
+                            }
+                            return doneWithFile();
+                        });
                     });
                 });
             });
@@ -190,17 +201,30 @@ module.exports = function (grunt) {
     }
 
     grunt.registerTask("npm-install-extensions-src", "Install node_modules for default extensions which have package.json defined", function () {
-        var globs = [
+        var doneWithTask = this.async();
+        npmInstallExtensions([
             "src/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
-        ];
-        return npmInstallExtensions.call(this, globs);
+        ]).then(function (result) {
+            doneWithTask(result);
+        });
     });
 
     grunt.registerTask("npm-install-extensions-dist", "Install node_modules for default extensions which have package.json defined", function () {
-        var globs = [
-            "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
-        ];
-        return npmInstallExtensions.call(this, globs);
+        var doneWithTask = this.async();
+        Promise.all([
+            npmInstallExtensions([
+                "dist/www/node_modules/codemirror/package.json" // make sure codemirror builds
+            ], false, false),
+            npmInstallExtensions([
+                "dist/www/+(extensibility|extensions|LiveDevelopment)/**/package.json"
+            ])
+        ]).then(function (results) {
+            var result = !results.some(x => x != null);
+            doneWithTask(result);
+        }).catch(function (err) {
+            grunt.log.error('err ' + err);
+            doneWithTask(false);
+        });
     });
 
 };
