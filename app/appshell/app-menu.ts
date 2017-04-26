@@ -165,7 +165,7 @@ export function addMenu(title: string, id: string, position: string, relativeId:
         const err = _addToPosition(newObj, menuTemplate, position || "last", relativeId);
         _refreshMenu(callback.bind(null, err));
     });
-};
+}
 
 export function addMenuItem(
     parentId: string,
@@ -216,7 +216,7 @@ export function addMenuItem(
         const err = _addToPosition(newObj, parentObj.submenu as MenuItemOptions[], position || "last", relativeId);
         _refreshMenu(callback.bind(null, err));
     });
-};
+}
 
 export function getMenuItemState(
     commandId: string,
@@ -230,7 +230,7 @@ export function getMenuItemState(
         }
         callback(null, obj.enabled === true, obj.checked === true);
     });
-};
+}
 
 export function getMenuPosition(
     commandId: string,
@@ -241,7 +241,7 @@ export function getMenuPosition(
         const res = _findMenuItemPosition(commandId);
         return res ? callback(null, res[0], res[1]) : callback(null);
     });
-};
+}
 
 export function getMenuTitle(commandId: string, callback: (err?: string | null, title?: string) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
@@ -252,7 +252,7 @@ export function getMenuTitle(commandId: string, callback: (err?: string | null, 
         }
         callback(null, obj.label);
     });
-};
+}
 
 export function removeMenu(commandId: string, callback: (err?: string | null, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
@@ -260,7 +260,7 @@ export function removeMenu(commandId: string, callback: (err?: string | null, de
         const deleted = _deleteMenuItemById(commandId);
         _refreshMenu(callback.bind(null, deleted ? null : ERR_NOT_FOUND));
     });
-};
+}
 
 export function removeMenuItem(commandId: string, callback: (err?: string | null, deleted?: boolean) => void) {
     assert(commandId && typeof commandId === "string", "commandId must be a string");
@@ -268,7 +268,7 @@ export function removeMenuItem(commandId: string, callback: (err?: string | null
         const deleted = _deleteMenuItemById(commandId);
         _refreshMenu(callback.bind(null, deleted ? null : ERR_NOT_FOUND));
     });
-};
+}
 
 export function setMenuItemShortcut(
     commandId: string,
@@ -291,7 +291,7 @@ export function setMenuItemShortcut(
         }
         _refreshMenu(callback.bind(null, null));
     });
-};
+}
 
 export function setMenuItemState(
     commandId: string,
@@ -316,7 +316,7 @@ export function setMenuItemState(
         }
         _refreshMenu(callback.bind(null, null));
     });
-};
+}
 
 export function setMenuTitle(
     commandId: string,
@@ -333,4 +333,4 @@ export function setMenuTitle(
         obj.label = title;
         _refreshMenu(callback.bind(null, null));
     });
-};
+}

@@ -15,22 +15,22 @@ const trash = require("trash");
 
 export function isBinaryFile(filename: string, callback: (err?: Error, res?: boolean) => void) {
     isbinaryfile(filename, callback);
-};
+}
 
 export function isBinaryFileSync(filename: string): boolean {
     return isbinaryfile(filename);
-};
+}
 
 export function isEncodingSupported(encoding: string): boolean {
     return ["ascii", "utf-8", "utf8"].indexOf(encoding.toLowerCase()) !== -1;
-};
+}
 
 export function isNetworkDrive(path: string, callback: (err: Error | null, res: boolean) => void) {
     // TODO: implement
     process.nextTick(function () {
         callback(null, false);
     });
-};
+}
 
 export function moveToTrash(path: string, callback: (err: Error | null, result?: any) => void) {
     fs.stat(path, function (err) {
@@ -42,7 +42,7 @@ export function moveToTrash(path: string, callback: (err: Error | null, result?:
             .then((r: any) => callback(null, r))
             .catch((e: Error) => callback(e));
     });
-};
+}
 
 export function readTextFile(filename: string, encoding: string, callback: (err: Error | null, res?: string) => void) {
     if (typeof encoding === "function") {
@@ -82,7 +82,7 @@ export function readTextFile(filename: string, encoding: string, callback: (err:
             callback(null, content);
         });
     });
-};
+}
 
 export function remove(path: string, callback: (err?: Error) => void) {
     fs.stat(path, function (err, stats) {
@@ -91,7 +91,7 @@ export function remove(path: string, callback: (err?: Error) => void) {
         }
         fs.remove(path, callback);
     });
-};
+}
 
 export function rename(oldPath: string, newPath: string, callback: (err?: Error) => void) {
     fs.stat(newPath, function (err, stats) {
@@ -105,7 +105,7 @@ export function rename(oldPath: string, newPath: string, callback: (err?: Error)
         err.code = "EEXIST";
         callback(err);
     });
-};
+}
 
 export function showOpenDialog(
     allowMultipleSelection: boolean,
@@ -140,7 +140,7 @@ export function showOpenDialog(
     }, function (fileNames: string[]) {
         callback(null, fileNames ? fileNames.map(utils.convertWindowsPathToUnixPath) : []);
     });
-};
+}
 
 export function showSaveDialog(
     title: string,
@@ -157,4 +157,4 @@ export function showSaveDialog(
     }, function (path) {
         callback(null, utils.convertWindowsPathToUnixPath(path));
     });
-};
+}

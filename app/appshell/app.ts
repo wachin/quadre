@@ -28,22 +28,22 @@ export function closeLiveBrowser(callback: (err?: Error) => void) {
         // TODO: implement
         callback(new Error("app.closeLiveBrowser not implemented"));
     });
-};
+}
 
 export function dragWindow() {
     // TODO: implement
     throw new Error("app.dragWindow not implemented");
-};
+}
 
 export function getApplicationSupportDirectory() {
     return utils.convertWindowsPathToUnixPath(app.getPath("userData"));
-};
+}
 
 export function getExtensionsFolder() {
     return utils.convertWindowsPathToUnixPath(
         path.resolve(getApplicationSupportDirectory(), "extensions")
     );
-};
+}
 
 // TODO: it seems that both arguments aren't needed anymore
 export function showExtensionsFolder(appURL: any, callback: (err?: Error) => void) {
@@ -51,47 +51,47 @@ export function showExtensionsFolder(appURL: any, callback: (err?: Error) => voi
         shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(getExtensionsFolder()));
         if (callback) { callback(); }
     });
-};
+}
 
 export function getDroppedFiles(callback: (err?: Error) => void) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getDroppedFiles not implemented"));
     });
-};
+}
 
 // return the number of milliseconds that have elapsed since the application was launched
 export function getElapsedMilliseconds() {
     const diff = process.hrtime(startupTime);
     // diff = [ seconds, nanoseconds ]
     return diff[0] * 1000 + diff[1] / 1000000;
-};
+}
 
 export function getPendingFilesToOpen(callback: (err?: Error, filePaths?: string[]) => void) {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.getPendingFilesToOpen not implemented"), []);
     });
-};
+}
 
 export function getRemoteDebuggingPort(): number {
     return REMOTE_DEBUGGING_PORT;
-};
+}
 
 export function getUserHomeDirectory(): string {
     return utils.convertWindowsPathToUnixPath(app.getPath("home"));
-};
+}
 
 export function getUserDocumentsDirectory(): string {
     return utils.convertWindowsPathToUnixPath(app.getPath("documents"));
-};
+}
 
 export function installCommandLine(callback: (err?: Error) => void): void {
     process.nextTick(function () {
         // TODO: implement
         callback(new Error("app.installCommandLine not implemented"));
     });
-};
+}
 
 export function openLiveBrowser(
     url: string,
@@ -102,7 +102,7 @@ export function openLiveBrowser(
         // TODO: implement
         callback(new Error("app.openLiveBrowser not implemented" + url));
     });
-};
+}
 
 export function openURLInDefaultBrowser(
     url: string,
@@ -115,17 +115,17 @@ export function openURLInDefaultBrowser(
             callback();
         }
     });
-};
+}
 
 export function quit() {
     // close current window, shell will quit when all windows are closed
     remote.getCurrentWindow().close();
-};
+}
 
 export function showDeveloperTools() {
     const win = remote.getCurrentWindow();
     win.webContents.openDevTools({ mode: "detach" });
-};
+}
 
 // TODO: get rid of callback? This call is not throwing any error.
 export function showOSFolder(
@@ -136,4 +136,4 @@ export function showOSFolder(
         shell.showItemInFolder(utils.convertBracketsPathToWindowsPath(path));
         if (callback) { callback(); }
     });
-};
+}

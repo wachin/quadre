@@ -6,7 +6,6 @@
     "member-ordering": false,
     "no-namespace": false,
     "no-unused-expression": false,
-    "no-unused-new": false,
     "no-var-requires": false,
     "object-literal-sort-keys": false,
     "only-arrow-functions": false,

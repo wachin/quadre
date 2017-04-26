@@ -106,7 +106,7 @@ export function restart(query: {} | string = {}) {
     // this should mirror stuff done in "ready" handler except for auto-updater
     const win = openMainBracketsWindow(query);
     setLoggerWindow(win);
-};
+}
 
 export function getMainBracketsWindow(): Electron.BrowserWindow {
     return wins[0];
