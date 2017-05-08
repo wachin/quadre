@@ -365,6 +365,8 @@ define(function (require, exports, module) {
 
         // Editor supplies some standard keyboard behavior extensions of its own
         var codeMirrorKeyMap = {
+            "Ctrl-D": function () { window.triggerKeyboardShortcut("Ctrl-D"); },
+
             "Tab": function () { self._handleTabKey(); },
             "Shift-Tab": "indentLess",
 

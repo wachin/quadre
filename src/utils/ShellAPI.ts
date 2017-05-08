@@ -7,8 +7,13 @@ define(function (require, exports, module) {
     const Commands       = require("command/Commands");
 
     let appReady = false; // Set to true after app is fully initialized
+    let appShortcuts: { [shortcut: string]: string } = {};
 
-    electron.ipcRenderer.on("executeCommand", function (evt: any, eventName: string) {
+    electron.ipcRenderer.on("updateShortcuts", function (evt: any, data: string) {
+        appShortcuts = JSON.parse(data);
+    });
+
+    function executeCommand(eventName: string) {
         // Temporary fix for #2616 - don't execute the command if a modal dialog is open.
         // This should really be fixed with proper menu enabling.
         if ($(".modal.instance").length || !appReady) {
@@ -25,6 +30,18 @@ define(function (require, exports, module) {
 
         const promise = CommandManager.execute(eventName);
         return (promise && promise.state() === "rejected") ? false : true;
+    }
+
+    (window as any).triggerKeyboardShortcut = (shortcut: string) => {
+        const normalized = shortcut.replace(/-/g, "+");
+        if (appShortcuts[normalized]) {
+            return executeCommand(appShortcuts[normalized]);
+        }
+        return null;
+    };
+
+    electron.ipcRenderer.on("executeCommand", function (evt: any, eventName: string) {
+        return executeCommand(eventName);
     });
 
     electron.ipcRenderer.on("console-msg", function (evt: any, method: string, ...args: string[]) {

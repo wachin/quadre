@@ -8,7 +8,6 @@ import * as _ from "lodash";
 import * as assert from "assert";
 import { app, Menu } from "electron";
 import * as shell from "./shell";
-import * as electronLocalshortcut from "electron-localshortcut";
 
 const menuTemplate: MenuItemOptions[] = [];
 
@@ -21,15 +20,11 @@ app.on("browser-window-blur", function () {
     _refreshMenu();
 });
 
-// if overriden, these won't work in Brackets modal windows like Git commit
-const systemShortcuts = ["Ctrl+Z", "Ctrl+Y", "Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+A"];
+let currentShortcuts: { [accelerator: string]: string } = {};
 
 function registerShortcuts(win: Electron.BrowserWindow, menuItem: MenuItemOptions) {
-    if (
-        menuItem.accelerator &&
-        systemShortcuts.find((x) => x === menuItem.accelerator) == null
-    ) {
-        electronLocalshortcut.register(win, menuItem.accelerator, menuItem.click as Function);
+    if (menuItem.accelerator && menuItem.id) {
+        currentShortcuts[menuItem.accelerator] = menuItem.id;
     }
     if (Array.isArray(menuItem.submenu)) {
         menuItem.submenu.forEach((i) => registerShortcuts(win, i));
@@ -39,9 +34,10 @@ function registerShortcuts(win: Electron.BrowserWindow, menuItem: MenuItemOption
 const __refreshMenu = _.debounce(function () {
     Menu.setApplicationMenu(Menu.buildFromTemplate(_.cloneDeep(menuTemplate)));
     const mainWindow = shell.getMainWindow();
-    electronLocalshortcut.unregisterAll(mainWindow);
     if (mainWindow.isFocused()) {
+        currentShortcuts = {};
         menuTemplate.forEach((menuItem) => registerShortcuts(mainWindow, menuItem));
+        mainWindow.webContents.send("updateShortcuts", JSON.stringify(currentShortcuts));
     }
 }, 100);
 
