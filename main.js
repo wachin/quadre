@@ -34,15 +34,31 @@ define(function (require, exports, module) {
     preferences.set('excludeList', defaultExcludeList);
   }
 
+  function escapeStringToRegexp(str) {
+    // https://github.com/sindresorhus/escape-string-regexp/blob/master/index.js
+    return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+  }
+
   function toRegexp(str) {
     if (typeof str !== 'string') { str = str.toString(); }
-    // https://github.com/sindresorhus/escape-string-regexp/blob/master/index.js
-    str = str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-    // if starts with slash, make it possible start of the string too
-    if (str[0] === '/') { str = '(^|/)' + str.slice(1); }
+    var start = '';
+    var body = str;
+    var end = '';
+    // if starts with ^, it must be start of the string
+    // if starts with /, it can be either start of the string or start of the file/folder
+    if (body[0] === '^') {
+      start = '^';
+      body = body.slice(1);
+    } else if (body[0] === '/') {
+      start = '(^|/)';
+      body = body.slice(1);
+    }
     // if ends with slash, make it possible end of the string too
-    if (str.slice(-1) === '/') { str = str.slice(0, -1) + '(/|$)'; }
-    return str;
+    if (body.slice(-1) === '/') {
+      end = '(/|$)';
+      body = body.slice(0, -1);
+    }
+    return start + escapeStringToRegexp(body) + end;
   }
 
   function fetchVariables(forceRefresh) {
