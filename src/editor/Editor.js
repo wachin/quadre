@@ -365,7 +365,11 @@ define(function (require, exports, module) {
 
         // Editor supplies some standard keyboard behavior extensions of its own
         var codeMirrorKeyMap = {
+            // calls to triggerKeyboardShortcut are here to stop codemirror stealing shortcuts
+            // note: order of shift and ctrl must be reversed
             "Ctrl-D": function () { window.triggerKeyboardShortcut("Ctrl-D"); },
+            "Shift-Ctrl-Up": function () { window.triggerKeyboardShortcut("Ctrl-Shift-Up"); },
+            "Shift-Ctrl-Down": function () { window.triggerKeyboardShortcut("Ctrl-Shift-Down"); },
 
             "Tab": function () { self._handleTabKey(); },
             "Shift-Tab": "indentLess",
