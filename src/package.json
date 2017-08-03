@@ -1,7 +1,7 @@
 {
   "name": "brackets-src",
   "dependencies": {
-    "codemirror": "https://github.com/codemirror/CodeMirror.git#09adaf419347ee69ac5dad816eb2da697f8f6106",
+    "codemirror": "https://github.com/codemirror/CodeMirror.git#4c3d3c79a40fce2b38b4b507d3d0e944b56db9ff",
     "less": "2.7.2"
   }
 }
