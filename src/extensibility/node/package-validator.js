@@ -301,11 +301,14 @@ function extractAndValidateFiles(zipPath, extractDir, options, callback) {
                     npmOptions.push('--proxy ' + options.proxy);
                 }
 
-                if (process.platform.startsWith('win')) {
-                    // On Windows force a 32 bit build until nodejs 64 bit is supported.
-                    npmOptions.push('--arch=ia32');
-                    npmOptions.push('--npm_config_arch=ia32');
-                    npmOptions.push('--npm_config_target_arch=ia32');
+                npmOptions.push("--disturl=https://atom.io/download/electron");
+                npmOptions.push("--runtime=electron");
+                npmOptions.push("--target=" + options.electronVersion);
+
+                if (process.platform === "darwin") {
+                    npmOptions.push("--arch=x64");
+                } else {
+                    npmOptions.push("--arch=" + process.arch);
                 }
 
                 performNpmInstallIfRequired(npmOptions, {
@@ -321,7 +324,6 @@ function extractAndValidateFiles(zipPath, extractDir, options, callback) {
     unzipper.extract({
         path: extractDir,
         filter: function (file) {
-            console.log(JSON.stringify(file));
             return file.type !== "SymbolicLink" &&
               // Exclude toplevel .npmrc file
               !(file.filename === ".npmrc" && file.path === ".npmrc");
