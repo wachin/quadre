@@ -311,7 +311,10 @@ function extractAndValidateFiles(zipPath, extractDir, options, callback) {
     unzipper.extract({
         path: extractDir,
         filter: function (file) {
-            return file.type !== "SymbolicLink";
+            console.log(JSON.stringify(file));
+            return file.type !== "SymbolicLink" &&
+              // Exclude toplevel .npmrc file
+              !(file.filename === ".npmrc" && file.path === ".npmrc");
         }
     });
 }
