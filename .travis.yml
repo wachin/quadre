@@ -34,7 +34,6 @@ install:
 - nvm install 8.3
 - node --version
 - npm --version
-- npm prune
 - npm install
 
 script:
