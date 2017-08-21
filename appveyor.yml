@@ -12,7 +12,7 @@ cache:
 
 install:
   - git submodule update --init --recursive
-  - ps: Install-Product node 6 x64
+  - ps: Install-Product node 8 x64
   - set PATH=%APPDATA%\npm;%PATH%
   - node --version
   - npm --version
