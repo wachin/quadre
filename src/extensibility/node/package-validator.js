@@ -295,10 +295,23 @@ function extractAndValidateFiles(zipPath, extractDir, options, callback) {
                     errors.push([Errors.MISSING_MAIN, zipPath, mainJS]);
                 }
 
-                performNpmInstallIfRequired({
-                    production: true,
-                    proxy: options.proxy
-                }, {
+                var npmOptions = ['--production'];
+
+                if (options.proxy) {
+                    npmOptions.push('--proxy ' + options.proxy);
+                }
+
+                npmOptions.push("--disturl=https://atom.io/download/electron");
+                npmOptions.push("--runtime=electron");
+                npmOptions.push("--target=" + options.electronVersion);
+
+                if (process.platform === "darwin") {
+                    npmOptions.push("--arch=x64");
+                } else {
+                    npmOptions.push("--arch=" + process.arch);
+                }
+
+                performNpmInstallIfRequired(npmOptions, {
                     errors: errors,
                     metadata: metadata,
                     commonPrefix: commonPrefix,
@@ -311,7 +324,9 @@ function extractAndValidateFiles(zipPath, extractDir, options, callback) {
     unzipper.extract({
         path: extractDir,
         filter: function (file) {
-            return file.type !== "SymbolicLink";
+            return file.type !== "SymbolicLink" &&
+              // Exclude toplevel .npmrc file
+              !(file.filename === ".npmrc" && file.path === ".npmrc");
         }
     });
 }
