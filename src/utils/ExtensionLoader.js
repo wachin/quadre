@@ -58,9 +58,9 @@ define(function (require, exports, module) {
      */
     var contexts    = {};
 
-    // The native directory path ends with either "test" or "src". We need "src" to
+    // The native directory path ends with either "test" or "www". We need "www" to
     // load the text and i18n modules.
-    srcPath = srcPath.replace(/\/test$/, "/src"); // convert from "test" to "src"
+    srcPath = srcPath.replace(/\/test$/, "/www"); // convert from "test" to "www"
 
 
     // Retrieve the global paths

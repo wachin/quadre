@@ -339,7 +339,7 @@ define(function (require, exports, module) {
         // Convert from symlinked path to real path - otherwise Brackets will think they are two separate files.
         // Note: we assume the current project open in our parent Brackets window is the Brackets source
         var bracketsRoot = FileUtils.getNativeBracketsDirectoryPath();
-        if (bracketsRoot.substr(bracketsRoot.length - 4) === "/src") {
+        if (bracketsRoot.substr(bracketsRoot.length - 4) === "/www") {
             var symlinkPrefix = bracketsRoot.substring(0, bracketsRoot.length - 3);  // include trailing "/"
             if (path.indexOf(symlinkPrefix) === 0) {
                 var realPrefix = ProjectManager.getProjectRoot().fullPath;
