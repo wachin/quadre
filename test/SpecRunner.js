@@ -23,9 +23,9 @@
 
 /*global beforeEach, afterEach, beforeFirst, afterLast, jasmine */
 
-// Set the baseUrl to brackets/src
+// Set the baseUrl to dist/www
 require.config({
-    baseUrl: "../src",
+    baseUrl: "../www",
     paths: {
         "test"                          : "../test",
         "perf"                          : "../test/perf",
@@ -134,7 +134,7 @@ define(function (require, exports, module) {
         }
 
         // This returns path to test folder, so convert to src
-        bracketsPath = bracketsPath.replace(/\/test$/, "/src");
+        bracketsPath = bracketsPath.replace(/\/test$/, "/www");
 
         return Async.doInParallel(paths, function (dir) {
             var extensionPath = dir;
