@@ -136,7 +136,7 @@ define(function LiveDevelopment(require, exports, module) {
 
     // special case for test/SpecRunner.html since we can't tell how requirejs
     // baseUrl is configured dynamically
-    launcherUrl = launcherUrl.replace("/test/SpecRunner.html", "/src/index.html");
+    launcherUrl = launcherUrl.replace("/test/SpecRunner.html", "/www/index.html");
 
     launcherUrl = launcherUrl.substr(0, launcherUrl.lastIndexOf("/")) + "/LiveDevelopment/launch.html";
     launcherUrl = window.location.origin + launcherUrl;
