@@ -150,6 +150,7 @@ define(function (require, exports, module) {
     require("help/HelpCommandHandlers");
     require("search/FindInFilesUI");
     require("search/FindReplace");
+    require("settings/Settings");
 
     PerfUtils.addMeasurement("brackets module dependencies resolved");
 
