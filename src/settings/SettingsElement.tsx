@@ -1,12 +1,21 @@
 import React = require("thirdparty/react");
 
-//export class Welcome extends React.Component<any, any> {
-//    constructor(props: any){
-//        super(props);
+//class Welcome extends React.Component<{}, void> {
+//    constructor() {
+//        super();
 //    }
-//    render() {
-//        return <h1 style={{color: "orange"}}>Welcome, {this.props.name}</h1>;
+//    public render() {
+//        return (
+//            <h1 style={{color: "orange"}}>Welcome</h1>
+//        );
 //    }
 //}
 
-export const element = <h1 style={{color: "orange"}}>Welcome</h1>;
+const Welcome = React.createClass({
+    render() {
+        //, {this.props.name}
+        return <h1 style={{color: "orange"}}>Welcome</h1>;
+    }
+});
+
+export const element = <Welcome></Welcome>;
