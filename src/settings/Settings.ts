@@ -8,7 +8,7 @@ import { SettingsView } from "settings/SettingsView";
  * @return {jQuery.Promise}
  */
 function _createSettingsView(file, pane) {
-    var view = pane.getViewForPath(file.fullPath);
+    let view = pane.getViewForPath(file.fullPath);
 
     if (view) {
         pane.showView(view);
@@ -23,10 +23,10 @@ function _createSettingsView(file, pane) {
  * Initialization, register our view factory
  */
 MainViewFactory.registerViewFactory({
-    canOpenFile: function (fullPath) {
-        return fullPath.endsWith('.settings');
+    canOpenFile(fullPath) {
+        return fullPath.endsWith(".settings");
     },
-    openFile: function (file, pane) {
+    openFile(file, pane) {
         return _createSettingsView(file, pane);
     }
 });
