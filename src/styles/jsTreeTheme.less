@@ -27,7 +27,7 @@
 @li-min-height: 23px;
 
 .jstree {
-    ul,
+    .jstree-children,
     li {
         display: block;
         margin: 0 0 0 0;
@@ -44,7 +44,7 @@
         position: relative;
     }
 
-    > ul > li {
+    > .jstree-children > li {
         margin-left: 0;
     }
 
@@ -80,7 +80,7 @@
         margin-right: 18px;
     }
 
-    > ul > li {
+    > .jstree-children > li {
         margin-right: 0;
     }
 
@@ -91,11 +91,11 @@
 }
 
 li {
-    &.jstree-open > ul {
+    &.jstree-open > .jstree-children {
         display: block;
     }
 
-    &.jstree-closed > ul {
+    &.jstree-closed > .jstree-children {
         display: none;
     }
 }
