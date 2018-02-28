@@ -977,10 +977,14 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     public render() {
         const extensions = this.props.extensions;
         const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
-        const ulProps: React.HTMLProps<HTMLUListElement> = { key: "children" };
+        let className = "jstree-children";
         if (this.props.isRoot) {
-            ulProps.className = "jstree-brackets jstree-no-dots " + iconClass;
+            className += " jstree-brackets jstree-no-dots " + iconClass;
         }
+        const ulProps: React.HTMLProps<HTMLUListElement> = {
+            className,
+            key: "children"
+        };
 
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
