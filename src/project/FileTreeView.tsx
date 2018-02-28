@@ -644,7 +644,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
         });
 
         const liProps = {
-            className: getClasses("jstree-leaf", this.props.extensions, this.getDataForExtension),
+            className: getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension),
             onClick: this.handleClick,
             onMouseDown: this.props.handleMouseDown,
             onDoubleClick: this.handleDoubleClick
@@ -904,7 +904,7 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         });
 
         const liProps = {
-            className: getClasses("jstree-" + nodeClass, this.props.extensions, this.getDataForExtension),
+            className: getClasses("jstree-node jstree-" + nodeClass, this.props.extensions, this.getDataForExtension),
             onClick: this.handleClick,
             onMouseDown: this.props.handleMouseDown
         };

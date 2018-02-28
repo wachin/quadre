@@ -24,27 +24,27 @@
 
 /* Styles for jsTree control */
 /* (these are based on jsTree's default theme .css file, so they are not very LESS-like) */
-@li-min-height: 23px;
+@node-min-height: 23px;
 
 .jstree {
     .jstree-children,
-    li {
+    .jstree-node {
         display: block;
         margin: 0 0 0 0;
         padding: 0 0 0 0;
         list-style-type: none;
     }
 
-    li {
+    .jstree-node {
         display: block;
-        min-height: @li-min-height;
+        min-height: @node-min-height;
         line-height: 16px;
         white-space: nowrap;
         min-width: 18px;
         position: relative;
     }
 
-    > .jstree-children > li {
+    > .jstree-children > .jstree-node {
         margin-left: 0;
     }
 
@@ -75,12 +75,12 @@
 }
 
 .jstree-rtl {
-    li {
+    .jstree-node {
         margin-left: 0;
         margin-right: 18px;
     }
 
-    > .jstree-children > li {
+    > .jstree-children > .jstree-node {
         margin-right: 0;
     }
 
@@ -90,7 +90,7 @@
     }
 }
 
-li {
+.jstree-node {
     &.jstree-open > .jstree-children {
         display: block;
     }
@@ -107,7 +107,7 @@ ins.jstree-icon {
 }
 
 .jstree-brackets {
-    li,
+    .jstree-node,
     ins {
         background-image: url("images/jsTreeSprites.svg");
         background-repeat: no-repeat;
@@ -126,7 +126,7 @@ ins.jstree-icon {
         }
     }
 
-    li {
+    .jstree-node {
         background-position: -90px 0;
         background-repeat: repeat-y;
         vertical-align: baseline;
@@ -197,7 +197,7 @@ ins.jstree-icon {
     // These styles control the expand/collapse arrow icons.
     // Most other styles in this file with background-position are unused.
     .jstree-no-dots {
-        li,
+        .jstree-node,
         .jstree-leaf > ins {
             background: transparent;
         }
