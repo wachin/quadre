@@ -1187,11 +1187,8 @@ define(function (require, exports, module) {
     // Initialize variables and listeners that depend on the HTML DOM
     AppInit.htmlReady(function () {
         $projectTreeContainer = $("#project-files-container");
-        $projectTreeContainer.addClass("jstree jstree-brackets");
-        $projectTreeContainer.css("overflow", "auto");
-        $projectTreeContainer.css("position", "relative");
 
-        fileTreeViewContainer = $("<div>").appendTo($projectTreeContainer)[0];
+        fileTreeViewContainer = $("<div class=\"file-tree-view-container\">").appendTo($projectTreeContainer)[0];
 
         model.setSelectionWidth($projectTreeContainer.width());
 
