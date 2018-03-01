@@ -1220,7 +1220,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
 
-        return <div>
+        return <div className="file-tree-view">
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}

@@ -106,7 +106,24 @@ ins.jstree-icon {
     left: -@jstree-icon-backindent !important;
 }
 
+.file-tree-view-container {
+    .vbox;
+    .box-flex(1);
+
+    .file-tree-view {
+        .vbox;
+        .box-flex(1);
+        overflow: auto;
+    }
+}
+
 .jstree-brackets {
+    position: relative;
+    width: 100%;
+
+    .vbox;
+    .box-flex(1);
+
     .jstree-node,
     ins {
         background-image: url("images/jsTreeSprites.svg");
