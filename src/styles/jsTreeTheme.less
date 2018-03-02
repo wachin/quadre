@@ -91,11 +91,11 @@
 }
 
 .jstree-node {
-    &.jstree-open > .jstree-children {
+    &.jstree-open + .jstree-children {
         display: block;
     }
 
-    &.jstree-closed > .jstree-children {
+    &.jstree-closed + .jstree-children {
         display: none;
     }
 }

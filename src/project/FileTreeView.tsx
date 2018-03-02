@@ -881,16 +881,16 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
 
         if (isOpen && children) {
             nodeClass = "open";
-            childNodes = <DirectoryContents
-                depth={this.props.depth + 1}
-                parentPath={fullPath(this.props)}
-                contents={children}
-                extensions={this.props.extensions}
-                actions={this.props.actions}
-                forceRender={this.props.forceRender}
-                platform={this.props.platform}
-                sortDirectoriesFirst={this.props.sortDirectoriesFirst}
-                key="directoryContents"></DirectoryContents>;
+            //childNodes = <DirectoryContents
+            //    depth={this.props.depth + 1}
+            //    parentPath={fullPath(this.props)}
+            //    contents={children}
+            //    extensions={this.props.extensions}
+            //    actions={this.props.actions}
+            //    forceRender={this.props.forceRender}
+            //    platform={this.props.platform}
+            //    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
+            //    key="directoryContents"></DirectoryContents>;
         } else {
             nodeClass = "closed";
         }
@@ -1017,16 +1017,19 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     forceRender={self.props.forceRender}
                     platform={self.props.platform}
                     key={name}></WithContextSettable>);
-//                acc.push(<DirectoryContents
-//                    depth={self.props.depth + 1}
-//                    parentPath={fullPath(self.props)}
-//                    contents={entry}
-//                    extensions={self.props.extensions}
-//                    actions={self.props.actions}
-//                    forceRender={self.props.forceRender}
-//                    platform={self.props.platform}
-//                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
-//                    key="directoryContents"></DirectoryContents>);
+                const directoryChildren = entry.get("children");
+                if (directoryChildren) {
+                    acc.push(<DirectoryContents
+                        depth={this.props.depth + 1}
+                        parentPath={fullPath({ parentPath: self.props.parentPath, name, entry })}
+                        contents={directoryChildren}
+                        extensions={self.props.extensions}
+                        actions={self.props.actions}
+                        forceRender={self.props.forceRender}
+                        platform={self.props.platform}
+                        sortDirectoriesFirst={self.props.sortDirectoriesFirst}
+                        key="directoryContents"></DirectoryContents>);
+                }
             }
             return acc;
         }.bind(this), []);
