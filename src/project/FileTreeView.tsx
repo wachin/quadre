@@ -96,7 +96,7 @@ interface IFileTreeNode {
     entry: any;
     name: string;
     depth: number;
-    handleMouseDown?: (ev: React.MouseEvent<HTMLLIElement>) => void;
+    handleMouseDown?: (ev: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 interface IDirectoryNodeProps extends IFileTree, IFileTreeNode {
@@ -682,7 +682,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
 
         liChildren.push(nameDisplay);
 
-        return <li {...liProps}>{liChildren}</li>;
+        return <div {...liProps}>{liChildren}</div>;
     }
 }
 
@@ -941,7 +941,7 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         liChildren.push(nameDisplay);
         liChildren.push(childNodes);
 
-        return <li {...liProps}>{liChildren}</li>;
+        return <div {...liProps}>{liChildren}</div>;
     }
 }
 
@@ -977,11 +977,11 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     public render() {
         const extensions = this.props.extensions;
         const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
-        let className = "jstree-children";
+        let className = "folder-data jstree-children";
         if (this.props.isRoot) {
             className += " jstree-brackets jstree-no-dots " + iconClass;
         }
-        const ulProps: React.HTMLProps<HTMLUListElement> = {
+        const ulProps: React.HTMLProps<HTMLDivElement> = {
             className,
             key: "children"
         };
@@ -989,12 +989,12 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
         const self: DirectoryContents = this;
-        const children = namesInOrder.map(function (name) {
+        const children = namesInOrder.reduce(function (acc, name) {
             const entry = contents.get(name);
 
             if (FileTreeViewModel.isFile(entry)) {
                 const WithContextSettable = withContextSettable(FileNode);
-                return <WithContextSettable
+                acc.push(<WithContextSettable
                     depth={self.props.depth}
                     parentPath={self.props.parentPath}
                     name={name}
@@ -1003,10 +1003,10 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     extensions={self.props.extensions}
                     forceRender={self.props.forceRender}
                     platform={self.props.platform}
-                    key={name}></WithContextSettable>;
+                    key={name}></WithContextSettable>);
             } else {
                 const WithContextSettable = withContextSettable(DirectoryNode);
-                return <WithContextSettable
+                acc.push(<WithContextSettable
                     depth={self.props.depth}
                     parentPath={self.props.parentPath}
                     name={name}
@@ -1016,11 +1016,22 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     sortDirectoriesFirst={self.props.sortDirectoriesFirst}
                     forceRender={self.props.forceRender}
                     platform={self.props.platform}
-                    key={name}></WithContextSettable>;
+                    key={name}></WithContextSettable>);
+//                acc.push(<DirectoryContents
+//                    depth={self.props.depth + 1}
+//                    parentPath={fullPath(self.props)}
+//                    contents={entry}
+//                    extensions={self.props.extensions}
+//                    actions={self.props.actions}
+//                    forceRender={self.props.forceRender}
+//                    platform={self.props.platform}
+//                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
+//                    key="directoryContents"></DirectoryContents>);
             }
-        }.bind(this)).toArray();
+            return acc;
+        }.bind(this), []);
 
-        return <ul {...ulProps}>{children}</ul>;
+        return <div {...ulProps}>{children}</div>;
     }
 }
 
@@ -1313,3 +1324,41 @@ exports._fileTreeView = React.createFactory(FileTreeView);
 exports.addIconProvider = addIconProvider;
 exports.addClassesProvider = addClassesProvider;
 exports.render = render;
+
+//
+//    <div class="project">
+//        <div class="folder-data">
+//            <div class="folder-item folder" onclick="toggleFolder('d1')">
+//                <div class="name">d1</div>
+//            </div>
+//            <div class="folder-data" id="d1">
+//                <div class="folder-item folder" onclick="toggleFolder('dd1')">
+//                    <div class="indent"></div>
+//                    <div class="name">dd1</div>
+//                </div>
+//                <div class="folder-data" id="dd1">
+//                    <div class="folder-item file" id="ff1" onclick="selectFile('ff1')">
+//                        <div class="indent"></div>
+//                        <div class="indent"></div>
+//                        <div class="name">ff1</div>
+//                    </div>
+//                </div>
+//                <div class="folder-item file" id="f1" onclick="selectFile('f1')">
+//                    <div class="indent"></div>
+//                    <div class="name">f1</div>
+//                </div>
+//            </div>
+//            <div class="folder-item folder" onclick="toggleFolder('d2')">
+//                <div class="name">d2</div>
+//            </div>
+//            <div class="folder-data" id="d2">
+//                <div class="folder-item file" id="f2" onclick="selectFile('f2')">
+//                    <div class="indent"></div>
+//                    <div class="name">f2</div>
+//                </div>
+//            </div>
+//            <div class="folder-item file" id="rf1" onclick="selectFile('rf1')">
+//                <div class="name">rf1</div>
+//            </div>
+//        </div>
+//    </div>
