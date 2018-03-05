@@ -959,82 +959,116 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
-class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
-    constructor(props: IDirectoryContentsProps) {
+//class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
+//    constructor(props: IDirectoryContentsProps) {
+//        super(props);
+//    }
+//
+//    /**
+//     * Need to re-render if the sort order or the contents change.
+//     */
+//    public shouldComponentUpdate(nextProps, nextState) {
+//        return nextProps.forceRender ||
+//            this.props.contents !== nextProps.contents ||
+//            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
+//            this.props.extensions !== nextProps.extensions;
+//    }
+//
+//    public render() {
+//        const extensions = this.props.extensions;
+//        const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
+//        let className = "folder-data jstree-children";
+//        if (this.props.isRoot) {
+//            className += " jstree-brackets jstree-no-dots " + iconClass;
+//        }
+//        const ulProps: React.HTMLProps<HTMLDivElement> = {
+//            className,
+//            key: "children"
+//        };
+//
+//        const contents = this.props.contents;
+//        const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
+//        const self: DirectoryContents = this;
+//        const children = namesInOrder.reduce(function (acc, name) {
+//            const entry = contents.get(name);
+//
+//            if (FileTreeViewModel.isFile(entry)) {
+//                const WithContextSettable = withContextSettable(FileNode);
+//                acc.push(<WithContextSettable
+//                    depth={self.props.depth}
+//                    parentPath={self.props.parentPath}
+//                    name={name}
+//                    entry={entry}
+//                    actions={self.props.actions}
+//                    extensions={self.props.extensions}
+//                    forceRender={self.props.forceRender}
+//                    platform={self.props.platform}
+//                    key={name}></WithContextSettable>);
+//            } else {
+//                const WithContextSettable = withContextSettable(DirectoryNode);
+//                acc.push(<WithContextSettable
+//                    depth={self.props.depth}
+//                    parentPath={self.props.parentPath}
+//                    name={name}
+//                    entry={entry}
+//                    actions={self.props.actions}
+//                    extensions={self.props.extensions}
+//                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
+//                    forceRender={self.props.forceRender}
+//                    platform={self.props.platform}
+//                    key={name}></WithContextSettable>);
+//                const directoryChildren = entry.get("children");
+//                if (directoryChildren) {
+//                    acc.push(<DirectoryContents
+//                        depth={this.props.depth + 1}
+//                        parentPath={fullPath({ parentPath: self.props.parentPath, name, entry })}
+//                        contents={directoryChildren}
+//                        extensions={self.props.extensions}
+//                        actions={self.props.actions}
+//                        forceRender={self.props.forceRender}
+//                        platform={self.props.platform}
+//                        sortDirectoriesFirst={self.props.sortDirectoriesFirst}
+//                        key="directoryContents"></DirectoryContents>);
+//                }
+//            }
+//            return acc;
+//        }.bind(this), []);
+//
+//        return <div {...ulProps}>{children}</div>;
+//    }
+//}
+
+class DirectoryContents extends React.Component<any, {}> {
+    constructor(props: any) {
         super(props);
     }
 
-    /**
-     * Need to re-render if the sort order or the contents change.
-     */
-    public shouldComponentUpdate(nextProps, nextState) {
-        return nextProps.forceRender ||
-            this.props.contents !== nextProps.contents ||
-            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
-            this.props.extensions !== nextProps.extensions;
-    }
-
     public render() {
-        const extensions = this.props.extensions;
-        const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
-        let className = "folder-data jstree-children";
-        if (this.props.isRoot) {
-            className += " jstree-brackets jstree-no-dots " + iconClass;
-        }
-        const ulProps: React.HTMLProps<HTMLDivElement> = {
-            className,
-            key: "children"
-        };
-
         const contents = this.props.contents;
-        const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
-        const self: DirectoryContents = this;
-        const children = namesInOrder.reduce(function (acc, name) {
+        const folderData = contents.keySeq().reduce((acc, name) => {
+            console.log(name);
             const entry = contents.get(name);
-
-            if (FileTreeViewModel.isFile(entry)) {
-                const WithContextSettable = withContextSettable(FileNode);
-                acc.push(<WithContextSettable
-                    depth={self.props.depth}
-                    parentPath={self.props.parentPath}
-                    name={name}
-                    entry={entry}
-                    actions={self.props.actions}
-                    extensions={self.props.extensions}
-                    forceRender={self.props.forceRender}
-                    platform={self.props.platform}
-                    key={name}></WithContextSettable>);
-            } else {
-                const WithContextSettable = withContextSettable(DirectoryNode);
-                acc.push(<WithContextSettable
-                    depth={self.props.depth}
-                    parentPath={self.props.parentPath}
-                    name={name}
-                    entry={entry}
-                    actions={self.props.actions}
-                    extensions={self.props.extensions}
-                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
-                    forceRender={self.props.forceRender}
-                    platform={self.props.platform}
-                    key={name}></WithContextSettable>);
-                const directoryChildren = entry.get("children");
-                if (directoryChildren) {
-                    acc.push(<DirectoryContents
-                        depth={this.props.depth + 1}
-                        parentPath={fullPath({ parentPath: self.props.parentPath, name, entry })}
-                        contents={directoryChildren}
-                        extensions={self.props.extensions}
-                        actions={self.props.actions}
-                        forceRender={self.props.forceRender}
-                        platform={self.props.platform}
-                        sortDirectoriesFirst={self.props.sortDirectoriesFirst}
-                        key="directoryContents"></DirectoryContents>);
-                }
+            console.log(entry);
+            console.warn(this.props.parentPath, name, entry);
+            const path = fullPath({parentPath: this.props.parentPath, name, entry});
+            this.props.actions.setDirectoryOpen(path, true);
+            const children = entry.get("children");
+            console.log(children);
+            const fileTreeItem = [
+                _createThickness(this.props.depth),
+                <div>{name}</div>
+            ];
+            acc.push(<div>{fileTreeItem}</div>);
+            if (children) {
+                acc.push(<DirectoryContents
+                    depth={this.props.depth + 1}
+                    parentPath={path}
+                    contents={children}
+                    actions={this.props.actions}></DirectoryContents>);
             }
             return acc;
-        }.bind(this), []);
-
-        return <div {...ulProps}>{children}</div>;
+        }, []);
+        return <div className="folder-data">{folderData}</div>;
     }
 }
 
