@@ -1045,7 +1045,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
 
     public render() {
         const contents = this.props.contents;
-        const folderData = contents.keySeq().reduce((acc, name) => {
+        const children = contents.keySeq().reduce((acc, name) => {
             console.log(name);
             const entry = contents.get(name);
             console.log(entry);
@@ -1056,24 +1056,24 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             console.log(directoryChildren);
             const fileTreeItem = [
                 _createThickness(this.props.depth),
-                <div>{name}</div>
+                <div className="file-tree-item-name">{name}</div>
             ];
-            acc.push(<div>{fileTreeItem}</div>);
+            acc.push(<div className="file-tree-item">{fileTreeItem}</div>);
             if (directoryChildren) {
                 acc.push(<DirectoryContents
                     depth={this.props.depth + 1}
-                    parentPath={fullPath({ parentPath: this.props.parentPath, name, entry })}
+                    parentPath={path}
                     contents={directoryChildren}
                     extensions={this.props.extensions}
                     actions={this.props.actions}
                     forceRender={this.props.forceRender}
                     platform={this.props.platform}
                     sortDirectoriesFirst={this.props.sortDirectoriesFirst}
-                    key="directoryContents"></DirectoryContents>);
+                    key={path}></DirectoryContents>);
             }
             return acc;
         }, []);
-        return <div className="folder-data">{folderData}</div>;
+        return <div className="file-tree-children">{children}</div>;
     }
 }
 
