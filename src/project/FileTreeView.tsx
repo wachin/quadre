@@ -206,7 +206,7 @@ function _createThickness(depth): JSX.Element {
     // When running tests |depth| can be undefined.
     depth = depth || 1;
     const style = {
-        display: "inline-block",
+        display: "flex",
         width: INDENTATION_WIDTH * depth
     };
     return <div style={style} key="thickness"></div>;
@@ -1038,8 +1038,8 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
 //    }
 //}
 
-class DirectoryContents extends React.Component<any, {}> {
-    constructor(props: any) {
+class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
+    constructor(props: IDirectoryContentsProps) {
         super(props);
     }
 
@@ -1052,19 +1052,24 @@ class DirectoryContents extends React.Component<any, {}> {
             console.warn(this.props.parentPath, name, entry);
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
             this.props.actions.setDirectoryOpen(path, true);
-            const children = entry.get("children");
-            console.log(children);
+            const directoryChildren = entry.get("children");
+            console.log(directoryChildren);
             const fileTreeItem = [
                 _createThickness(this.props.depth),
                 <div>{name}</div>
             ];
             acc.push(<div>{fileTreeItem}</div>);
-            if (children) {
+            if (directoryChildren) {
                 acc.push(<DirectoryContents
                     depth={this.props.depth + 1}
-                    parentPath={path}
-                    contents={children}
-                    actions={this.props.actions}></DirectoryContents>);
+                    parentPath={fullPath({ parentPath: this.props.parentPath, name, entry })}
+                    contents={directoryChildren}
+                    extensions={this.props.extensions}
+                    actions={this.props.actions}
+                    forceRender={this.props.forceRender}
+                    platform={this.props.platform}
+                    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
+                    key="directoryContents"></DirectoryContents>);
             }
             return acc;
         }, []);
