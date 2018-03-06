@@ -1045,7 +1045,8 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
 
     public render() {
         const contents = this.props.contents;
-        const children = contents.keySeq().reduce((acc, name) => {
+        const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
+        const children = namesInOrder.reduce((acc, name) => {
             const entry = contents.get(name);
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
             this.props.actions.setDirectoryOpen(path, true);
