@@ -510,179 +510,193 @@ function getClasses(classes, extensions, getDataForExtension) {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
+//class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
+//    constructor(props: IFileNodeProps) {
+//        super(props);
+//
+//        this.state = {
+//            clickTimer: null
+//        };
+//
+//        this.clearTimer = this.clearTimer.bind(this);
+//        this.startRename = this.startRename.bind(this);
+//        this.handleClick = this.handleClick.bind(this);
+//        this.handleDoubleClick = this.handleDoubleClick.bind(this);
+//        this.getDataForExtension = this.getDataForExtension.bind(this);
+//    }
+//
+//    /**
+//     * Thanks to immutable objects, we can just do a start object identity check to know
+//     * whether or not we need to re-render.
+//     */
+//    public shouldComponentUpdate(nextProps, nextState) {
+//        return nextProps.forceRender ||
+//            this.props.entry !== nextProps.entry ||
+//            this.props.extensions !== nextProps.extensions;
+//    }
+//
+//    /**
+//     * If this node is newly selected, scroll it into view. Also, move the selection or
+//     * context boxes as appropriate.
+//     */
+//    public componentDidUpdate(prevProps, prevState) {
+//        const wasSelected = prevProps.entry.get("selected");
+//        const isSelected  = this.props.entry.get("selected");
+//
+//        if (isSelected && !wasSelected) {
+//            // TODO: This shouldn't really know about project-files-container
+//            // directly. It is probably the case that our React tree should actually
+//            // start with project-files-container instead of just the interior of
+//            // project-files-container and then the file tree will be one self-contained
+//            // functional unit.
+//            ViewUtils.scrollElementIntoView($("#project-files-container"), $(ReactDOM.findDOMNode(this)), true);
+//        } else if (!isSelected && wasSelected && this.state.clickTimer !== null) {
+//            this.clearTimer();
+//        }
+//    }
+//
+//    private clearTimer() {
+//        if (this.state.clickTimer !== null) {
+//            window.clearTimeout(this.state.clickTimer);
+//            this.setState({
+//                clickTimer: null
+//            });
+//        }
+//    }
+//
+//    private startRename() {
+//        if (!this.props.entry.get("rename")) {
+//            this.props.actions.startRename(fullPath(this.props));
+//        }
+//        this.clearTimer();
+//    }
+//
+//    /**
+//     * When the user clicks on the node, we'll either select it or, if they've clicked twice
+//     * with a bit of delay in between, we'll invoke the `startRename` action.
+//     */
+//    public handleClick(e) {
+//        // If we're renaming, allow the click to go through to the rename input.
+//        if (this.props.entry.get("rename")) {
+//            e.stopPropagation();
+//            return;
+//        }
+//
+//        if (e.button !== LEFT_MOUSE_BUTTON) {
+//            return;
+//        }
+//
+//        if (this.props.entry.get("selected") && !e.ctrlKey) {
+//            if (this.state.clickTimer === null && !this.props.entry.get("rename")) {
+//                const timer = window.setTimeout(this.startRename, CLICK_RENAME_MINIMUM);
+//                this.setState({
+//                    clickTimer: timer
+//                });
+//            }
+//        } else {
+//            this.props.actions.setSelected(fullPath(this.props));
+//        }
+//        e.stopPropagation();
+//        e.preventDefault();
+//    }
+//
+//    /**
+//     * When the user double clicks, we will select this file and add it to the working
+//     * set (via the `selectInWorkingSet` action.)
+//     */
+//    public handleDoubleClick() {
+//        if (!this.props.entry.get("rename")) {
+//            if (this.state.clickTimer !== null) {
+//                this.clearTimer();
+//            }
+//            this.props.actions.selectInWorkingSet(fullPath(this.props));
+//        }
+//    }
+//
+//    /**
+//     * Create the data object to pass to extensions.
+//     *
+//     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
+//     */
+//    public getDataForExtension() {
+//        return {
+//            name: this.props.name,
+//            isFile: true,
+//            fullPath: fullPath(this.props)
+//        };
+//    }
+//
+//    public render() {
+//        const fullname = this.props.name;
+//        let extension = LanguageManager.getCompoundFileExtension(fullname);
+//        const name = _getName(fullname, extension);
+//
+//        if (extension) {
+//            extension = <span className="extension" key="extension">{"." + extension}</span>;
+//        }
+//
+//        let nameDisplay;
+//        const cx = Classnames;
+//
+//        const fileClasses = cx({
+//            "jstree-clicked selected-node": this.props.entry.get("selected"),
+//            "context-node": this.props.entry.get("context")
+//        });
+//
+//        const liProps = {
+//            className: getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension),
+//            onClick: this.handleClick,
+//            onMouseDown: this.props.handleMouseDown,
+//            onDoubleClick: this.handleDoubleClick
+//        };
+//        const liChildren: [JSX.Element] = [
+//            <ins className="jstree-icon" key="ins"></ins>
+//        ];
+//
+//        const thickness = _createThickness(this.props.depth);
+//
+//        if (this.props.entry.get("rename")) {
+//            liChildren.push(thickness);
+//            const WithRenameBehavior = withRenameBehavior(FileRenameInput);
+//            nameDisplay = <WithRenameBehavior
+//                actions={this.props.actions}
+//                entry={this.props.entry}
+//                name={this.props.name}
+//                parentPath={this.props.parentPath}
+//                key="fileRename"></WithRenameBehavior>;
+//        } else {
+//            const aProps = {
+//                href: "#",
+//                className: fileClasses,
+//                key: "file"
+//            };
+//            // Need to flatten the argument list because getIcons returns an array
+//            const aChildren = _.flatten([
+//                thickness,
+//                getIcons(this.props.extensions, this.getDataForExtension),
+//                name,
+//                extension
+//            ]);
+//            nameDisplay = <a {...aProps}>{aChildren}</a>;
+//        }
+//
+//        liChildren.push(nameDisplay);
+//
+//        return <div {...liProps}>{liChildren}</div>;
+//    }
+//}
+
 class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
     constructor(props: IFileNodeProps) {
         super(props);
-
-        this.state = {
-            clickTimer: null
-        };
-
-        this.clearTimer = this.clearTimer.bind(this);
-        this.startRename = this.startRename.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-        this.handleDoubleClick = this.handleDoubleClick.bind(this);
-        this.getDataForExtension = this.getDataForExtension.bind(this);
-    }
-
-    /**
-     * Thanks to immutable objects, we can just do a start object identity check to know
-     * whether or not we need to re-render.
-     */
-    public shouldComponentUpdate(nextProps, nextState) {
-        return nextProps.forceRender ||
-            this.props.entry !== nextProps.entry ||
-            this.props.extensions !== nextProps.extensions;
-    }
-
-    /**
-     * If this node is newly selected, scroll it into view. Also, move the selection or
-     * context boxes as appropriate.
-     */
-    public componentDidUpdate(prevProps, prevState) {
-        const wasSelected = prevProps.entry.get("selected");
-        const isSelected  = this.props.entry.get("selected");
-
-        if (isSelected && !wasSelected) {
-            // TODO: This shouldn't really know about project-files-container
-            // directly. It is probably the case that our React tree should actually
-            // start with project-files-container instead of just the interior of
-            // project-files-container and then the file tree will be one self-contained
-            // functional unit.
-            ViewUtils.scrollElementIntoView($("#project-files-container"), $(ReactDOM.findDOMNode(this)), true);
-        } else if (!isSelected && wasSelected && this.state.clickTimer !== null) {
-            this.clearTimer();
-        }
-    }
-
-    private clearTimer() {
-        if (this.state.clickTimer !== null) {
-            window.clearTimeout(this.state.clickTimer);
-            this.setState({
-                clickTimer: null
-            });
-        }
-    }
-
-    private startRename() {
-        if (!this.props.entry.get("rename")) {
-            this.props.actions.startRename(fullPath(this.props));
-        }
-        this.clearTimer();
-    }
-
-    /**
-     * When the user clicks on the node, we'll either select it or, if they've clicked twice
-     * with a bit of delay in between, we'll invoke the `startRename` action.
-     */
-    public handleClick(e) {
-        // If we're renaming, allow the click to go through to the rename input.
-        if (this.props.entry.get("rename")) {
-            e.stopPropagation();
-            return;
-        }
-
-        if (e.button !== LEFT_MOUSE_BUTTON) {
-            return;
-        }
-
-        if (this.props.entry.get("selected") && !e.ctrlKey) {
-            if (this.state.clickTimer === null && !this.props.entry.get("rename")) {
-                const timer = window.setTimeout(this.startRename, CLICK_RENAME_MINIMUM);
-                this.setState({
-                    clickTimer: timer
-                });
-            }
-        } else {
-            this.props.actions.setSelected(fullPath(this.props));
-        }
-        e.stopPropagation();
-        e.preventDefault();
-    }
-
-    /**
-     * When the user double clicks, we will select this file and add it to the working
-     * set (via the `selectInWorkingSet` action.)
-     */
-    public handleDoubleClick() {
-        if (!this.props.entry.get("rename")) {
-            if (this.state.clickTimer !== null) {
-                this.clearTimer();
-            }
-            this.props.actions.selectInWorkingSet(fullPath(this.props));
-        }
-    }
-
-    /**
-     * Create the data object to pass to extensions.
-     *
-     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
-     */
-    public getDataForExtension() {
-        return {
-            name: this.props.name,
-            isFile: true,
-            fullPath: fullPath(this.props)
-        };
     }
 
     public render() {
-        const fullname = this.props.name;
-        let extension = LanguageManager.getCompoundFileExtension(fullname);
-        const name = _getName(fullname, extension);
-
-        if (extension) {
-            extension = <span className="extension" key="extension">{"." + extension}</span>;
-        }
-
-        let nameDisplay;
-        const cx = Classnames;
-
-        const fileClasses = cx({
-            "jstree-clicked selected-node": this.props.entry.get("selected"),
-            "context-node": this.props.entry.get("context")
-        });
-
-        const liProps = {
-            className: getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension),
-            onClick: this.handleClick,
-            onMouseDown: this.props.handleMouseDown,
-            onDoubleClick: this.handleDoubleClick
-        };
-        const liChildren: [JSX.Element] = [
-            <ins className="jstree-icon" key="ins"></ins>
+        const fileTreeItem = [
+            _createThickness(this.props.depth),
+            <div className="file-tree-item-name">{this.props.name}</div>
         ];
-
-        const thickness = _createThickness(this.props.depth);
-
-        if (this.props.entry.get("rename")) {
-            liChildren.push(thickness);
-            const WithRenameBehavior = withRenameBehavior(FileRenameInput);
-            nameDisplay = <WithRenameBehavior
-                actions={this.props.actions}
-                entry={this.props.entry}
-                name={this.props.name}
-                parentPath={this.props.parentPath}
-                key="fileRename"></WithRenameBehavior>;
-        } else {
-            const aProps = {
-                href: "#",
-                className: fileClasses,
-                key: "file"
-            };
-            // Need to flatten the argument list because getIcons returns an array
-            const aChildren = _.flatten([
-                thickness,
-                getIcons(this.props.extensions, this.getDataForExtension),
-                name,
-                extension
-            ]);
-            nameDisplay = <a {...aProps}>{aChildren}</a>;
-        }
-
-        liChildren.push(nameDisplay);
-
-        return <div {...liProps}>{liChildren}</div>;
+        return <div className="file-tree-item">{fileTreeItem}</div>;
     }
 }
 
@@ -798,152 +812,152 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
-class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
-    constructor(props: IDirectoryNodeProps) {
-        super(props);
-
-        this.handleClick = this.handleClick.bind(this);
-        this.getDataForExtension = this.getDataForExtension.bind(this);
-    }
-
-    /**
-     * We need to update this component if the sort order changes or our entry object
-     * changes. Thanks to immutability, if any of the directory contents change, our
-     * entry object will change.
-     */
-    public shouldComponentUpdate(nextProps, nextState) {
-        return nextProps.forceRender ||
-            this.props.entry !== nextProps.entry ||
-            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
-            this.props.extensions !== nextProps.extensions;
-    }
-
-    /**
-     * If you click on a directory, it will toggle between open and closed.
-     */
-    public handleClick(event) {
-        if (this.props.entry.get("rename")) {
-            event.stopPropagation();
-            return;
-        }
-
-        if (event.button !== LEFT_MOUSE_BUTTON) {
-            return;
-        }
-
-        const isOpen = this.props.entry.get("open");
-        const setOpen = isOpen ? false : true;
-
-        if (event.metaKey || event.ctrlKey) {
-            // ctrl-alt-click toggles this directory and its children
-            if (event.altKey) {
-                if (setOpen) {
-                    // when opening, we only open the immediate children because
-                    // opening a whole subtree could be really slow (consider
-                    // a `node_modules` directory, for example).
-                    this.props.actions.toggleSubdirectories(fullPath(this.props), setOpen);
-                    this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
-                } else {
-                    // When closing, we recursively close the whole subtree.
-                    this.props.actions.closeSubtree(fullPath(this.props));
-                }
-            } else {
-                // ctrl-click toggles the sibling directories
-                this.props.actions.toggleSubdirectories(this.props.parentPath, setOpen);
-            }
-        } else {
-            // directory toggle with no modifier
-            this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
-        }
-        event.stopPropagation();
-        event.preventDefault();
-    }
-
-    /**
-     * Create the data object to pass to extensions.
-     *
-     * @return {{name: {string}, isFile: {boolean}, fullPath: {string}}} Data for extensions
-     */
-    public getDataForExtension() {
-        return {
-            name: this.props.name,
-            isFile: false,
-            fullPath: fullPath(this.props)
-        };
-    }
-
-    public render() {
-        const entry = this.props.entry;
-        let nodeClass;
-        let childNodes;
-        const children = entry.get("children");
-        const isOpen = entry.get("open");
-
-        if (isOpen && children) {
-            nodeClass = "open";
-            //childNodes = <DirectoryContents
-            //    depth={this.props.depth + 1}
-            //    parentPath={fullPath(this.props)}
-            //    contents={children}
-            //    extensions={this.props.extensions}
-            //    actions={this.props.actions}
-            //    forceRender={this.props.forceRender}
-            //    platform={this.props.platform}
-            //    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
-            //    key="directoryContents"></DirectoryContents>;
-        } else {
-            nodeClass = "closed";
-        }
-
-        let nameDisplay;
-        const cx = Classnames;
-
-        const directoryClasses = cx({
-            "jstree-clicked sidebar-selection": entry.get("selected"),
-            "context-node": entry.get("context")
-        });
-
-        const liProps = {
-            className: getClasses("jstree-node jstree-" + nodeClass, this.props.extensions, this.getDataForExtension),
-            onClick: this.handleClick,
-            onMouseDown: this.props.handleMouseDown
-        };
-        const liChildren: [JSX.Element] = [
-            _createAlignedIns(this.props.depth)
-        ];
-
-        const thickness = _createThickness(this.props.depth);
-
-        if (entry.get("rename")) {
-            liChildren.push(thickness);
-            const WithRenameBehavior = withRenameBehavior(DirectoryRenameInput);
-            nameDisplay = <WithRenameBehavior
-                actions={this.props.actions}
-                entry={entry}
-                name={this.props.name}
-                parentPath={this.props.parentPath}
-                key="directoryRename"></WithRenameBehavior>;
-        } else {
-            const aProps = {
-                href: "#",
-                className: directoryClasses,
-                key: "directory"
-            };
-            // Need to flatten the arguments because getIcons returns an array
-            const aChildren = _.flatten([
-                thickness,
-                getIcons(this.props.extensions, this.getDataForExtension),
-                this.props.name
-            ]);
-            nameDisplay = <a {...aProps}>{aChildren}</a>;
-        }
-
-        liChildren.push(nameDisplay);
-        liChildren.push(childNodes);
-
-        return <div {...liProps}>{liChildren}</div>;
-    }
-}
+//class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
+//    constructor(props: IDirectoryNodeProps) {
+//        super(props);
+//
+//        this.handleClick = this.handleClick.bind(this);
+//        this.getDataForExtension = this.getDataForExtension.bind(this);
+//    }
+//
+//    /**
+//     * We need to update this component if the sort order changes or our entry object
+//     * changes. Thanks to immutability, if any of the directory contents change, our
+//     * entry object will change.
+//     */
+//    public shouldComponentUpdate(nextProps, nextState) {
+//        return nextProps.forceRender ||
+//            this.props.entry !== nextProps.entry ||
+//            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
+//            this.props.extensions !== nextProps.extensions;
+//    }
+//
+//    /**
+//     * If you click on a directory, it will toggle between open and closed.
+//     */
+//    public handleClick(event) {
+//        if (this.props.entry.get("rename")) {
+//            event.stopPropagation();
+//            return;
+//        }
+//
+//        if (event.button !== LEFT_MOUSE_BUTTON) {
+//            return;
+//        }
+//
+//        const isOpen = this.props.entry.get("open");
+//        const setOpen = isOpen ? false : true;
+//
+//        if (event.metaKey || event.ctrlKey) {
+//            // ctrl-alt-click toggles this directory and its children
+//            if (event.altKey) {
+//                if (setOpen) {
+//                    // when opening, we only open the immediate children because
+//                    // opening a whole subtree could be really slow (consider
+//                    // a `node_modules` directory, for example).
+//                    this.props.actions.toggleSubdirectories(fullPath(this.props), setOpen);
+//                    this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
+//                } else {
+//                    // When closing, we recursively close the whole subtree.
+//                    this.props.actions.closeSubtree(fullPath(this.props));
+//                }
+//            } else {
+//                // ctrl-click toggles the sibling directories
+//                this.props.actions.toggleSubdirectories(this.props.parentPath, setOpen);
+//            }
+//        } else {
+//            // directory toggle with no modifier
+//            this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
+//        }
+//        event.stopPropagation();
+//        event.preventDefault();
+//    }
+//
+//    /**
+//     * Create the data object to pass to extensions.
+//     *
+//     * @return {{name: {string}, isFile: {boolean}, fullPath: {string}}} Data for extensions
+//     */
+//    public getDataForExtension() {
+//        return {
+//            name: this.props.name,
+//            isFile: false,
+//            fullPath: fullPath(this.props)
+//        };
+//    }
+//
+//    public render() {
+//        const entry = this.props.entry;
+//        let nodeClass;
+//        let childNodes;
+//        const children = entry.get("children");
+//        const isOpen = entry.get("open");
+//
+//        if (isOpen && children) {
+//            nodeClass = "open";
+//            //childNodes = <DirectoryContents
+//            //    depth={this.props.depth + 1}
+//            //    parentPath={fullPath(this.props)}
+//            //    contents={children}
+//            //    extensions={this.props.extensions}
+//            //    actions={this.props.actions}
+//            //    forceRender={this.props.forceRender}
+//            //    platform={this.props.platform}
+//            //    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
+//            //    key="directoryContents"></DirectoryContents>;
+//        } else {
+//            nodeClass = "closed";
+//        }
+//
+//        let nameDisplay;
+//        const cx = Classnames;
+//
+//        const directoryClasses = cx({
+//            "jstree-clicked sidebar-selection": entry.get("selected"),
+//            "context-node": entry.get("context")
+//        });
+//
+//        const liProps = {
+//            className: getClasses("jstree-node jstree-" + nodeClass, this.props.extensions, this.getDataForExtension),
+//            onClick: this.handleClick,
+//            onMouseDown: this.props.handleMouseDown
+//        };
+//        const liChildren: [JSX.Element] = [
+//            _createAlignedIns(this.props.depth)
+//        ];
+//
+//        const thickness = _createThickness(this.props.depth);
+//
+//        if (entry.get("rename")) {
+//            liChildren.push(thickness);
+//            const WithRenameBehavior = withRenameBehavior(DirectoryRenameInput);
+//            nameDisplay = <WithRenameBehavior
+//                actions={this.props.actions}
+//                entry={entry}
+//                name={this.props.name}
+//                parentPath={this.props.parentPath}
+//                key="directoryRename"></WithRenameBehavior>;
+//        } else {
+//            const aProps = {
+//                href: "#",
+//                className: directoryClasses,
+//                key: "directory"
+//            };
+//            // Need to flatten the arguments because getIcons returns an array
+//            const aChildren = _.flatten([
+//                thickness,
+//                getIcons(this.props.extensions, this.getDataForExtension),
+//                this.props.name
+//            ]);
+//            nameDisplay = <a {...aProps}>{aChildren}</a>;
+//        }
+//
+//        liChildren.push(nameDisplay);
+//        liChildren.push(childNodes);
+//
+//        return <div {...liProps}>{liChildren}</div>;
+//    }
+//}
 
 /**
  * @private
@@ -1038,6 +1052,20 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
 //    }
 //}
 
+class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
+    constructor(props: IDirectoryNodeProps) {
+        super(props);
+    }
+
+    public render() {
+        const fileTreeItem = [
+            _createThickness(this.props.depth),
+            <div className="file-tree-item-name">{this.props.name}</div>
+        ];
+        return <div className="file-tree-item">{fileTreeItem}</div>;
+    }
+}
+
 class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     constructor(props: IDirectoryContentsProps) {
         super(props);
@@ -1051,11 +1079,30 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
             this.props.actions.setDirectoryOpen(path, true);
             const directoryChildren = entry.get("children");
-            const fileTreeItem = [
-                _createThickness(this.props.depth),
-                <div className="file-tree-item-name">{name}</div>
-            ];
-            acc.push(<div className="file-tree-item">{fileTreeItem}</div>);
+            if (FileTreeViewModel.isFile(entry)) {
+                acc.push(<FileNode
+                    depth={this.props.depth}
+                    parentPath={this.props.parentPath}
+                    name={name}
+                    entry={entry}
+                    actions={this.props.actions}
+                    extensions={this.props.extensions}
+                    forceRender={this.props.forceRender}
+                    platform={this.props.platform}
+                    key={name}></FileNode>);
+            } else {
+                acc.push(<DirectoryNode
+                    depth={this.props.depth}
+                    parentPath={this.props.parentPath}
+                    name={name}
+                    entry={entry}
+                    actions={this.props.actions}
+                    extensions={this.props.extensions}
+                    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
+                    forceRender={this.props.forceRender}
+                    platform={this.props.platform}
+                    key={name}></DirectoryNode>);
+            }
             if (directoryChildren) {
                 acc.push(<DirectoryContents
                     depth={this.props.depth + 1}
