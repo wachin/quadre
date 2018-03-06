@@ -26,6 +26,17 @@
 /* (these are based on jsTree's default theme .css file, so they are not very LESS-like) */
 @node-min-height: 23px;
 
+.file-tree-view-container {
+    .vbox;
+    .box-flex(1);
+
+    .file-tree-view {
+        .vbox;
+        .box-flex(1);
+        overflow: auto;
+    }
+}
+
 .jstree {
     .jstree-children,
     .jstree-node {
@@ -104,17 +115,6 @@
 
 ins.jstree-icon {
     left: -@jstree-icon-backindent !important;
-}
-
-.file-tree-view-container {
-    .vbox;
-    .box-flex(1);
-
-    .file-tree-view {
-        .vbox;
-        .box-flex(1);
-        overflow: auto;
-    }
 }
 
 .jstree-brackets {
