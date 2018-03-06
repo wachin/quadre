@@ -27,13 +27,26 @@
 @node-min-height: 23px;
 
 .file-tree-view-container {
-    .vbox;
-    .box-flex(1);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
 
-    .file-tree-view {
-        .vbox;
-        .box-flex(1);
-        overflow: auto;
+.file-tree-view {
+    overflow: auto;
+
+    .file-tree-children {
+        display: flex;
+        flex-direction: column;
+
+        .file-tree-item {
+            display: flex;
+
+            .file-tree-item-name {
+                display: flex;
+                flex-grow: 1;
+            }
+        }
     }
 }
 
