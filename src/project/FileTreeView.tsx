@@ -962,6 +962,62 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
 class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
     constructor(props: IDirectoryNodeProps) {
         super(props);
+
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    /**
+     * We need to update this component if the sort order changes or our entry object
+     * changes. Thanks to immutability, if any of the directory contents change, our
+     * entry object will change.
+     */
+    public shouldComponentUpdate(nextProps, nextState) {
+        //return nextProps.forceRender ||
+        //    this.props.entry !== nextProps.entry ||
+        //    this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
+        //    this.props.extensions !== nextProps.extensions;
+        return true;
+    }
+
+    /**
+     * If you click on a directory, it will toggle between open and closed.
+     */
+    public handleClick(event) {
+        if (this.props.entry.get("rename")) {
+            event.stopPropagation();
+            return;
+        }
+
+        if (event.button !== LEFT_MOUSE_BUTTON) {
+            return;
+        }
+
+        const isOpen = this.props.entry.get("open");
+        const setOpen = isOpen ? false : true;
+
+        if (event.metaKey || event.ctrlKey) {
+            // ctrl-alt-click toggles this directory and its children
+            if (event.altKey) {
+                if (setOpen) {
+                    // when opening, we only open the immediate children because
+                    // opening a whole subtree could be really slow (consider
+                    // a `node_modules` directory, for example).
+                    this.props.actions.toggleSubdirectories(fullPath(this.props), setOpen);
+                    this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
+                } else {
+                    // When closing, we recursively close the whole subtree.
+                    this.props.actions.closeSubtree(fullPath(this.props));
+                }
+            } else {
+                // ctrl-click toggles the sibling directories
+                this.props.actions.toggleSubdirectories(this.props.parentPath, setOpen);
+            }
+        } else {
+            // directory toggle with no modifier
+            this.props.actions.setDirectoryOpen(fullPath(this.props), setOpen);
+        }
+        event.stopPropagation();
+        event.preventDefault();
     }
 
     public render() {
@@ -969,7 +1025,11 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
             _createThickness(this.props.depth),
             <div className="file-tree-item-name">{this.props.name}</div>
         ];
-        return <div className="file-tree-item">{fileTreeItem}</div>;
+        const propsItem = {
+            ...this.props,
+            onClick: this.handleClick
+        };
+        return <div className="file-tree-item" {...propsItem}>{fileTreeItem}</div>;
     }
 }
 
@@ -1071,13 +1131,23 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
         super(props);
     }
 
+    /**
+     * Need to re-render if the sort order or the contents change.
+     */
+    public shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.forceRender ||
+            this.props.entry !== nextProps.entry ||
+            this.props.contents !== nextProps.contents ||
+            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
+            this.props.extensions !== nextProps.extensions;
+    }
+
     public render() {
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
         const children = namesInOrder.reduce((acc, name) => {
             const entry = contents.get(name);
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
-            this.props.actions.setDirectoryOpen(path, true);
             const directoryChildren = entry.get("children");
             if (FileTreeViewModel.isFile(entry)) {
                 acc.push(<FileNode
@@ -1103,7 +1173,8 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     platform={this.props.platform}
                     key={name}></DirectoryNode>);
             }
-            if (directoryChildren) {
+            const isOpen = entry.get("open");
+            if (directoryChildren && isOpen) {
                 acc.push(<DirectoryContents
                     depth={this.props.depth + 1}
                     parentPath={path}
