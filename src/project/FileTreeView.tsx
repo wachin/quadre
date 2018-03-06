@@ -1046,14 +1046,10 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     public render() {
         const contents = this.props.contents;
         const children = contents.keySeq().reduce((acc, name) => {
-            console.log(name);
             const entry = contents.get(name);
-            console.log(entry);
-            console.warn(this.props.parentPath, name, entry);
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
             this.props.actions.setDirectoryOpen(path, true);
             const directoryChildren = entry.get("children");
-            console.log(directoryChildren);
             const fileTreeItem = [
                 _createThickness(this.props.depth),
                 <div className="file-tree-item-name">{name}</div>
