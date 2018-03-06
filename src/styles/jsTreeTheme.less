@@ -50,277 +50,277 @@
     }
 }
 
-.jstree {
-    .jstree-children,
-    .jstree-node {
-        display: block;
-        margin: 0 0 0 0;
-        padding: 0 0 0 0;
-        list-style-type: none;
-    }
-
-    .jstree-node {
-        display: block;
-        min-height: @node-min-height;
-        line-height: 16px;
-        white-space: nowrap;
-        min-width: 18px;
-        position: relative;
-    }
-
-    > .jstree-children > .jstree-node {
-        margin-left: 0;
-    }
-
-    ins {
-        display: inline-block;
-        text-decoration: none;
-        width: 18px;
-        height: 18px;
-        margin: 0 0 0 0;
-        padding: 0;
-        position: absolute;
-    }
-
-    a:focus {
-        outline: none;
-    }
-
-    a {
-        > ins {
-            height: 16px;
-            width: 16px;
-        }
-
-        > .jstree-icon {
-            margin-right: 3px;
-        }
-    }
-}
-
-.jstree-rtl {
-    .jstree-node {
-        margin-left: 0;
-        margin-right: 18px;
-    }
-
-    > .jstree-children > .jstree-node {
-        margin-right: 0;
-    }
-
-    a > .jstree-icon {
-        margin-left: 3px;
-        margin-right: 0;
-    }
-}
-
-.jstree-node {
-    &.jstree-open + .jstree-children {
-        display: block;
-    }
-
-    &.jstree-closed + .jstree-children {
-        display: none;
-    }
-}
-
-@jstree-icon-backindent: 12px;
-
-ins.jstree-icon {
-    left: -@jstree-icon-backindent !important;
-}
-
-.jstree-brackets {
-    position: relative;
-    width: 100%;
-
-    .vbox;
-    .box-flex(1);
-
-    .jstree-node,
-    ins {
-        background-image: url("images/jsTreeSprites.svg");
-        background-repeat: no-repeat;
-        background-color: transparent;
-    }
-
-    a {
-        .jstree-icon {
-            background-position: -56px -19px;
-        }
-
-        &.jstree-loading {
-            .jstree-icon {
-                background: url("images/throbber.gif") center center no-repeat !important;
-            }
-        }
-    }
-
-    .jstree-node {
-        background-position: -90px 0;
-        background-repeat: repeat-y;
-        vertical-align: baseline;
-
-        a,
-        a:hover {
-            color: @project-panel-text-1;
-            font-size: 13px;
-            cursor: default;
-
-            &.jstree-clicked, &.jstree-clicked .extension {
-                color: @open-working-file-name-highlight;
-            }
-        }
-
-        a:hover {
-            text-decoration: none;
-        }
-
-        .extension {
-            color: @project-panel-text-2;
-        }
-
-        &.jstree-closed,
-        &.jstree-open {
-            > a {
-                color: @project-panel-text-2;
-            }
-        }
-
-        &.jstree-last {
-            background: transparent;
-        }
-
-        /* Make the links in the JS tree the width of the container
-         * by shifting the off the screen by negative margin and moving the
-         * content back by pushing the padding. The icons are positioned absolute
-         * relative to the containing list item so they sit above the a's background.
-         * This also means we need to include the size of the sprite in the padding
-         * so the text ends up back in the same spot visually
-         */
-        > a {
-            padding-top: 3px;
-            padding-bottom: 3px;
-            @jstree-icon-text-overlap: 2px;
-            padding-left: (@jstree-sprite-size - @jstree-icon-backindent - @jstree-icon-text-overlap);
-            display: block;
-        }
-
-        > ins {
-            margin-top: 2px;
-            margin-bottom: 2px;
-        }
-    }
-
-    .jstree-open > ins {
-        background-position: -72px 0;
-    }
-
-    .jstree-closed > ins {
-        background-position: -54px 0;
-    }
-
-    .jstree-leaf > ins {
-        background-position: -36px 0;
-    }
-
-    // These styles control the expand/collapse arrow icons.
-    // Most other styles in this file with background-position are unused.
-    .jstree-no-dots {
-        .jstree-node,
-        .jstree-leaf > ins {
-            background: transparent;
-        }
-
-        .jstree-open > ins {
-            background-position: -18px 0;
-        }
-
-        .jstree-closed > ins {
-            background-position: 0 0;
-        }
-    }
-
-    .jstree-no-icons {
-        a .jstree-icon {
-            display: none;
-        }
-
-        .jstree-checkbox {
-            display: inline-block;
-        }
-    }
-
-    .jstree-no-checkboxes .jstree-checkbox {
-        display: none !important;
-    }
-
-    .jstree-checked > a > .jstree-checkbox {
-        background-position: -38px -19px;
-
-        &:hover {
-            background-position: -38px -37px;
-        }
-    }
-
-    .jstree-unchecked > a > .jstree-checkbox {
-        background-position: -2px -19px;
-
-        &:hover {
-            background-position: -2px -37px;
-        }
-    }
-
-    .jstree-undetermined > a > .jstree-checkbox {
-        background-position: -20px -19px;
-
-        &:hover {
-            background-position: -20px -37px;
-        }
-    }
-
-    .jstree-search {
-        font-style: italic;
-    }
-
-    a.jstree-search {
-        color: aqua;
-    }
-
-    .jstree-locked a {
-        color: silver;
-        cursor: default;
-    }
-}
-
-#jstree-marker.jstree-brackets {
-    background: url("images/jsTreeSprites.svg") -41px -57px no-repeat !important;
-    text-indent: -100px;
-}
-
-#project-files-container .jstree-brackets .jstree-rename-input {
-    background: #000;
-    border: 1px solid #000;
-    border-radius: 2px;
-    box-shadow: @bc-shadow-small;
-    box-sizing: border-box;
-    color: #fff;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 13px;
-    left: 3px !important;
-    top: 2px !important;
-    margin: 0;
-    margin-bottom: 5px; /* It should instead be applyed only to folders */
-    padding: 0;
-    position: relative;
-    width: 150px;
-    height: 17px;
-    line-height: 17px;
-
-    &:focus {
-        border: 1px solid @bc-btn-border-focused;
-        box-shadow: none;
-        outline: none;
-    }
-}
+//.jstree {
+//    .jstree-children,
+//    .jstree-node {
+//        display: block;
+//        margin: 0 0 0 0;
+//        padding: 0 0 0 0;
+//        list-style-type: none;
+//    }
+//
+//    .jstree-node {
+//        display: block;
+//        min-height: @node-min-height;
+//        line-height: 16px;
+//        white-space: nowrap;
+//        min-width: 18px;
+//        position: relative;
+//    }
+//
+//    > .jstree-children > .jstree-node {
+//        margin-left: 0;
+//    }
+//
+//    ins {
+//        display: inline-block;
+//        text-decoration: none;
+//        width: 18px;
+//        height: 18px;
+//        margin: 0 0 0 0;
+//        padding: 0;
+//        position: absolute;
+//    }
+//
+//    a:focus {
+//        outline: none;
+//    }
+//
+//    a {
+//        > ins {
+//            height: 16px;
+//            width: 16px;
+//        }
+//
+//        > .jstree-icon {
+//            margin-right: 3px;
+//        }
+//    }
+//}
+//
+//.jstree-rtl {
+//    .jstree-node {
+//        margin-left: 0;
+//        margin-right: 18px;
+//    }
+//
+//    > .jstree-children > .jstree-node {
+//        margin-right: 0;
+//    }
+//
+//    a > .jstree-icon {
+//        margin-left: 3px;
+//        margin-right: 0;
+//    }
+//}
+//
+//.jstree-node {
+//    &.jstree-open + .jstree-children {
+//        display: block;
+//    }
+//
+//    &.jstree-closed + .jstree-children {
+//        display: none;
+//    }
+//}
+//
+//@jstree-icon-backindent: 12px;
+//
+//ins.jstree-icon {
+//    left: -@jstree-icon-backindent !important;
+//}
+//
+//.jstree-brackets {
+//    position: relative;
+//    width: 100%;
+//
+//    .vbox;
+//    .box-flex(1);
+//
+//    .jstree-node,
+//    ins {
+//        background-image: url("images/jsTreeSprites.svg");
+//        background-repeat: no-repeat;
+//        background-color: transparent;
+//    }
+//
+//    a {
+//        .jstree-icon {
+//            background-position: -56px -19px;
+//        }
+//
+//        &.jstree-loading {
+//            .jstree-icon {
+//                background: url("images/throbber.gif") center center no-repeat !important;
+//            }
+//        }
+//    }
+//
+//    .jstree-node {
+//        background-position: -90px 0;
+//        background-repeat: repeat-y;
+//        vertical-align: baseline;
+//
+//        a,
+//        a:hover {
+//            color: @project-panel-text-1;
+//            font-size: 13px;
+//            cursor: default;
+//
+//            &.jstree-clicked, &.jstree-clicked .extension {
+//                color: @open-working-file-name-highlight;
+//            }
+//        }
+//
+//        a:hover {
+//            text-decoration: none;
+//        }
+//
+//        .extension {
+//            color: @project-panel-text-2;
+//        }
+//
+//        &.jstree-closed,
+//        &.jstree-open {
+//            > a {
+//                color: @project-panel-text-2;
+//            }
+//        }
+//
+//        &.jstree-last {
+//            background: transparent;
+//        }
+//
+//        /* Make the links in the JS tree the width of the container
+//         * by shifting the off the screen by negative margin and moving the
+//         * content back by pushing the padding. The icons are positioned absolute
+//         * relative to the containing list item so they sit above the a's background.
+//         * This also means we need to include the size of the sprite in the padding
+//         * so the text ends up back in the same spot visually
+//         */
+//        > a {
+//            padding-top: 3px;
+//            padding-bottom: 3px;
+//            @jstree-icon-text-overlap: 2px;
+//            padding-left: (@jstree-sprite-size - @jstree-icon-backindent - @jstree-icon-text-overlap);
+//            display: block;
+//        }
+//
+//        > ins {
+//            margin-top: 2px;
+//            margin-bottom: 2px;
+//        }
+//    }
+//
+//    .jstree-open > ins {
+//        background-position: -72px 0;
+//    }
+//
+//    .jstree-closed > ins {
+//        background-position: -54px 0;
+//    }
+//
+//    .jstree-leaf > ins {
+//        background-position: -36px 0;
+//    }
+//
+//    // These styles control the expand/collapse arrow icons.
+//    // Most other styles in this file with background-position are unused.
+//    .jstree-no-dots {
+//        .jstree-node,
+//        .jstree-leaf > ins {
+//            background: transparent;
+//        }
+//
+//        .jstree-open > ins {
+//            background-position: -18px 0;
+//        }
+//
+//        .jstree-closed > ins {
+//            background-position: 0 0;
+//        }
+//    }
+//
+//    .jstree-no-icons {
+//        a .jstree-icon {
+//            display: none;
+//        }
+//
+//        .jstree-checkbox {
+//            display: inline-block;
+//        }
+//    }
+//
+//    .jstree-no-checkboxes .jstree-checkbox {
+//        display: none !important;
+//    }
+//
+//    .jstree-checked > a > .jstree-checkbox {
+//        background-position: -38px -19px;
+//
+//        &:hover {
+//            background-position: -38px -37px;
+//        }
+//    }
+//
+//    .jstree-unchecked > a > .jstree-checkbox {
+//        background-position: -2px -19px;
+//
+//        &:hover {
+//            background-position: -2px -37px;
+//        }
+//    }
+//
+//    .jstree-undetermined > a > .jstree-checkbox {
+//        background-position: -20px -19px;
+//
+//        &:hover {
+//            background-position: -20px -37px;
+//        }
+//    }
+//
+//    .jstree-search {
+//        font-style: italic;
+//    }
+//
+//    a.jstree-search {
+//        color: aqua;
+//    }
+//
+//    .jstree-locked a {
+//        color: silver;
+//        cursor: default;
+//    }
+//}
+//
+//#jstree-marker.jstree-brackets {
+//    background: url("images/jsTreeSprites.svg") -41px -57px no-repeat !important;
+//    text-indent: -100px;
+//}
+//
+//#project-files-container .jstree-brackets .jstree-rename-input {
+//    background: #000;
+//    border: 1px solid #000;
+//    border-radius: 2px;
+//    box-shadow: @bc-shadow-small;
+//    box-sizing: border-box;
+//    color: #fff;
+//    font-style: normal;
+//    font-weight: 400;
+//    font-size: 13px;
+//    left: 3px !important;
+//    top: 2px !important;
+//    margin: 0;
+//    margin-bottom: 5px; /* It should instead be applyed only to folders */
+//    padding: 0;
+//    position: relative;
+//    width: 150px;
+//    height: 17px;
+//    line-height: 17px;
+//
+//    &:focus {
+//        border: 1px solid @bc-btn-border-focused;
+//        box-shadow: none;
+//        outline: none;
+//    }
+//}
