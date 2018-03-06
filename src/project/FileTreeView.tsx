@@ -959,6 +959,20 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
 //    }
 //}
 
+class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
+    constructor(props: IDirectoryNodeProps) {
+        super(props);
+    }
+
+    public render() {
+        const fileTreeItem = [
+            _createThickness(this.props.depth),
+            <div className="file-tree-item-name">{this.props.name}</div>
+        ];
+        return <div className="file-tree-item">{fileTreeItem}</div>;
+    }
+}
+
 /**
  * @private
  *
@@ -1051,20 +1065,6 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
 //        return <div {...ulProps}>{children}</div>;
 //    }
 //}
-
-class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
-    constructor(props: IDirectoryNodeProps) {
-        super(props);
-    }
-
-    public render() {
-        const fileTreeItem = [
-            _createThickness(this.props.depth),
-            <div className="file-tree-item-name">{this.props.name}</div>
-        ];
-        return <div className="file-tree-item">{fileTreeItem}</div>;
-    }
-}
 
 class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     constructor(props: IDirectoryContentsProps) {
