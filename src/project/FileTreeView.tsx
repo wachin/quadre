@@ -510,123 +510,123 @@ function getClasses(classes, extensions, getDataForExtension) {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
-//class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
-//    constructor(props: IFileNodeProps) {
-//        super(props);
-//
-//        this.state = {
-//            clickTimer: null
-//        };
-//
-//        this.clearTimer = this.clearTimer.bind(this);
-//        this.startRename = this.startRename.bind(this);
-//        this.handleClick = this.handleClick.bind(this);
-//        this.handleDoubleClick = this.handleDoubleClick.bind(this);
-//        this.getDataForExtension = this.getDataForExtension.bind(this);
-//    }
-//
-//    /**
-//     * Thanks to immutable objects, we can just do a start object identity check to know
-//     * whether or not we need to re-render.
-//     */
-//    public shouldComponentUpdate(nextProps, nextState) {
-//        return nextProps.forceRender ||
-//            this.props.entry !== nextProps.entry ||
-//            this.props.extensions !== nextProps.extensions;
-//    }
-//
-//    /**
-//     * If this node is newly selected, scroll it into view. Also, move the selection or
-//     * context boxes as appropriate.
-//     */
-//    public componentDidUpdate(prevProps, prevState) {
-//        const wasSelected = prevProps.entry.get("selected");
-//        const isSelected  = this.props.entry.get("selected");
-//
-//        if (isSelected && !wasSelected) {
-//            // TODO: This shouldn't really know about project-files-container
-//            // directly. It is probably the case that our React tree should actually
-//            // start with project-files-container instead of just the interior of
-//            // project-files-container and then the file tree will be one self-contained
-//            // functional unit.
-//            ViewUtils.scrollElementIntoView($("#project-files-container"), $(ReactDOM.findDOMNode(this)), true);
-//        } else if (!isSelected && wasSelected && this.state.clickTimer !== null) {
-//            this.clearTimer();
-//        }
-//    }
-//
-//    private clearTimer() {
-//        if (this.state.clickTimer !== null) {
-//            window.clearTimeout(this.state.clickTimer);
-//            this.setState({
-//                clickTimer: null
-//            });
-//        }
-//    }
-//
-//    private startRename() {
-//        if (!this.props.entry.get("rename")) {
-//            this.props.actions.startRename(fullPath(this.props));
-//        }
-//        this.clearTimer();
-//    }
-//
-//    /**
-//     * When the user clicks on the node, we'll either select it or, if they've clicked twice
-//     * with a bit of delay in between, we'll invoke the `startRename` action.
-//     */
-//    public handleClick(e) {
-//        // If we're renaming, allow the click to go through to the rename input.
-//        if (this.props.entry.get("rename")) {
-//            e.stopPropagation();
-//            return;
-//        }
-//
-//        if (e.button !== LEFT_MOUSE_BUTTON) {
-//            return;
-//        }
-//
-//        if (this.props.entry.get("selected") && !e.ctrlKey) {
-//            if (this.state.clickTimer === null && !this.props.entry.get("rename")) {
-//                const timer = window.setTimeout(this.startRename, CLICK_RENAME_MINIMUM);
-//                this.setState({
-//                    clickTimer: timer
-//                });
-//            }
-//        } else {
-//            this.props.actions.setSelected(fullPath(this.props));
-//        }
-//        e.stopPropagation();
-//        e.preventDefault();
-//    }
-//
-//    /**
-//     * When the user double clicks, we will select this file and add it to the working
-//     * set (via the `selectInWorkingSet` action.)
-//     */
-//    public handleDoubleClick() {
-//        if (!this.props.entry.get("rename")) {
-//            if (this.state.clickTimer !== null) {
-//                this.clearTimer();
-//            }
-//            this.props.actions.selectInWorkingSet(fullPath(this.props));
-//        }
-//    }
-//
-//    /**
-//     * Create the data object to pass to extensions.
-//     *
-//     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
-//     */
-//    public getDataForExtension() {
-//        return {
-//            name: this.props.name,
-//            isFile: true,
-//            fullPath: fullPath(this.props)
-//        };
-//    }
-//
-//    public render() {
+class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
+    constructor(props: IFileNodeProps) {
+        super(props);
+
+        this.state = {
+            clickTimer: null
+        };
+
+        this.clearTimer = this.clearTimer.bind(this);
+        this.startRename = this.startRename.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleDoubleClick = this.handleDoubleClick.bind(this);
+        this.getDataForExtension = this.getDataForExtension.bind(this);
+    }
+
+    /**
+     * Thanks to immutable objects, we can just do a start object identity check to know
+     * whether or not we need to re-render.
+     */
+    public shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.forceRender ||
+            this.props.entry !== nextProps.entry ||
+            this.props.extensions !== nextProps.extensions;
+    }
+
+    /**
+     * If this node is newly selected, scroll it into view. Also, move the selection or
+     * context boxes as appropriate.
+     */
+    public componentDidUpdate(prevProps, prevState) {
+        const wasSelected = prevProps.entry.get("selected");
+        const isSelected  = this.props.entry.get("selected");
+
+        if (isSelected && !wasSelected) {
+            // TODO: This shouldn't really know about project-files-container
+            // directly. It is probably the case that our React tree should actually
+            // start with project-files-container instead of just the interior of
+            // project-files-container and then the file tree will be one self-contained
+            // functional unit.
+            ViewUtils.scrollElementIntoView($("#project-files-container"), $(ReactDOM.findDOMNode(this)), true);
+        } else if (!isSelected && wasSelected && this.state.clickTimer !== null) {
+            this.clearTimer();
+        }
+    }
+
+    private clearTimer() {
+        if (this.state.clickTimer !== null) {
+            window.clearTimeout(this.state.clickTimer);
+            this.setState({
+                clickTimer: null
+            });
+        }
+    }
+
+    private startRename() {
+        if (!this.props.entry.get("rename")) {
+            this.props.actions.startRename(fullPath(this.props));
+        }
+        this.clearTimer();
+    }
+
+    /**
+     * When the user clicks on the node, we'll either select it or, if they've clicked twice
+     * with a bit of delay in between, we'll invoke the `startRename` action.
+     */
+    public handleClick(e) {
+        // If we're renaming, allow the click to go through to the rename input.
+        if (this.props.entry.get("rename")) {
+            e.stopPropagation();
+            return;
+        }
+
+        if (e.button !== LEFT_MOUSE_BUTTON) {
+            return;
+        }
+
+        if (this.props.entry.get("selected") && !e.ctrlKey) {
+            if (this.state.clickTimer === null && !this.props.entry.get("rename")) {
+                const timer = window.setTimeout(this.startRename, CLICK_RENAME_MINIMUM);
+                this.setState({
+                    clickTimer: timer
+                });
+            }
+        } else {
+            this.props.actions.setSelected(fullPath(this.props));
+        }
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    /**
+     * When the user double clicks, we will select this file and add it to the working
+     * set (via the `selectInWorkingSet` action.)
+     */
+    public handleDoubleClick() {
+        if (!this.props.entry.get("rename")) {
+            if (this.state.clickTimer !== null) {
+                this.clearTimer();
+            }
+            this.props.actions.selectInWorkingSet(fullPath(this.props));
+        }
+    }
+
+    /**
+     * Create the data object to pass to extensions.
+     *
+     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
+     */
+    public getDataForExtension() {
+        return {
+            name: this.props.name,
+            isFile: true,
+            fullPath: fullPath(this.props)
+        };
+    }
+
+    public render() {
 //        const fullname = this.props.name;
 //        let extension = LanguageManager.getCompoundFileExtension(fullname);
 //        const name = _getName(fullname, extension);
@@ -683,30 +683,7 @@ function getClasses(classes, extensions, getDataForExtension) {
 //        liChildren.push(nameDisplay);
 //
 //        return <div {...liProps}>{liChildren}</div>;
-//    }
-//}
 
-class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
-    constructor(props: IFileNodeProps) {
-        super(props);
-
-        this.getDataForExtension = this.getDataForExtension.bind(this);
-    }
-
-    /**
-     * Create the data object to pass to extensions.
-     *
-     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
-     */
-    public getDataForExtension() {
-        return {
-            name: this.props.name,
-            isFile: true,
-            fullPath: fullPath(this.props)
-        };
-    }
-
-    public render() {
         const fullname = this.props.name;
         let extension = LanguageManager.getCompoundFileExtension(fullname);
         const name = _getName(fullname, extension);
