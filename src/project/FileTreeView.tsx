@@ -964,6 +964,7 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         super(props);
 
         this.handleClick = this.handleClick.bind(this);
+        this.getDataForExtension = this.getDataForExtension.bind(this);
     }
 
     /**
@@ -1020,11 +1021,26 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         event.preventDefault();
     }
 
+
+    /**
+     * Create the data object to pass to extensions.
+     *
+     * @return {{name: {string}, isFile: {boolean}, fullPath: {string}}} Data for extensions
+     */
+    public getDataForExtension() {
+        return {
+            name: this.props.name,
+            isFile: false,
+            fullPath: fullPath(this.props)
+        };
+    }
+
     public render() {
-        const fileTreeItem = [
+        const fileTreeItem = _.flatten([
             _createThickness(this.props.depth),
+            getIcons(this.props.extensions, this.getDataForExtension),
             <div className="file-tree-item-name">{this.props.name}</div>
-        ];
+        ]);
         const propsItem = {
             ...this.props,
             onClick: this.handleClick
