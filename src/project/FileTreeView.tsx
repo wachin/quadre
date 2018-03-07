@@ -627,14 +627,14 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
     }
 
     public render() {
-//        const fullname = this.props.name;
-//        let extension = LanguageManager.getCompoundFileExtension(fullname);
-//        const name = _getName(fullname, extension);
-//
-//        if (extension) {
-//            extension = <span className="extension" key="extension">{"." + extension}</span>;
-//        }
-//
+        const fullname = this.props.name;
+        let extension = LanguageManager.getCompoundFileExtension(fullname);
+        const name = _getName(fullname, extension);
+
+        if (extension) {
+            extension = <span className="extension" key="extension">{"." + extension}</span>;
+        }
+
 //        let nameDisplay;
 //        const cx = Classnames;
 //
@@ -643,6 +643,11 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
 //            "context-node": this.props.entry.get("context")
 //        });
 //
+
+        const nodeProps = {
+            className: "tree-node"
+        };
+
 //        const liProps = {
 //            className: getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension),
 //            onClick: this.handleClick,
@@ -684,15 +689,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
 //
 //        return <div {...liProps}>{liChildren}</div>;
 
-        const fullname = this.props.name;
-        let extension = LanguageManager.getCompoundFileExtension(fullname);
-        const name = _getName(fullname, extension);
-
-        if (extension) {
-            extension = <span className="extension" key="extension">{"." + extension}</span>;
-        }
-
-        const fileTreeItem =  _.flatten([
+        const fileTreeItem = _.flatten([
             _createThickness(this.props.depth),
             getIcons(this.props.extensions, this.getDataForExtension),
             <div className="tree-node-name">
@@ -700,7 +697,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
                 {extension}
             </div>
         ]);
-        return <div className="tree-node">{fileTreeItem}</div>;
+        return <div {...nodeProps}>{fileTreeItem}</div>;
     }
 }
 
