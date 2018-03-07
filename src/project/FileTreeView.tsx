@@ -141,7 +141,7 @@ const CLICK_RENAME_MINIMUM  = 500;
 const RIGHT_MOUSE_BUTTON    = 2;
 const LEFT_MOUSE_BUTTON     = 0;
 
-const INDENTATION_WIDTH     = 10;
+const INDENTATION_WIDTH     = 20;
 
 /**
  * @private
@@ -204,7 +204,7 @@ function _measureText(text) {
  */
 function _createThickness(depth): JSX.Element {
     // When running tests |depth| can be undefined.
-    depth = depth || 1;
+    depth = depth || 0;
     const style = {
         display: "flex",
         width: INDENTATION_WIDTH * depth
@@ -222,7 +222,7 @@ function _createThickness(depth): JSX.Element {
  */
 function _createAlignedIns(depth): JSX.Element {
     // When running tests |depth| can be undefined.
-    depth = depth || 1;
+    depth = depth || 0;
     const style = {
         marginLeft: INDENTATION_WIDTH * depth
     };
@@ -1063,6 +1063,17 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
     }
 
     public render() {
+        const entry = this.props.entry;
+        let nodeClass;
+        const children = entry.get("children");
+        const isOpen = entry.get("open");
+
+        if (isOpen && children) {
+            nodeClass = "tree-node-open";
+        } else {
+            nodeClass = "tree-node-closed";
+        }
+
         const fileTreeItem = _.flatten([
             _createThickness(this.props.depth),
             getIcons(this.props.extensions, this.getDataForExtension),
@@ -1070,9 +1081,10 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         ]);
         const propsItem = {
             ...this.props,
+            className: getClasses("tree-node " + nodeClass, this.props.extensions, this.getDataForExtension),
             onClick: this.handleClick
         };
-        return <div className="tree-node" {...propsItem}>{fileTreeItem}</div>;
+        return <div {...propsItem}>{fileTreeItem}</div>;
     }
 }
 
@@ -1422,7 +1434,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             className="filetree-context-extension"></SelectionExtension>;
         const contents = <DirectoryContents
             isRoot={true}
-            depth={1}
+            depth={0}
             parentPath={this.props.parentPath}
             sortDirectoriesFirst={this.props.sortDirectoriesFirst}
             contents={this.props.treeData}
