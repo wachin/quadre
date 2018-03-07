@@ -689,13 +689,29 @@ function getClasses(classes, extensions, getDataForExtension) {
 class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
     constructor(props: IFileNodeProps) {
         super(props);
+
+        this.getDataForExtension = this.getDataForExtension.bind(this);
+    }
+
+    /**
+     * Create the data object to pass to extensions.
+     *
+     * @return {!{name:string, isFile:boolean, fullPath:string}} Data for extensions
+     */
+    public getDataForExtension() {
+        return {
+            name: this.props.name,
+            isFile: true,
+            fullPath: fullPath(this.props)
+        };
     }
 
     public render() {
-        const fileTreeItem = [
+        const fileTreeItem =  _.flatten([
             _createThickness(this.props.depth),
+            getIcons(this.props.extensions, this.getDataForExtension),
             <div className="file-tree-item-name">{this.props.name}</div>
-        ];
+        ]);
         return <div className="file-tree-item">{fileTreeItem}</div>;
     }
 }
