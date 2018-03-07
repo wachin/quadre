@@ -718,12 +718,12 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
         const fileTreeItem =  _.flatten([
             _createThickness(this.props.depth),
             getIcons(this.props.extensions, this.getDataForExtension),
-            <div className="file-tree-item-name">
+            <div className="tree-node-name">
                 <span>{name}</span>
                 {extension}
             </div>
         ]);
-        return <div className="file-tree-item">{fileTreeItem}</div>;
+        return <div className="tree-node">{fileTreeItem}</div>;
     }
 }
 
@@ -1066,13 +1066,13 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         const fileTreeItem = _.flatten([
             _createThickness(this.props.depth),
             getIcons(this.props.extensions, this.getDataForExtension),
-            <div className="file-tree-item-name">{this.props.name}</div>
+            <div className="tree-node-name">{this.props.name}</div>
         ]);
         const propsItem = {
             ...this.props,
             onClick: this.handleClick
         };
-        return <div className="file-tree-item" {...propsItem}>{fileTreeItem}</div>;
+        return <div className="tree-node" {...propsItem}>{fileTreeItem}</div>;
     }
 }
 
@@ -1231,7 +1231,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             }
             return acc;
         }, []);
-        return <div className="file-tree-children">{children}</div>;
+        return <div className="tree-children">{children}</div>;
     }
 }
 
@@ -1431,7 +1431,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
 
-        return <div className="file-tree-view">
+        return <div className="tree-view">
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}

@@ -1188,7 +1188,7 @@ define(function (require, exports, module) {
     AppInit.htmlReady(function () {
         $projectTreeContainer = $("#project-files-container");
 
-        fileTreeViewContainer = $("<div class=\"file-tree-view-container\">").appendTo($projectTreeContainer)[0];
+        fileTreeViewContainer = $("<div class=\"tree-views-container\">").appendTo($projectTreeContainer)[0];
 
         model.setSelectionWidth($projectTreeContainer.width());
 
