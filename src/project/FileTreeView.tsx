@@ -707,10 +707,21 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
     }
 
     public render() {
+        const fullname = this.props.name;
+        let extension = LanguageManager.getCompoundFileExtension(fullname);
+        const name = _getName(fullname, extension);
+
+        if (extension) {
+            extension = <span className="extension" key="extension">{"." + extension}</span>;
+        }
+
         const fileTreeItem =  _.flatten([
             _createThickness(this.props.depth),
             getIcons(this.props.extensions, this.getDataForExtension),
-            <div className="file-tree-item-name">{this.props.name}</div>
+            <div className="file-tree-item-name">
+                <span>{name}</span>
+                {extension}
+            </div>
         ]);
         return <div className="file-tree-item">{fileTreeItem}</div>;
     }
