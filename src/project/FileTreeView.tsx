@@ -935,21 +935,24 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
-//class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
-//    constructor(props: IDirectoryContentsProps) {
-//        super(props);
-//    }
-//
-//    /**
-//     * Need to re-render if the sort order or the contents change.
-//     */
-//    public shouldComponentUpdate(nextProps, nextState) {
-//        return nextProps.forceRender ||
-//            this.props.contents !== nextProps.contents ||
-//            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
-//            this.props.extensions !== nextProps.extensions;
-//    }
-//
+class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
+    constructor(props: IDirectoryContentsProps) {
+        super(props);
+    }
+
+    /**
+     * Need to re-render if the sort order or the contents change.
+     */
+    public shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.forceRender ||
+            this.props.entry !== nextProps.entry ||
+            this.props.contents !== nextProps.contents ||
+            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
+            this.props.extensions !== nextProps.extensions;
+    }
+
+    
+
 //    public render() {
 //        const extensions = this.props.extensions;
 //        const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
@@ -1012,24 +1015,6 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
 //
 //        return <div {...ulProps}>{children}</div>;
 //    }
-//}
-
-class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
-    constructor(props: IDirectoryContentsProps) {
-        super(props);
-    }
-
-    /**
-     * Need to re-render if the sort order or the contents change.
-     */
-    public shouldComponentUpdate(nextProps, nextState) {
-        return nextProps.forceRender ||
-            this.props.entry !== nextProps.entry ||
-            this.props.contents !== nextProps.contents ||
-            this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
-            this.props.extensions !== nextProps.extensions;
-    }
-
     public render() {
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
