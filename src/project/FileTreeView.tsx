@@ -350,7 +350,7 @@ class FileRenameInput extends React.Component<IFileRenameInputProps, {}> {
         const width = _measureText(this.props.name);
 
         return <input
-            className="jstree-rename-input"
+            className="tree-rename-input"
             type="text"
             defaultValue={this.props.name}
             autoFocus={true}
@@ -761,7 +761,7 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
         const width = _measureText(this.props.name);
 
         return <input
-            className="jstree-rename-input"
+            className="tree-rename-input"
             type="text"
             defaultValue={this.props.name}
             autoFocus={true}
@@ -1278,7 +1278,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
 
-        return <div className="tree-view">
+        return <div className="tree-view jstree-brackets">
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}
