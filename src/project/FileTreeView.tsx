@@ -951,71 +951,18 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             this.props.extensions !== nextProps.extensions;
     }
 
-    
-
-//    public render() {
-//        const extensions = this.props.extensions;
-//        const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
-//        let className = "folder-data jstree-children";
-//        if (this.props.isRoot) {
-//            className += " jstree-brackets jstree-no-dots " + iconClass;
-//        }
-//        const ulProps: React.HTMLProps<HTMLDivElement> = {
-//            className,
-//            key: "children"
-//        };
-//
-//        const contents = this.props.contents;
-//        const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
-//        const self: DirectoryContents = this;
-//        const children = namesInOrder.reduce(function (acc, name) {
-//            const entry = contents.get(name);
-//
-//            if (FileTreeViewModel.isFile(entry)) {
-//                const WithContextSettable = withContextSettable(FileNode);
-//                acc.push(<WithContextSettable
-//                    depth={self.props.depth}
-//                    parentPath={self.props.parentPath}
-//                    name={name}
-//                    entry={entry}
-//                    actions={self.props.actions}
-//                    extensions={self.props.extensions}
-//                    forceRender={self.props.forceRender}
-//                    platform={self.props.platform}
-//                    key={name}></WithContextSettable>);
-//            } else {
-//                const WithContextSettable = withContextSettable(DirectoryNode);
-//                acc.push(<WithContextSettable
-//                    depth={self.props.depth}
-//                    parentPath={self.props.parentPath}
-//                    name={name}
-//                    entry={entry}
-//                    actions={self.props.actions}
-//                    extensions={self.props.extensions}
-//                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
-//                    forceRender={self.props.forceRender}
-//                    platform={self.props.platform}
-//                    key={name}></WithContextSettable>);
-//                const directoryChildren = entry.get("children");
-//                if (directoryChildren) {
-//                    acc.push(<DirectoryContents
-//                        depth={this.props.depth + 1}
-//                        parentPath={fullPath({ parentPath: self.props.parentPath, name, entry })}
-//                        contents={directoryChildren}
-//                        extensions={self.props.extensions}
-//                        actions={self.props.actions}
-//                        forceRender={self.props.forceRender}
-//                        platform={self.props.platform}
-//                        sortDirectoriesFirst={self.props.sortDirectoriesFirst}
-//                        key="directoryContents"></DirectoryContents>);
-//                }
-//            }
-//            return acc;
-//        }.bind(this), []);
-//
-//        return <div {...ulProps}>{children}</div>;
-//    }
     public render() {
+        const extensions = this.props.extensions;
+        const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
+        let className = "tree-children";
+        if (this.props.isRoot) {
+            className += " jstree-brackets jstree-no-dots " + iconClass;
+        }
+        const contentsProps: React.HTMLProps<HTMLDivElement> = {
+            className,
+            key: "children"
+        };
+
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
         const children = namesInOrder.reduce((acc, name) => {
@@ -1063,7 +1010,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             }
             return acc;
         }, []);
-        return <div className="tree-children">{children}</div>;
+        return <div {...contentsProps}>{children}</div>;
     }
 }
 
