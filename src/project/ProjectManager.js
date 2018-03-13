@@ -1193,7 +1193,7 @@ define(function (require, exports, module) {
         model.setSelectionWidth($projectTreeContainer.width());
 
         $(".main-view").click(function (jqEvent) {
-            if (!jqEvent.target.classList.contains("jstree-rename-input")) {
+            if (!jqEvent.target.classList.contains("tree-rename-input")) {
                 forceFinishRename();
                 actionCreator.setContext(null);
             }
