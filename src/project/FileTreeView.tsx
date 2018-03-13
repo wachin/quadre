@@ -635,69 +635,49 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
             extension = <span className="extension" key="extension">{"." + extension}</span>;
         }
 
-//        let nameDisplay;
-//        const cx = Classnames;
-//
-//        const fileClasses = cx({
-//            "jstree-clicked selected-node": this.props.entry.get("selected"),
-//            "context-node": this.props.entry.get("context")
-//        });
-//
+        let nameDisplay;
+        const cx = Classnames;
+
+        const fileClasses = cx({
+            "jstree-clicked selected-node": this.props.entry.get("selected"),
+            "context-node": this.props.entry.get("context")
+        });
+
+        const className = fileClasses + " " +
+              getClasses("tree-node tree-leaf", this.props.extensions, this.getDataForExtension);
 
         const nodeProps = {
-            className: "tree-node"
+            ...this.props,
+            className,
+            onClick: this.handleClick,
+            onMouseDown: this.props.handleMouseDown,
+            onDoubleClick: this.handleDoubleClick
         };
 
-//        const liProps = {
-//            className: getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension),
-//            onClick: this.handleClick,
-//            onMouseDown: this.props.handleMouseDown,
-//            onDoubleClick: this.handleDoubleClick
-//        };
-//        const liChildren: [JSX.Element] = [
-//            <ins className="jstree-icon" key="ins"></ins>
-//        ];
-//
-//        const thickness = _createThickness(this.props.depth);
-//
-//        if (this.props.entry.get("rename")) {
-//            liChildren.push(thickness);
-//            const WithRenameBehavior = withRenameBehavior(FileRenameInput);
-//            nameDisplay = <WithRenameBehavior
-//                actions={this.props.actions}
-//                entry={this.props.entry}
-//                name={this.props.name}
-//                parentPath={this.props.parentPath}
-//                key="fileRename"></WithRenameBehavior>;
-//        } else {
-//            const aProps = {
-//                href: "#",
-//                className: fileClasses,
-//                key: "file"
-//            };
-//            // Need to flatten the argument list because getIcons returns an array
-//            const aChildren = _.flatten([
-//                thickness,
-//                getIcons(this.props.extensions, this.getDataForExtension),
-//                name,
-//                extension
-//            ]);
-//            nameDisplay = <a {...aProps}>{aChildren}</a>;
-//        }
-//
-//        liChildren.push(nameDisplay);
-//
-//        return <div {...liProps}>{liChildren}</div>;
-
-        const fileTreeItem = _.flatten([
+        // Need to flatten the arguments because getIcons returns an array
+        const nodeChildren: [JSX.Element] = _.flatten([
             _createThickness(this.props.depth),
-            getIcons(this.props.extensions, this.getDataForExtension),
-            <div className="tree-node-name">
-                <span>{name}</span>
-                {extension}
-            </div>
+            getIcons(this.props.extensions, this.getDataForExtension)
         ]);
-        return <div {...nodeProps}>{fileTreeItem}</div>;
+
+        if (this.props.entry.get("rename")) {
+            const WithRenameBehavior = withRenameBehavior(FileRenameInput);
+            nameDisplay = <WithRenameBehavior
+                actions={this.props.actions}
+                entry={this.props.entry}
+                name={this.props.name}
+                parentPath={this.props.parentPath}
+                key="fileRename"></WithRenameBehavior>;
+        } else {
+            nameDisplay = [
+                name,
+                extension
+            ];
+        }
+
+        nodeChildren.push(<div className="tree-node-name">{nameDisplay}</div>);
+
+        return <div {...nodeProps}>{nodeChildren}</div>;
     }
 }
 
@@ -1058,7 +1038,8 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             const path = fullPath({parentPath: this.props.parentPath, name, entry});
             const directoryChildren = entry.get("children");
             if (FileTreeViewModel.isFile(entry)) {
-                acc.push(<FileNode
+                const WithContextSettable = withContextSettable(FileNode);
+                acc.push(<WithContextSettable
                     depth={this.props.depth}
                     parentPath={this.props.parentPath}
                     name={name}
@@ -1067,7 +1048,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     extensions={this.props.extensions}
                     forceRender={this.props.forceRender}
                     platform={this.props.platform}
-                    key={name}></FileNode>);
+                    key={name}></WithContextSettable>);
             } else {
                 const WithContextSettable = withContextSettable(DirectoryNode);
                 acc.push(<WithContextSettable
