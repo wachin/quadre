@@ -213,23 +213,6 @@ function _createThickness(depth): JSX.Element {
 }
 
 /**
- * @private
- *
- * Create, and indent correctly, the arrow icons used for the folders.
- *
- * @param {int} depth The depth of the current node.
- * @return {ReactComponent} The resulting ins.
- */
-function _createAlignedIns(depth): JSX.Element {
-    // When running tests |depth| can be undefined.
-    depth = depth || 0;
-    const style = {
-        marginLeft: INDENTATION_WIDTH * depth
-    };
-    return <ins className="jstree-icon" style={style} key="alignedIns"></ins>;
-}
-
-/**
  * This is a High Order Component that provides rename input behavior.
  * It is responsible for taking keyboard input and invoking the correct action
  * based on that input.
@@ -945,7 +928,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
      */
     public shouldComponentUpdate(nextProps, nextState) {
         return nextProps.forceRender ||
-            this.props.entry !== nextProps.entry ||
+            // this.props.entry !== nextProps.entry ||
             this.props.contents !== nextProps.contents ||
             this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
             this.props.extensions !== nextProps.extensions;
