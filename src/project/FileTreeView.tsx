@@ -141,7 +141,7 @@ const CLICK_RENAME_MINIMUM  = 500;
 const RIGHT_MOUSE_BUTTON    = 2;
 const LEFT_MOUSE_BUTTON     = 0;
 
-const INDENTATION_WIDTH     = 20;
+const INDENTATION_WIDTH     = 10;
 
 /**
  * @private
