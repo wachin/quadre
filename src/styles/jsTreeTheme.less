@@ -50,7 +50,33 @@
             }
         }
     }
+
+    .tree-node-name {
+        color: @project-panel-text-1;
+        font-size: 13px;
+    }
+
+    .jstree-clicked .tree-node-name,
+    .jstree-clicked .tree-node-name .extension {
+        color: @open-working-file-name-highlight;
+    }
+
+    .extension {
+        color: @project-panel-text-2;
+    }
+
+    .tree-node-closed,
+    .tree-node-open {
+        .tree-node-name {
+            color: @project-panel-text-2;
+        }
+    }
 }
+
+
+
+
+
 
 //.jstree {
 //    .jstree-children,
