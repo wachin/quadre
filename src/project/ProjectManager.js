@@ -1188,12 +1188,12 @@ define(function (require, exports, module) {
     AppInit.htmlReady(function () {
         $projectTreeContainer = $("#project-files-container");
 
-        fileTreeViewContainer = $("<div class=\"tree-views-container\">").appendTo($projectTreeContainer)[0];
+        fileTreeViewContainer = $("<div class=\"jstree-views-container\">").appendTo($projectTreeContainer)[0];
 
         model.setSelectionWidth($projectTreeContainer.width());
 
         $(".main-view").click(function (jqEvent) {
-            if (!jqEvent.target.classList.contains("tree-rename-input")) {
+            if (!jqEvent.target.classList.contains("jstree-rename-input")) {
                 forceFinishRename();
                 actionCreator.setContext(null);
             }

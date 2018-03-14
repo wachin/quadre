@@ -26,38 +26,38 @@
 /* (these are based on jsTree's default theme .css file, so they are not very LESS-like) */
 @node-min-height: 23px;
 
-.tree-views-container {
+.jstree-views-container {
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
-.tree-view {
+.jstree-view {
     overflow: auto;
 
-    .tree-children {
+    .jstree-children {
         display: flex;
         flex-direction: column;
 
-        .tree-node {
+        .jstree-node {
             display: flex;
             min-height: @node-min-height;
             padding-left: 8px;
 
-            .tree-node-name {
+            .jstree-node-name {
                 display: flex;
                 flex-grow: 1;
             }
         }
     }
 
-    .tree-node-name {
+    .jstree-node-name {
         color: @project-panel-text-1;
         font-size: 13px;
     }
 
-    .jstree-clicked .tree-node-name,
-    .jstree-clicked .tree-node-name .extension {
+    .jstree-clicked .jstree-node-name,
+    .jstree-clicked .jstree-node-name .extension {
         color: @open-working-file-name-highlight;
     }
 
@@ -65,9 +65,9 @@
         color: @project-panel-text-2;
     }
 
-    .tree-node-closed,
-    .tree-node-open {
-        .tree-node-name {
+    .jstree-closed,
+    .jstree-open {
+        .jstree-node-name {
             color: @project-panel-text-2;
         }
     }
@@ -327,7 +327,7 @@
 //    text-indent: -100px;
 //}
 
-#project-files-container .jstree-brackets .tree-rename-input {
+#project-files-container .jstree-brackets .jstree-rename-input {
     background: #000;
     border: 1px solid #000;
     border-radius: 2px;

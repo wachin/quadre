@@ -333,7 +333,7 @@ class FileRenameInput extends React.Component<IFileRenameInputProps, {}> {
         const width = _measureText(this.props.name);
 
         return <input
-            className="tree-rename-input"
+            className="jstree-rename-input"
             type="text"
             defaultValue={this.props.name}
             autoFocus={true}
@@ -627,7 +627,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
         });
 
         const className = fileClasses + " " +
-              getClasses("tree-node tree-leaf", this.props.extensions, this.getDataForExtension);
+              getClasses("jstree-node jstree-leaf", this.props.extensions, this.getDataForExtension);
 
         const nodeProps = {
             ...this.props,
@@ -658,7 +658,7 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
             ];
         }
 
-        nodeChildren.push(<div className="tree-node-name">{nameDisplay}</div>);
+        nodeChildren.push(<div className="jstree-node-name">{nameDisplay}</div>);
 
         return <div {...nodeProps}>{nodeChildren}</div>;
     }
@@ -744,7 +744,7 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
         const width = _measureText(this.props.name);
 
         return <input
-            className="tree-rename-input"
+            className="jstree-rename-input"
             type="text"
             defaultValue={this.props.name}
             autoFocus={true}
@@ -857,9 +857,9 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         const isOpen = entry.get("open");
 
         if (isOpen && children) {
-            nodeClass = "tree-node-open";
+            nodeClass = "jstree-open";
         } else {
-            nodeClass = "tree-node-closed";
+            nodeClass = "jstree-closed";
         }
 
         let nameDisplay;
@@ -871,7 +871,7 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         });
 
         const className = directoryClasses + " " +
-              getClasses("tree-node " + nodeClass, this.props.extensions, this.getDataForExtension);
+              getClasses("jstree-node " + nodeClass, this.props.extensions, this.getDataForExtension);
 
         const nodeProps = {
             ...this.props,
@@ -898,7 +898,7 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
             nameDisplay = this.props.name;
         }
 
-        nodeChildren.push(<div className="tree-node-name">{nameDisplay}</div>);
+        nodeChildren.push(<div className="jstree-node-name">{nameDisplay}</div>);
 
         return <div {...nodeProps}>{nodeChildren}</div>;
     }
@@ -937,7 +937,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
     public render() {
         const extensions = this.props.extensions;
         const iconClass = extensions && extensions.get("icons") ? "jstree-icons" : "jstree-no-icons";
-        let className = "tree-children";
+        let className = "jstree-children";
         if (this.props.isRoot) {
             className += " jstree-brackets jstree-no-dots " + iconClass;
         }
@@ -1193,7 +1193,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
 
-        return <div className="tree-view jstree-brackets">
+        return <div className="jstree-view jstree-brackets">
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}
