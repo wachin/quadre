@@ -948,51 +948,52 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
 
         const contents = this.props.contents;
         const namesInOrder = _sortDirectoryContents(contents, this.props.sortDirectoriesFirst);
-        const children = namesInOrder.reduce((acc, name) => {
+        const self: DirectoryContents = this;
+        const children = namesInOrder.reduce(function (acc, name) {
             const entry = contents.get(name);
-            const path = fullPath({parentPath: this.props.parentPath, name, entry});
+            const path = fullPath({parentPath: self.props.parentPath, name, entry});
             const directoryChildren = entry.get("children");
             if (FileTreeViewModel.isFile(entry)) {
                 const WithContextSettable = withContextSettable(FileNode);
                 acc.push(<WithContextSettable
-                    depth={this.props.depth}
-                    parentPath={this.props.parentPath}
+                    depth={self.props.depth}
+                    parentPath={self.props.parentPath}
                     name={name}
                     entry={entry}
-                    actions={this.props.actions}
-                    extensions={this.props.extensions}
-                    forceRender={this.props.forceRender}
-                    platform={this.props.platform}
+                    actions={self.props.actions}
+                    extensions={self.props.extensions}
+                    forceRender={self.props.forceRender}
+                    platform={self.props.platform}
                     key={name}></WithContextSettable>);
             } else {
                 const WithContextSettable = withContextSettable(DirectoryNode);
                 acc.push(<WithContextSettable
-                    depth={this.props.depth}
-                    parentPath={this.props.parentPath}
+                    depth={self.props.depth}
+                    parentPath={self.props.parentPath}
                     name={name}
                     entry={entry}
-                    actions={this.props.actions}
-                    extensions={this.props.extensions}
-                    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
-                    forceRender={this.props.forceRender}
-                    platform={this.props.platform}
+                    actions={self.props.actions}
+                    extensions={self.props.extensions}
+                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
+                    forceRender={self.props.forceRender}
+                    platform={self.props.platform}
                     key={name}></WithContextSettable>);
             }
             const isOpen = entry.get("open");
             if (directoryChildren && isOpen) {
                 acc.push(<DirectoryContents
-                    depth={this.props.depth + 1}
+                    depth={self.props.depth + 1}
                     parentPath={path}
                     contents={directoryChildren}
-                    extensions={this.props.extensions}
-                    actions={this.props.actions}
-                    forceRender={this.props.forceRender}
-                    platform={this.props.platform}
-                    sortDirectoriesFirst={this.props.sortDirectoriesFirst}
+                    extensions={self.props.extensions}
+                    actions={self.props.actions}
+                    forceRender={self.props.forceRender}
+                    platform={self.props.platform}
+                    sortDirectoriesFirst={self.props.sortDirectoriesFirst}
                     key={path}></DirectoryContents>);
             }
             return acc;
-        }, []);
+        }.bind(this), []);
         return <div {...contentsProps}>{children}</div>;
     }
 }
@@ -1193,7 +1194,7 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
 
-        return <div className="jstree-view jstree-brackets">
+        return <div className="jstree jstree-brackets">
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}
