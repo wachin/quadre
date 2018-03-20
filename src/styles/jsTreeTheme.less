@@ -38,16 +38,16 @@
     .jstree-children {
         display: flex;
         flex-direction: column;
+    }
 
-        .jstree-node {
+    .jstree-node {
+        display: flex;
+        min-height: @node-min-height;
+        padding-left: 8px;
+
+        .jstree-node-name {
             display: flex;
-            min-height: @node-min-height;
-            padding-left: 8px;
-
-            .jstree-node-name {
-                display: flex;
-                flex-grow: 1;
-            }
+            flex-grow: 1;
         }
     }
 
