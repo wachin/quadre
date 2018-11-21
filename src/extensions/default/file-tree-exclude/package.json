@@ -1,0 +1,28 @@
+{
+  "name": "brackets-file-tree-exclude",
+  "version": "1.1.0",
+  "title": "File tree exclude",
+  "description": "Excludes folders from the Brackets file system to avoid performance problems.",
+  "keywords": [
+    "brackets-extension",
+    "brackets",
+    "exclude",
+    "folders",
+    "hide"
+  ],
+  "homepage": "https://github.com/zaggino/brackets-file-tree-exclude",
+  "bugs": "https://github.com/zaggino/brackets-file-tree-exclude/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Martin Zagora",
+    "email": "zaggino@gmail.com",
+    "url": "https://github.com/zaggino"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaggino/brackets-file-tree-exclude.git"
+  },
+  "engines": {
+    "brackets": ">=1.2.0"
+  }
+}
