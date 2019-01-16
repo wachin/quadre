@@ -27,13 +27,13 @@
 /*global define */
 
 define({
-    'TITLE':            'Occurrences Marker Einstellungen',
-    'ENABLED':          'Markiere Auftreten',
-    'TIME_INTERVAL':    'Wartezeit vor Markierung in Sekunden (0 - 10)',
-    'EXCLUDE':          'Folgende Dateitypen von der Markierung ausschließen',
-    'SELECTED_ONLY':    'Markiere nur ausgewählten Text und nicht das Wort unter dem Cursor',
-    'BACKGROUND_COLOR': 'Hintergrundfarbe oder CSS Style für Markierungen',
-    'ANIM':             'Markierungen animieren',
-    'CANCEL':           'Abbrechen',
-    'DONE':             'Fertig'
+    "TITLE":            "Occurrences Marker Einstellungen",
+    "ENABLED":          "Markiere Auftreten",
+    "TIME_INTERVAL":    "Wartezeit vor Markierung in Sekunden (0 - 10)",
+    "EXCLUDE":          "Folgende Dateitypen von der Markierung ausschließen",
+    "SELECTED_ONLY":    "Markiere nur ausgewählten Text und nicht das Wort unter dem Cursor",
+    "BACKGROUND_COLOR": "Hintergrundfarbe oder CSS Style für Markierungen",
+    "ANIM":             "Markierungen animieren",
+    "CANCEL":           "Abbrechen",
+    "DONE":             "Fertig"
 });
