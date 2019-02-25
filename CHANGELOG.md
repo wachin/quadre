@@ -1,8 +1,22 @@
-## Unreleased
+## v2.0.0-alpha.4 (2019-02-25)
+
+Update CodeMirror to 5.44.0
+
+Add highlighting for cm-type token
+
+Integrate https://github.com/quadre-code/quadre-git as default extension
+
+Integrate https://github.com/yaddran/brackets-occurrences-marker as default extension
 
 Don't show the Extension Manager by default (for now)
 
 Backport some patches from Brackets (Context sub menu)
+
+Added new line and tab as replacement in case of regex search
+
+Add "Find Whole Word" functionality
+
+Start converting the code base to TypeScript
 
 
 ## v2.0.0-alpha.3 (2019-01-06)
