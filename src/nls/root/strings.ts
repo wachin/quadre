@@ -812,7 +812,7 @@ export = {
     "DESCRIPTION_COMMENT_BLANK_LINES"                : "true to comment blank lines, false otherwise",
     "DESCRIPTION_RECENT_FILES_NAV"                   : "Enable/disable navigation in recent files",
     "DESCRIPTION_LIVEDEV_WEBSOCKET_PORT"             : "Port on which WebSocket Server runs for Live Preview",
-    "DESCRIPTION_LIVE_DEV_HIGHLIGHT_SETTINGS"        : "Live Preview Hightlight settings",
+    "DESCRIPTION_LIVE_DEV_HIGHLIGHT_SETTINGS"        : "Live Preview Highlight settings",
 
     "DESCRIPTION_SHELL_BLINK_FEATURES"               : "blinkFeatures option from electron BrowserWindow class",
     "DESCRIPTION_SHELL_DISABLE_BLINK_FEATURES"       : "disableBlinkFeatures option from electron BrowserWindow class",

@@ -156,7 +156,7 @@ export = {
     "FIND_HISTORY_MAX_COUNT": "検索履歴内の検索項目の最大数",
     "REPLACE_PLACEHOLDER": "\u2026 に置換",
     "BUTTON_REPLACE_ALL": "すべて置換",
-    "BUTTON_REPLACE_BATCH": "バッチ¥u2026",
+    "BUTTON_REPLACE_BATCH": "バッチ\u2026",
     "BUTTON_REPLACE_ALL_IN_FILES": "置換\u2026",
     "BUTTON_REPLACE": "置換",
     "BUTTON_NEXT": "\u25B6",
@@ -770,6 +770,6 @@ export = {
     "DESCRIPTION_PURE_CODING_SURFACE": "{APP_NAME} でコードのみモードを有効にし、その他すべての UI エレメントを非表示にするには true",
     "DESCRIPTION_INDENT_LINE_COMMENT": "行コメントのインデントを有効にするには true",
     "DESCRIPTION_RECENT_FILES_NAV": "最近使用したファイルのナビゲーションを有効化/無効化",
-    "DESCRIPTION_LIVEDEV_WEBSOCKET_PORT": "WebSocket サーバーがライブプレビューで実行するポート",
+    "DESCRIPTION_LIVEDEV_WEBSOCKET_PORT": "ライブプレビューで WebSocket サーバーが実行されるポート",
     "DESCRIPTION_LIVE_DEV_HIGHLIGHT_SETTINGS": "ライブプレビューハイライト設定"
 };
