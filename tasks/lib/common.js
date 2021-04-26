@@ -27,16 +27,16 @@
 const path = require("path");
 const file = require("./file");
 
+function resolve(relPath) {
+    return path.resolve(process.cwd(), relPath);
+}
+
 function writeJSON(pathJson, obj) {
     let content = JSON.stringify(obj, null, "    ");
     if (process.platform === "win32") {
         content = content.split("\n").join("\r\n");
     }
     file.write(pathJson, content);
-}
-
-function resolve(relPath) {
-    return path.resolve(process.cwd(), relPath);
 }
 
 exports.writeJSON    = writeJSON;

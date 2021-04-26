@@ -1663,7 +1663,11 @@ a, img {
         border-top-right-radius: 3px;
         border-bottom-right-radius: 3px;
         border-left: none;
-        margin-left: 0;
+        border-right: 1px solid @bc-btn-border;
+        
+        .dark & {
+            border-right-color: @dark-bc-btn-border;
+        }
     }
 
     // Make find field snug with options buttons
