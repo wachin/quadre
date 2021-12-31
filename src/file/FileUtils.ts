@@ -76,7 +76,7 @@ export function readAsText(file): JQueryPromise<string> {
     });
 
     // Read file
-    file.read(function (err, data, stat) {
+    file.read(function (err, data, encoding, stat) {
         if (!err) {
             result.resolve(data, stat.mtime);
         } else {
@@ -188,6 +188,12 @@ export function getFileErrorString(name) {
         result = Strings.UNSUPPORTED_ENCODING_ERR;
     } else if (name === FileSystemError.EXCEEDS_MAX_FILE_SIZE) {
         result = StringUtils.format(Strings.EXCEEDS_MAX_FILE_SIZE, MAX_FILE_SIZE_MB);
+    } else if (name === FileSystemError.ENCODE_FILE_FAILED) {
+        result = Strings.ENCODE_FILE_FAILED_ERR;
+    } else if (name === FileSystemError.DECODE_FILE_FAILED) {
+        result = Strings.DECODE_FILE_FAILED_ERR;
+    } else if (name === FileSystemError.UNSUPPORTED_UTF16_ENCODING) {
+        result = Strings.UNSUPPORTED_UTF16_ENCODING_ERR;
     } else {
         result = StringUtils.format(Strings.GENERIC_ERROR, name);
     }

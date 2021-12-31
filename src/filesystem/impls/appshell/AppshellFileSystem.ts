@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2012 - 2017 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (c) 2018 - present The quadre code authors. All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 /// <amd-dependency path="module" name="module"/>
 
 import FileSystemStatsType from "../../../types/FileSystemStats";
@@ -64,6 +88,7 @@ function _enqueueChange(changedPath: string, stats: FileSystemStatsType | null) 
                     _changeCallback(path, _pendingChanges[path]);
                 }
             }
+
             _changeTimeout = null;
             _pendingChanges = {};
         }, FILE_WATCHER_BATCH_TIMEOUT);
@@ -362,7 +387,8 @@ function rename(oldPath: string, newPath: string, callback: Function) {
  * @param {function(?string, string=, FileSystemStats=)} callback
  */
 function readFile(path: string, options: { encoding: string, stat: any }, callback: Function) {
-    const encoding = options.encoding || "utf8";
+    // const encoding = options.encoding || "utf8";
+    const encoding = "utf8";
 
     // callback to be executed when the call to stat completes
     //  or immediately if a stat object was passed as an argument
@@ -370,11 +396,11 @@ function readFile(path: string, options: { encoding: string, stat: any }, callba
         if (stat.size > (FileUtils.MAX_FILE_SIZE)) {
             callback(FileSystemError.EXCEEDS_MAX_FILE_SIZE);
         } else {
-            appshell.fs.readTextFile(path, encoding, function (_err: NodeJS.ErrnoException, _data: string) {
+            appshell.fs.readTextFile(path, encoding, function (_err: NodeJS.ErrnoException, _data: string/*, encoding2, preserveBOM2*/) {
                 if (_err) {
                     callback(_mapError(_err));
                 } else {
-                    callback(null, _data, stat);
+                    callback(null, _data, encoding, /* preserveBOM */ false, stat);
                 }
             });
         }
@@ -412,10 +438,12 @@ function readFile(path: string, options: { encoding: string, stat: any }, callba
 function writeFile(
     path: string,
     data: string,
-    options: { encoding: string, mode: number, expectedHash: string, expectedContents: string },
+    options: { encoding: string, preserveBOM: boolean, mode: number, expectedHash: string, expectedContents: string },
     callback: Function
 ) {
-    const encoding = options.encoding || "utf8";
+    // const encoding = options.encoding || "utf8";
+    const encoding = "utf8";
+    // const preserveBOM = options.preserveBOM;
 
     function _finishWrite(created: boolean) {
         if (typeof data !== "string") {
@@ -427,13 +455,13 @@ function writeFile(
         // window is going to close, we need to use sync writes to avoid unfinished writes
         if (appshell.windowGoingAway) {
             try {
-                appshell.fs.writeFileSync(path, data, encoding);
+                appshell.fs.writeFileSync(path, data, encoding/*, preserveBOM*/);
                 return callback(null, statSync(path), created);
             } catch (err) {
                 return callback(_mapError(err));
             }
         } else {
-            appshell.fs.writeFile(path, data, encoding, function (err: NodeJS.ErrnoException) {
+            appshell.fs.writeFile(path, data, encoding/*, preserveBOM*/, function (err: NodeJS.ErrnoException) {
                 if (err) {
                     callback(_mapError(err));
                 } else {

@@ -39,11 +39,21 @@ import * as LanguageManager from "language/LanguageManager";
 import * as PreferencesManager from "preferences/PreferencesManager";
 import * as StatusBar from "widgets/StatusBar";
 import * as Strings from "strings";
+import InMemoryFile = require("document/InMemoryFile");
+import * as Dialogs from "widgets/Dialogs";
+import * as DefaultDialogs from "widgets/DefaultDialogs";
+import * as ProjectManager from "project/ProjectManager";
+import * as Async from "utils/Async";
+import * as FileSystem from "filesystem/FileSystem";
 import * as StringUtils from "utils/StringUtils";
 import { DispatcherEvents } from "utils/EventDispatcher";
 
+import * as SupportedEncodingsText from "text!supported-encodings.json";
+const SupportedEncodings = JSON.parse(SupportedEncodingsText);
+
 /* StatusBar indicators */
 let languageSelect; // this is a DropdownButton instance
+let encodingSelect; // this is a DropdownButton instance
 let $cursorInfo;
 let $fileInfo;
 let $indentType;
@@ -74,10 +84,22 @@ function _updateLanguageInfo(editor) {
     const doc = editor.document;
     const lang = doc.getLanguage();
 
-    // Ensure width isn't left locked by a previous click of the dropdown (which may not have resulted in a "change" event at the time)
-    languageSelect.$button.css("width", "auto");
     // Show the current language as button title
     languageSelect.$button.text(lang.getName());
+}
+
+/**
+ * Update encoding
+ * @param {Editor} editor Current editor
+ */
+function _updateEncodingInfo(editor) {
+    const doc = editor.document;
+
+    // Show the current encoding as button title
+    if (!doc.file._encoding) {
+        doc.file._encoding = "UTF-8";
+    }
+    encodingSelect.$button.text(doc.file._encoding);
 }
 
 /**
@@ -277,6 +299,7 @@ function _onActiveEditorChange(event, current, previous) {
 
         _updateCursorInfo(null, current);
         _updateLanguageInfo(current);
+        _updateEncodingInfo(current);
         _updateFileInfo(current);
         _initOverwriteMode(current);
         _updateIndentType(fullPath);
@@ -303,6 +326,40 @@ function _populateLanguageDropdown() {
     // Add option to top of menu for persisting the override
     languageSelect.items.unshift("---");
     languageSelect.items.unshift(LANGUAGE_SET_AS_DEFAULT);
+}
+
+/**
+ * Change the encoding and reload the current document.
+ * If passed then save the preferred encoding in state.
+ */
+function _changeEncodingAndReloadDoc(document) {
+    const promise = document.reload();
+    promise.done(function (text, readTimestamp) {
+        encodingSelect.$button.text(document.file._encoding);
+        // Store the preferred encoding in the state
+        const projectRoot = ProjectManager.getProjectRoot()!;
+        const context = {
+            location : {
+                scope: "user",
+                layer: "project",
+                layerID: projectRoot.fullPath
+            }
+        };
+        const encoding = PreferencesManager.getViewState("encoding", context);
+        encoding[document.file.fullPath] = document.file._encoding;
+        PreferencesManager.setViewState("encoding", encoding, context);
+    });
+    promise.fail(function (error) {
+        console.log("Error reloading contents of " + document.file.fullPath, error);
+    });
+}
+
+
+/**
+ * Populate the encodingSelect DropdownButton's menu with all registered encodings
+ */
+function _populateEncodingDropdown() {
+    encodingSelect.items = SupportedEncodings;
 }
 
 /**
@@ -342,6 +399,27 @@ function _init() {
     languageSelect.$button.addClass("btn-status-bar");
     $("#status-language").append(languageSelect.$button);
     languageSelect.$button.attr("title", Strings.STATUSBAR_LANG_TOOLTIP);
+
+
+    encodingSelect = new DropdownButton("", [], function (item, index) {
+        const document = EditorManager.getActiveEditor()!.document;
+        let html = _.escape(item);
+
+        // Show indicators for currently selected & default languages for the current file
+        if (item === "UTF-8") {
+            html += " <span class='default-language'>" + Strings.STATUSBAR_DEFAULT_LANG + "</span>";
+        }
+        if (item === document.file._encoding) {
+            html = "<span class='checked-language'></span>" + html;
+        }
+        return html;
+    });
+
+    encodingSelect.dropdownExtraClasses = "dropdown-status-bar";
+    encodingSelect.$button.addClass("btn-status-bar");
+    $("#status-encoding").append(encodingSelect.$button);
+    encodingSelect.$button.attr("title", Strings.STATUSBAR_ENCODING_TOOLTIP);
+
 
     // indentation event handlers
     $indentType.on("click", _toggleIndentType);
@@ -389,16 +467,94 @@ function _init() {
         }
     });
 
+    // Encoding select change handler
+    encodingSelect.on("select", function (e, encoding) {
+        const document = EditorManager.getActiveEditor()!.document;
+
+        document.file._encoding = encoding;
+
+        if (!(document.file instanceof InMemoryFile) && document.isDirty) {
+            const dialogId = DefaultDialogs.DIALOG_ID_EXT_CHANGED;
+            const message = StringUtils.format(
+                Strings.DIRTY_FILE_ENCODING_CHANGE_WARN,
+                StringUtils.breakableUrl(
+                    ProjectManager.makeProjectRelativeIfPossible(document.file.fullPath)
+                )
+            );
+            const buttons = [
+                {
+                    className: Dialogs.DIALOG_BTN_CLASS_LEFT,
+                    id:        Dialogs.DIALOG_BTN_DONTSAVE,
+                    text:      Strings.IGNORE_RELOAD_FROM_DISK
+                },
+                {
+                    className: Dialogs.DIALOG_BTN_CLASS_PRIMARY,
+                    id:        Dialogs.DIALOG_BTN_CANCEL,
+                    text:      Strings.CANCEL
+                }
+            ];
+
+            Dialogs.showModalDialog(dialogId, Strings.SAVE_FILE_ENCODING_CHANGE_WARN, message, buttons)
+                .done(function (id) {
+                    if (id === Dialogs.DIALOG_BTN_DONTSAVE) {
+                        _changeEncodingAndReloadDoc(document);
+                    }
+                });
+        } else if (document.file instanceof InMemoryFile) {
+            encodingSelect.$button.text(encoding);
+        } else if (!document.isDirty) {
+            _changeEncodingAndReloadDoc(document);
+        }
+    });
+
     $statusOverwrite.on("click", _updateEditorOverwriteMode);
 }
 
 // Initialize: status bar focused listener
 (EditorManager as unknown as DispatcherEvents).on("activeEditorChange", _onActiveEditorChange);
 
+function _checkFileExistance(filePath, index, encoding) {
+    const deferred = $.Deferred();
+    const fileEntry = FileSystem.getFileForPath(filePath);
+
+    fileEntry.exists(function (err, exists) {
+        if (!err && exists) {
+            deferred.resolve();
+        } else {
+            delete encoding[filePath];
+            deferred.reject();
+        }
+    });
+
+    return deferred.promise();
+}
+
+(ProjectManager as unknown as DispatcherEvents).on("projectOpen", function () {
+    const projectRoot = ProjectManager.getProjectRoot()!;
+    const context = {
+        location : {
+            scope: "user",
+            layer: "project",
+            layerID: projectRoot.fullPath
+        }
+    };
+    const encoding = PreferencesManager.getViewState("encoding", context);
+    if (!encoding) {
+        PreferencesManager.setViewState("encoding", {}, context);
+    }
+    Async.doSequentially(Object.keys(encoding), function (filePath, index) {
+        return _checkFileExistance(filePath, index, encoding);
+    }, false)
+        .always(function () {
+            PreferencesManager.setViewState("encoding", encoding, context);
+        });
+});
+
 AppInit.htmlReady(_init);
 AppInit.appReady(function () {
     // Populate language switcher with all languages after startup; update it later if this set changes
     _populateLanguageDropdown();
+    _populateEncodingDropdown();
     (LanguageManager as unknown as DispatcherEvents).on("languageAdded languageModified", _populateLanguageDropdown);
     _onActiveEditorChange(null, EditorManager.getActiveEditor(), null);
     StatusBar.show();

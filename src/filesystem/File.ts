@@ -49,6 +49,20 @@ class File extends FileSystemEntry {
     private _contents = null;
 
     /**
+     * Encoding detected by brackets-shell
+     * @private
+     * @type {?string}
+     */
+    private _encoding: string | null = null;
+
+    /**
+     * BOM detected by brackets-shell
+     * @private
+     * @type {?bool}
+     */
+    private _preserveBOM = false;
+
+    /**
      * Consistency hash for this file. Reads and writes update this value, and
      * writes confirm the hash before overwriting existing files. The type of
      * this object is dependent on the FileSystemImpl; the only constraint is
@@ -86,14 +100,16 @@ class File extends FileSystemEntry {
         if (typeof (options) === "function") {
             callback = options;
             options = {};
+            options.encoding = this._encoding;
         }
+        options.encoding = this._encoding || "utf8";
 
         // We don't need to check isWatched() here because contents are only saved
         // for watched files. Note that we need to explicitly test this._contents
         // for a default value; otherwise it could be the empty string, which is
         // falsey.
         if (this._contents !== null && this._stat) {
-            callback(null, this._contents, this._stat);
+            callback(null, this._contents, this._encoding, this._stat);
             return;
         }
 
@@ -102,7 +118,7 @@ class File extends FileSystemEntry {
             options.stat = this._stat;
         }
 
-        this._impl.readFile(this._path, options, function (this: File, err, data, stat) {
+        this._impl.readFile(this._path, options, function (this: File, err, data, encoding, preserveBOM, stat) {
             if (err) {
                 this._clearCachedData();
                 callback(err);
@@ -111,6 +127,8 @@ class File extends FileSystemEntry {
 
             // Always store the hash
             this._hash = stat._hash;
+            this._encoding = encoding;
+            this._preserveBOM = preserveBOM;
 
             // Only cache data for watched files
             if (watched) {
@@ -118,7 +136,7 @@ class File extends FileSystemEntry {
                 this._contents = data;
             }
 
-            callback(err, data, stat);
+            callback(err, data, encoding, stat);
         }.bind(this));
     }
 
@@ -147,6 +165,10 @@ class File extends FileSystemEntry {
             options.expectedHash = this._hash;
             options.expectedContents = this._contents;
         }
+        if (!options.encoding) {
+            options.encoding = this._encoding || "utf8";
+        }
+        options.preserveBOM = this._preserveBOM;
 
         // Block external change events until after the write has finished
         this._fileSystem._beginChange();

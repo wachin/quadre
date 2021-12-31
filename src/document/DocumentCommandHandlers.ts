@@ -341,6 +341,22 @@ function _doOpen(fullPath, silent, paneId, options) {
         });
 
         const file = FileSystem.getFileForPath(fullPath);
+        if (options && options.encoding) {
+            file._encoding = options.encoding;
+        } else {
+            const projectRoot = ProjectManager.getProjectRoot()!;
+            const context = {
+                location : {
+                    scope: "user",
+                    layer: "project",
+                    layerID: projectRoot.fullPath
+                }
+            };
+            const encoding = PreferencesManager.getViewState("encoding", context);
+            if (encoding[fullPath]) {
+                file._encoding = encoding[fullPath];
+            }
+        }
         MainViewManager._open(paneId, file, options)
             .done(function () {
                 result.resolve(file);
@@ -930,7 +946,21 @@ function _doSaveAs(doc, settings): JQueryPromise<File> {
         doc.isSaving = true;    // mark that we're saving the document
 
         // First, write document's current text to new file
+        if (doc.file._encoding && doc.file._encoding !== "UTF-8") {
+            const projectRoot = ProjectManager.getProjectRoot()!;
+            const context = {
+                location : {
+                    scope: "user",
+                    layer: "project",
+                    layerID: projectRoot.fullPath
+                }
+            };
+            const encoding = PreferencesManager.getViewState("encoding", context);
+            encoding[path] = doc.file._encoding;
+            PreferencesManager.setViewState("encoding", encoding, context);
+        }
         const newFile = FileSystem.getFileForPath(path);
+        newFile._encoding = doc.file._encoding;
 
         // Save as warns you when you're about to overwrite a file, so we
         // explicitly allow "blind" writes to the filesystem in this case,
@@ -1408,7 +1438,8 @@ function _handleWindowGoingAway(commandData, postCloseHandler, failHandler?) {
             // window is going away, hide it from the user
             browserWindow.hide();
 
-            // give everyone a chance to save their state - but don't let any problems block us from quitting
+            // Give everyone a chance to save their state - but don't let any problems block
+            // us from quitting
             try {
                 (ProjectManager as unknown as DispatcherEvents).trigger("beforeAppClose");
             } catch (ex) {
@@ -1683,7 +1714,8 @@ function browserReload(href) {
         // window is going away, hide it from the user
         browserWindow.hide();
 
-        // Give everyone a chance to save their state - but don't let any problems block us from quitting
+        // Give everyone a chance to save their state - but don't let any problems block
+        // us from quitting
         try {
             (ProjectManager as unknown as DispatcherEvents).trigger("beforeAppClose");
         } catch (ex) {

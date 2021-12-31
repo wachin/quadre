@@ -92,6 +92,7 @@ import * as CommandManager from "command/CommandManager";
 import * as Commands from "command/Commands";
 import * as PerfUtils from "utils/PerfUtils";
 import * as LanguageManager from "language/LanguageManager";
+import * as ProjectManager from "project/ProjectManager";
 import * as Strings from "strings";
 
 
@@ -421,7 +422,7 @@ export function getDocumentText(file, checkLineEndings?) {
     if (doc) {
         result.resolve(doc.getText(), doc.diskTimestamp, checkLineEndings ? doc._lineEndings : null);
     } else {
-        file.read(function (err, contents, stat) {
+        file.read(function (err, contents, encoding, stat) {
             if (err) {
                 result.reject(err);
             } else {
@@ -499,6 +500,18 @@ export function notifyPathDeleted(fullPath) {
     //  the user to save any unsaved changes and then calls us back
     //  via notifyFileDeleted
     FileSyncManager.syncOpenDocuments(Strings.FILE_DELETED_TITLE);
+
+    const projectRoot = ProjectManager.getProjectRoot()!;
+    const context = {
+        location : {
+            scope: "user",
+            layer: "project",
+            layerID: projectRoot.fullPath
+        }
+    };
+    const encoding = PreferencesManager.getViewState("encoding", context);
+    delete encoding[fullPath];
+    PreferencesManager.setViewState("encoding", encoding, context);
 
     if (!getOpenDocumentForPath(fullPath) &&
             !MainViewManager.findInAllWorkingSets(fullPath).length) {

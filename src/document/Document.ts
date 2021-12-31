@@ -361,7 +361,7 @@ export class Document {
      * @param {boolean} initial True if this is the initial load of the document. In that case,
      *      we don't send change events.
      */
-    public refreshText(text, newTimestamp, initial) {
+    public refreshText(text, newTimestamp, initial = false) {
         const perfTimerName = PerfUtils.markStart("refreshText:\t" + (!this.file || this.file.fullPath));
 
         // If clean, don't transiently mark dirty during refresh
@@ -757,6 +757,25 @@ export class Document {
      */
     public isUntitled() {
         return this.file instanceof InMemoryFile;
+    }
+
+    /**
+     *  Reloads the document from FileSystem
+     *  @return {promise} - to check if reload was successful or not
+     */
+    public reload() {
+        const $deferred = $.Deferred();
+        const self = this;
+        FileUtils.readAsText(this.file)
+            .done(function (text, readTimestamp) {
+                self.refreshText(text, readTimestamp);
+                $deferred.resolve();
+            })
+            .fail(function (error) {
+                console.log("Error reloading contents of " + self.file.fullPath, error);
+                $deferred.reject();
+            });
+        return $deferred.promise();
     }
 }
 EventDispatcher.makeEventDispatcher(Document.prototype);
