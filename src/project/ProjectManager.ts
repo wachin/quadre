@@ -1088,7 +1088,10 @@ export function createNewItem(baseDir, initialName, skipRename, isFolder) {
     baseDir = model.getDirectoryInProject(baseDir);
 
     if (skipRename) {
-        return model.createAtPath(baseDir + initialName/*, isFolder*/);
+        if (isFolder) {
+            return model.createAtPath(baseDir + initialName + "/");
+        }
+        return model.createAtPath(baseDir + initialName);
     }
     return _actionCreator.startCreating(baseDir, initialName, isFolder);
 }
