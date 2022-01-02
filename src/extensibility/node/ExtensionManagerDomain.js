@@ -237,7 +237,7 @@ function _cmdInstall(packagePath, destinationDirectory, options, callback, pCall
         // If there was trouble at the validation stage, we stop right away.
         if (err || validationResult.errors.length > 0) {
             validationResult.installationStatus = Statuses.FAILED;
-            deleteTempAndCallback(err, validationResult);
+            deleteTempAndCallback(err);
             return;
         }
 
@@ -288,7 +288,7 @@ function _cmdInstall(packagePath, destinationDirectory, options, callback, pCall
                     // both legacy and new extensions installed.
                     fs.remove(legacyDirectory, function (err) {
                         if (err) {
-                            deleteTempAndCallback(err, validationResult);
+                            deleteTempAndCallback(err);
                             return;
                         }
                         _removeAndInstall(packagePath, installDirectory, validationResult, deleteTempAndCallback);
@@ -299,7 +299,7 @@ function _cmdInstall(packagePath, destinationDirectory, options, callback, pCall
             } else if (hasLegacyPackage) {
                 validationResult.installationStatus = Statuses.NEEDS_UPDATE;
                 validationResult.name = guessedName;
-                deleteTempAndCallback(null, validationResult);
+                deleteTempAndCallback(null);
             } else {
                 _checkExistingInstallation(validationResult, installDirectory, systemInstallDirectory, deleteTempAndCallback);
             }

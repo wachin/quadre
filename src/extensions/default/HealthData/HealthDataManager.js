@@ -79,53 +79,51 @@ define(function (require, exports, module) {
                             oneTimeHealthData.uuid      = userUuid;
                             oneTimeHealthData.olderuuid = olderUuid;
                             return result.resolve(oneTimeHealthData);
-                        } else {
+                        }
 
-                            // So we are going to get the Machine hash in either of the cases.
-                            if (appshell.app.getMachineHash) {
-                                appshell.app.getMachineHash(function (err, macHash) {
-
-                                    var generatedUuid;
-                                    if (err) {
-                                        generatedUuid = uuid.v4();
-                                    } else {
-                                        generatedUuid = macHash;
-                                    }
-
-                                    if (!userUuid) {
-                                        // Could be a new user. In this case
-                                        // both will remain the same.
-                                        userUuid = olderUuid = generatedUuid;
-                                    } else {
-                                        // For existing user, we will still cache
-                                        // the older uuid, so that we can improve
-                                        // our reporting in terms of figuring out
-                                        // the new users accurately.
-                                        olderUuid = userUuid;
-                                        userUuid  = generatedUuid;
-                                    }
-
-                                    PreferencesManager.setViewState("UUID", userUuid);
-                                    PreferencesManager.setViewState("OlderUUID", olderUuid);
-
-                                    oneTimeHealthData.uuid      = userUuid;
-                                    oneTimeHealthData.olderuuid = olderUuid;
-                                    return result.resolve(oneTimeHealthData);
-                                });
-                            } else {
-                                // Probably running on older shell, in which case we will
-                                // assign the same uuid to olderuuid.
-                                if (!userUuid) {
-                                    oneTimeHealthData.uuid = oneTimeHealthData.olderuuid = uuid.v4();
+                        // So we are going to get the Machine hash in either of the cases.
+                        if (appshell.app.getMachineHash) {
+                            appshell.app.getMachineHash(function (err, macHash) {
+                                var generatedUuid;
+                                if (err) {
+                                    generatedUuid = uuid.v4();
                                 } else {
-                                    oneTimeHealthData.olderuuid = userUuid;
+                                    generatedUuid = macHash;
                                 }
 
-                                PreferencesManager.setViewState("UUID",      oneTimeHealthData.uuid);
-                                PreferencesManager.setViewState("OlderUUID", oneTimeHealthData.olderuuid);
+                                if (!userUuid) {
+                                    // Could be a new user. In this case
+                                    // both will remain the same.
+                                    userUuid = olderUuid = generatedUuid;
+                                } else {
+                                    // For existing user, we will still cache
+                                    // the older uuid, so that we can improve
+                                    // our reporting in terms of figuring out
+                                    // the new users accurately.
+                                    olderUuid = userUuid;
+                                    userUuid  = generatedUuid;
+                                }
 
+                                PreferencesManager.setViewState("UUID", userUuid);
+                                PreferencesManager.setViewState("OlderUUID", olderUuid);
+
+                                oneTimeHealthData.uuid      = userUuid;
+                                oneTimeHealthData.olderuuid = olderUuid;
                                 return result.resolve(oneTimeHealthData);
+                            });
+                        } else {
+                            // Probably running on older shell, in which case we will
+                            // assign the same uuid to olderuuid.
+                            if (!userUuid) {
+                                oneTimeHealthData.uuid = oneTimeHealthData.olderuuid = uuid.v4();
+                            } else {
+                                oneTimeHealthData.olderuuid = userUuid;
                             }
+
+                            PreferencesManager.setViewState("UUID",      oneTimeHealthData.uuid);
+                            PreferencesManager.setViewState("OlderUUID", oneTimeHealthData.olderuuid);
+
+                            return result.resolve(oneTimeHealthData);
                         }
                     });
 

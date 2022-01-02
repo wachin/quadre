@@ -435,8 +435,6 @@ function _makeDraggable($el) {
             const gTop = $ghost.offset().top;
             const gHeight = $ghost.height();
             const gBottom = gTop + gHeight;
-            // @ts-ignore
-            const deltaY = pageY - e.pageY; // eslint-disable-line @typescript-eslint/no-unused-vars
 
             // data to help us determine if we have a scroller
             hasScroller = $item.length && $container.length && $container[0].scrollHeight > $container[0].clientHeight;

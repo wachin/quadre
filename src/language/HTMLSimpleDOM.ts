@@ -318,8 +318,6 @@ export class Builder {
         let token;
         let lastClosedTag;
         let lastTextNode;
-        // @ts-ignore
-        let lastIndex = 0; // eslint-disable-line @typescript-eslint/no-unused-vars
         const stack = this.stack;
         let attributeName: string | null = null;
         const nodeMap = {};
@@ -499,7 +497,6 @@ export class Builder {
                     newNode.update();
                 }
             }
-            lastIndex = token.end;
         }
 
         // If we have any tags hanging open, fail the parse if we're in strict mode,

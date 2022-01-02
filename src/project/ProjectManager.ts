@@ -377,6 +377,15 @@ class ActionCreator {
 export const _actionCreator = new ActionCreator(model);
 
 /**
+ * Returns the File or Directory corresponding to the item that was right-clicked on in the file tree menu.
+ * @return {?(File|Directory)}
+ */
+export function getFileTreeContext() {
+    const selectedEntry = model.getContext();
+    return selectedEntry;
+}
+
+/**
  * Returns the File or Directory corresponding to the item selected in the sidebar panel, whether in
  * the file tree OR in the working set; or null if no item is selected anywhere in the sidebar.
  * May NOT be identical to the current Document - a folder may be selected in the sidebar, or the sidebar may not
@@ -384,8 +393,8 @@ export const _actionCreator = new ActionCreator(model);
  * @return {?(File|Directory)}
  */
 export function getSelectedItem() {
-    // Prefer file tree context, then selection, else use working set
-    let selectedEntry = model.getContext();
+    // Prefer file tree context, then file tree selection, else use working set
+    let selectedEntry = getFileTreeContext();
     if (!selectedEntry) {
         selectedEntry = model.getSelected();
     }

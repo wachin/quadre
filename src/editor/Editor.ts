@@ -1149,6 +1149,9 @@ export class Editor {
         this._codeMirror.on("cursorActivity", function (instance) {
             (self as unknown as EventDispatcher.DispatcherEvents).trigger("cursorActivity", self);
         });
+        this._codeMirror.on("beforeSelectionChange", function (instance, selectionObj) {
+            (self as unknown as EventDispatcher.DispatcherEvents).trigger("beforeSelectionChange", selectionObj);
+        });
         this._codeMirror.on("scroll", function (instance) {
             // If this editor is visible, close all dropdowns on scroll.
             // (We don't want to do this if we're just scrolling in a non-visible editor

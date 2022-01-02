@@ -470,14 +470,9 @@ define(function (require, exports, module) {
         var propertyLookup   = false,
             context          = null,
             cursor           = this.getCursor(),
-            token            = this.getToken(cursor),
-            // eslint-disable-next-line no-unused-vars
-            lexical;
+            token            = this.getToken(cursor);
 
         if (token) {
-            // if this token is part of a function call, then the tokens lexical info
-            // will be annotated with "call"
-            lexical = getLexicalState(token);
             if (token.type === "property") {
                 propertyLookup = true;
             }

@@ -128,7 +128,7 @@ export function setHealthLogsEnabled(enabled) {
  * @param {boolean} addedToWorkingSet set to true if extensions of files added to the
  *                                    working set needs to be logged
  */
-export function fileOpened(filePath, addedToWorkingSet = false) {
+export function fileOpened(filePath, addedToWorkingSet = false, encoding) {
     if (!shouldLogHealthData()) {
         return;
     }
@@ -138,7 +138,8 @@ export function fileOpened(filePath, addedToWorkingSet = false) {
     let fileExtCountMap = {};
     healthData.fileStats = healthData.fileStats || {
         openedFileExt     : {},
-        workingSetFileExt : {}
+        workingSetFileExt : {},
+        openedFileEncoding: {}
     };
     if (language.getId() !== "unknown") {
         fileExtCountMap = addedToWorkingSet ? healthData.fileStats.workingSetFileExt : healthData.fileStats.openedFileExt;
@@ -146,6 +147,18 @@ export function fileOpened(filePath, addedToWorkingSet = false) {
             fileExtCountMap[fileExtension] = 0;
         }
         fileExtCountMap[fileExtension]++;
+        setHealthData(healthData);
+    }
+    if (encoding) {
+        let fileEncCountMap = healthData.fileStats.openedFileEncoding;
+        if (!fileEncCountMap) {
+            healthData.fileStats.openedFileEncoding = {};
+            fileEncCountMap = healthData.fileStats.openedFileEncoding;
+        }
+        if (!fileEncCountMap[encoding]) {
+            fileEncCountMap[encoding] = 0;
+        }
+        fileEncCountMap[encoding]++;
         setHealthData(healthData);
     }
 }

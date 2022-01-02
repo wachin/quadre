@@ -40,11 +40,12 @@ import * as PreferencesManager from "preferences/PreferencesManager";
 import * as StatusBar from "widgets/StatusBar";
 import * as Strings from "strings";
 import InMemoryFile = require("document/InMemoryFile");
-import * as Dialogs from "widgets/Dialogs";
-import * as DefaultDialogs from "widgets/DefaultDialogs";
 import * as ProjectManager from "project/ProjectManager";
 import * as Async from "utils/Async";
 import * as FileSystem from "filesystem/FileSystem";
+import * as CommandManager from "command/CommandManager";
+import * as Commands from "command/Commands";
+import * as DocumentManager from "document/DocumentManager";
 import * as StringUtils from "utils/StringUtils";
 import { DispatcherEvents } from "utils/EventDispatcher";
 
@@ -470,36 +471,21 @@ function _init() {
     // Encoding select change handler
     encodingSelect.on("select", function (e, encoding) {
         const document = EditorManager.getActiveEditor()!.document;
+        const originalPath = document.file.fullPath;
+        const originalEncoding = document.file._encoding;
 
         document.file._encoding = encoding;
-
         if (!(document.file instanceof InMemoryFile) && document.isDirty) {
-            const dialogId = DefaultDialogs.DIALOG_ID_EXT_CHANGED;
-            const message = StringUtils.format(
-                Strings.DIRTY_FILE_ENCODING_CHANGE_WARN,
-                StringUtils.breakableUrl(
-                    ProjectManager.makeProjectRelativeIfPossible(document.file.fullPath)
-                )
-            );
-            const buttons = [
-                {
-                    className: Dialogs.DIALOG_BTN_CLASS_LEFT,
-                    id:        Dialogs.DIALOG_BTN_DONTSAVE,
-                    text:      Strings.IGNORE_RELOAD_FROM_DISK
-                },
-                {
-                    className: Dialogs.DIALOG_BTN_CLASS_PRIMARY,
-                    id:        Dialogs.DIALOG_BTN_CANCEL,
-                    text:      Strings.CANCEL
+            CommandManager.execute(Commands.FILE_SAVE_AS, {doc: document}).done(function () {
+                const doc = DocumentManager.getCurrentDocument()!;
+                if (originalPath === doc.file.fullPath) {
+                    _changeEncodingAndReloadDoc(doc);
+                } else {
+                    document.file._encoding = originalEncoding;
                 }
-            ];
-
-            Dialogs.showModalDialog(dialogId, Strings.SAVE_FILE_ENCODING_CHANGE_WARN, message, buttons)
-                .done(function (id) {
-                    if (id === Dialogs.DIALOG_BTN_DONTSAVE) {
-                        _changeEncodingAndReloadDoc(document);
-                    }
-                });
+            }).fail(function () {
+                document.file._encoding = originalEncoding;
+            });
         } else if (document.file instanceof InMemoryFile) {
             encodingSelect.$button.text(encoding);
         } else if (!document.isDirty) {
@@ -538,9 +524,10 @@ function _checkFileExistance(filePath, index, encoding) {
             layerID: projectRoot.fullPath
         }
     };
-    const encoding = PreferencesManager.getViewState("encoding", context);
+    let encoding = PreferencesManager.getViewState("encoding", context);
     if (!encoding) {
-        PreferencesManager.setViewState("encoding", {}, context);
+        encoding = {};
+        PreferencesManager.setViewState("encoding", encoding, context);
     }
     Async.doSequentially(Object.keys(encoding), function (filePath, index) {
         return _checkFileExistance(filePath, index, encoding);

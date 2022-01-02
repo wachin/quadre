@@ -53,7 +53,7 @@ class File extends FileSystemEntry {
      * @private
      * @type {?string}
      */
-    private _encoding: string | null = null;
+    public _encoding: string | null = null;
 
     /**
      * BOM detected by brackets-shell

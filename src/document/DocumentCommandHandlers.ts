@@ -492,7 +492,7 @@ function handleFileOpen(commandData): JQueryPromise<File> {
 
     _doOpenWithOptionalPath(fileInfo.path, silent, paneId, commandData && commandData.options)
         .done(function (file) {
-            HealthLogger.fileOpened(file._path);
+            HealthLogger.fileOpened(file._path, false, file._encoding);
             if (!commandData || !commandData.options || !commandData.options.noPaneActivate) {
                 MainViewManager.setActivePaneId(paneId);
             }
@@ -574,7 +574,7 @@ function handleFileAddToWorkingSetAndOpen(commandData) {
     return handleFileOpen(commandData).done(function (file) {
         const paneId = (commandData && commandData.paneId) || MainViewManager.ACTIVE_PANE;
         MainViewManager.addToWorkingSet(paneId, file, commandData.index, commandData.forceRedraw);
-        HealthLogger.fileOpened(file!.fullPath, true);
+        HealthLogger.fileOpened(file!.fullPath, true, file!._encoding);
     });
 }
 
@@ -672,10 +672,8 @@ function _handleNewItemInProject(isFolder) {
     // If a file is currently selected in the tree, put it next to it.
     // If a directory is currently selected in the tree, put it in it.
     // If an Untitled document is selected or nothing is selected in the tree, put it at the root of the project.
-    // (Note: 'selected' may be an item that's selected in the workingset and not the tree; but in that case
-    // ProjectManager.createNewItem() ignores the baseDir we give it and falls back to the project root on its own)
     let baseDirEntry;
-    let selected = ProjectManager.getSelectedItem();
+    let selected = ProjectManager.getFileTreeContext();
     if ((!selected) || (selected instanceof InMemoryFile)) {
         selected = ProjectManager.getProjectRoot();
     }
