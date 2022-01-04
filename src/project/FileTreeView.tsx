@@ -343,6 +343,7 @@ class FileRenameInput extends React.Component<IFileRenameInputProps, {}> {
         const node = this.textInput;
         if (node) {
             node.setSelectionRange(0, _getName(fullname, extension).length);
+            node.focus(); // set focus on the rename input
             ViewUtils.scrollElementIntoView($("#project-files-container"), $(node), true);
         }
     }
@@ -761,6 +762,7 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
         const node = this.textInput;
         if (node) {
             node.setSelectionRange(0, fullname.length);
+            node.focus(); // set focus on the rename input
             ViewUtils.scrollElementIntoView($("#project-files-container"), $(node), true);
         }
     }

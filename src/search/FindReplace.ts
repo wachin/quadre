@@ -703,6 +703,11 @@ function doReplace(editor, all) {
     const state = getSearchState(cm);
     const replaceText = findBar.getReplaceText();
 
+    // Do not replace if editor is set to read only
+    if (cm.options.readOnly) {
+        return;
+    }
+
     if (all === null) {
         findBar.close();
         FindInFilesUI.searchAndReplaceResults(state.queryInfo, editor.document.file, null, replaceText);

@@ -384,7 +384,7 @@ export class Editor {
     /**
      * The Editor's last known width.
      * Used in conjunction with updateLayout to recompute the layout
-     * if the the parent container changes its size since our last layout update.
+     * if the parent container changes its size since our last layout update.
      * @type {?number}
      */
     private _lastEditorWidth: number | null = null;
@@ -1621,7 +1621,7 @@ export class Editor {
     }
 
     /**
-     * Gets the total number of lines in the the document (includes lines not visible in the viewport)
+     * Gets the total number of lines in the document (includes lines not visible in the viewport)
      * @return {!number}
      */
     public lineCount() {

@@ -644,7 +644,7 @@ function _addBinding(commandID, keyBinding, platform, userBindings?) {
     const bindingsToDelete: Array<KeyBinding> = [];
     let existing;
 
-    // For platform: "all", use explicit current plaform
+    // For platform: "all", use explicit current platform
     if (explicitPlatform && explicitPlatform !== "all") {
         targetPlatform = explicitPlatform;
     } else {

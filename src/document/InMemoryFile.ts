@@ -68,7 +68,7 @@ class InMemoryFile extends File {
      * @param {string} data Data to write.
      * @param {string=} encoding Encoding for data. Defaults to UTF-8.
      * @param {!function (err, object)} callback Callback that is passed the
-     *              error code and the file's new stats if the write is sucessful.
+     *              error code and the file's new stats if the write is successful.
      */
     public write(data, encoding, callback) {
         if (typeof (encoding) === "function") {

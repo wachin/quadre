@@ -353,7 +353,7 @@ function _doOpen(fullPath, silent, paneId, options) {
                 }
             };
             const encoding = PreferencesManager.getViewState("encoding", context);
-            if (encoding[fullPath]) {
+            if (encoding && encoding[fullPath]) {
                 file._encoding = encoding[fullPath];
             }
         }
@@ -1781,6 +1781,32 @@ function handleReload(loadWithoutExtensions) {
  * Reload Without Extensions commnad handler
  */
 const handleReloadWithoutExts = _.partial(handleReload, true);
+
+/**
+ * Attach a beforeunload handler to notify user about unsaved changes and URL redirection in CEF.
+ * Prevents data loss in scenario reported under #13708
+**/
+window.onbeforeunload = function (e) {
+    if (window.location.pathname.indexOf("SpecRunner") > -1) {
+        return;
+    }
+
+    let openDocs = DocumentManager.getAllOpenDocuments();
+
+    // Detect any unsaved changes
+    openDocs = openDocs.filter(function (doc) {
+        return doc && doc.isDirty;
+    });
+
+    // Ensure we are not in normal app-quit or reload workflow
+    if (!_isReloading && !appshell.windowGoingAway) {
+        if (openDocs.length > 0) {
+            return Strings.WINDOW_UNLOAD_WARNING_WITH_UNSAVED_CHANGES;
+        }
+
+        return Strings.WINDOW_UNLOAD_WARNING;
+    }
+};
 
 /**
  * Do some initialization when the DOM is ready

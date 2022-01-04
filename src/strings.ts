@@ -55,8 +55,7 @@ const isDevBuild = !StringUtils.endsWith(decodeURI(window.location.pathname), "/
 if (isDevBuild) {
     additionalGlobals.BUILD_TYPE = strings.DEVELOPMENT_BUILD;
 } else {
-    const isReleaseBuild = (brackets.platform === "mac" || brackets.platform === "win");
-    additionalGlobals.BUILD_TYPE = (isReleaseBuild ? strings.RELEASE_BUILD : strings.EXPERIMENTAL_BUILD);
+    additionalGlobals.BUILD_TYPE = strings.RELEASE_BUILD;
 }
 
 // Insert application strings

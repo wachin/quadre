@@ -1162,6 +1162,10 @@ ready.always(function () {
     const scss = getLanguage("scss");
     scss._setLanguageForMode("css", scss);
 
+    // Map stylus mode to the stylus Brackets language, fixes #13378
+    const stylus = getLanguage("stylus");
+    _setLanguageForMode("stylus", stylus);
+
     // The fallback language for unknown modes and file extensions
     _fallbackLanguage = getLanguage("unknown");
 

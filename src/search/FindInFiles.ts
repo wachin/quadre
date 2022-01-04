@@ -993,7 +993,7 @@ const _initCache = function () {
 
 
 /**
- * Gets the next page of search recults to append to the result set.
+ * Gets the next page of search results to append to the result set.
  * @return {object} A promise that's resolved with the search results or rejected when the find competes.
  */
 export function getNextPageofSearchResults() {
