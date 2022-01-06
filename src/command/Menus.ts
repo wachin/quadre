@@ -1239,7 +1239,7 @@ export class ContextMenu extends Menu {
     public open(mouseOrLocation?) {
 
         if (!this.parentMenuItem &&
-        (!mouseOrLocation || !mouseOrLocation.hasOwnProperty("pageX") || !mouseOrLocation.hasOwnProperty("pageY"))) {
+            (!mouseOrLocation || !mouseOrLocation.hasOwnProperty("pageX") || !mouseOrLocation.hasOwnProperty("pageY"))) {
             console.error("ContextMenu open(): missing required parameter");
             return;
         }

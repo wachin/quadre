@@ -4,7 +4,7 @@ import appshell = require("./appshell/index");
 let t: any;
 
 // define global object extensions
-interface BracketsWindowGlobal extends NodeJS.Global {
+interface BracketsWindowGlobal {
     // TODO: better define appshell (brackets) global object
     appshell: any;
     brackets: any;
@@ -35,7 +35,7 @@ process.once("loaded", function () {
         return;
     }
 
-    const g = global as BracketsWindowGlobal;
+    const g = global as BracketsWindowGlobal & typeof global;
     // expose electron renderer process modules
     g.electron = t.electron;
     // expose node stuff under node global wrapper because of requirejs

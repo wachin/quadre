@@ -159,14 +159,19 @@ function npmInstallDist(cb) {
         ]);
         common.writeJSON("dist/www/package.json", srcJson);
 
-        runNpmInstall("dist/www", function (errSrc) {
-            if (errSrc) {
-                log.error(errSrc);
-                const errPlugin = new PluginError("npm-install-dist", errSrc, { showStack: true });
-                return cb(errPlugin);
-            }
+        const dirs = ["dist/www", "dist/www/JSUtils", "dist/www/JSUtils/node"];
+        const done = _.after(dirs.length, cb);
 
-            cb();
+        dirs.forEach(function (dir) {
+            runNpmInstall(dir, function (errSrc) {
+                if (errSrc) {
+                    log.error(errSrc);
+                    const errPlugin = new PluginError("npm-install-dist", errSrc, { showStack: true });
+                    return cb(errPlugin);
+                }
+
+                done();
+            });
         });
     });
 }
@@ -175,14 +180,19 @@ gulp.task("npm-install-dist", npmInstallDist);
 
 
 function npmInstallSrc(cb) {
-    runNpmInstall("src", false, function (err) {
-        if (err) {
-            log.error(err);
-            const errPlugin = new PluginError("npm-install-src", err, { showStack: true });
-            return cb(errPlugin);
-        }
+    const dirs = ["src", "src/JSUtils", "src/JSUtils/node"];
+    const done = _.after(dirs.length, cb);
 
-        cb();
+    dirs.forEach(function (dir) {
+        runNpmInstall(dir, false, function (err) {
+            if (err) {
+                log.error(err);
+                const errPlugin = new PluginError("npm-install-src", err, { showStack: true });
+                return cb(errPlugin);
+            }
+
+            done();
+        });
     });
 }
 npmInstallSrc.description = "Install node_modules to the src folder";

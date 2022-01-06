@@ -75,8 +75,7 @@ import * as Dialogs from "widgets/Dialogs";
 import * as DefaultDialogs from "widgets/DefaultDialogs";
 import * as ExtensionLoader from "utils/ExtensionLoader";
 import * as Async from "utils/Async";
-// @ts-ignore
-import * as UpdateNotification from "utils/UpdateNotification"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as UpdateNotification from "utils/UpdateNotification";
 import { UrlParams } from "utils/UrlParams";
 import * as PreferencesManager from "preferences/PreferencesManager";
 import * as DragAndDrop from "utils/DragAndDrop";
@@ -181,6 +180,10 @@ import "editor/ImageViewer";
 import "extensibility/ExtensionManagerDialog";
 import "help/HelpCommandHandlers";
 import "search/FindReplace";
+
+// Load common JS module
+import "JSUtils/Session";
+import "JSUtils/ScopeManager";
 
 PerfUtils.addMeasurement("brackets module dependencies resolved");
 
@@ -436,9 +439,9 @@ function _beforeHTMLReady() {
         // Text fields should always be focusable.
         const $target = $(e.target);
         const isFormElement =
-            $target.is("input") ||
-            $target.is("textarea") ||
-            $target.is("select");
+                $target.is("input") ||
+                $target.is("textarea") ||
+                $target.is("select");
 
         if (!isFormElement) {
             e.preventDefault();
