@@ -29,22 +29,15 @@ define(function (require, exports, module) {
 
     var EditorManager        = brackets.getModule("editor/EditorManager"),
         TokenUtils           = brackets.getModule("utils/TokenUtils"),
-        CommandManager       = brackets.getModule("command/CommandManager"),
-        Menus                = brackets.getModule("command/Menus"),
         Strings              = brackets.getModule("strings"),
-        RefactoringSession   = require("RefactoringUtils");
+        RefactoringUtils     = require("RefactoringUtils"),
+        RefactoringSession   = RefactoringUtils.RefactoringSession;
 
     //Template keys mentioned in Templates.json
     var WRAP_IN_CONDITION       = "wrapCondition",
         ARROW_FUNCTION          = "arrowFunction",
         GETTERS_SETTERS         = "gettersSetters",
         TRY_CATCH               = "tryCatch";
-
-    //Commands
-    var refactorWrapInTryCatch  = "refactoring.wrapintrycatch",
-        refactorWrapInCondition = "refactoring.wrapincondition",
-        refactorConvertToArrowFn = "refactoring.converttoarrowfunction",
-        refactorCreateGetSet = "refactoring.creategettersandsetters";
 
     //Active session which will contain information about editor, selection etc
     var current = null;
@@ -75,18 +68,22 @@ define(function (require, exports, module) {
             pos;
 
         if (selectedText.length === 0) {
-            var statementNode = current.findSurroundASTNode(current.ast, {start: startIndex}, ["Statement"]);
+            var statementNode = RefactoringUtils.findSurroundASTNode(current.ast, {start: startIndex}, ["Statement"]);
+            if (!statementNode) {
+                current.editor.displayErrorMessageAtCursor(err);
+                return;
+            }
             selectedText = current.text.substr(statementNode.start, statementNode.end - statementNode.start);
             startIndex = statementNode.start;
             endIndex = statementNode.end;
         } else {
-            var selectionDetails = current.normalizeText(selectedText, startIndex, endIndex);
+            var selectionDetails = RefactoringUtils.normalizeText(selectedText, startIndex, endIndex);
             selectedText = selectionDetails.text;
             startIndex = selectionDetails.start;
             endIndex = selectionDetails.end;
         }
 
-        if (!current.checkStatement(current.ast, startIndex, endIndex, selectedText)) {
+        if (!RefactoringUtils.checkStatement(current.ast, startIndex, endIndex, selectedText)) {
             current.editor.displayErrorMessageAtCursor(err);
             return;
         }
@@ -129,19 +126,50 @@ define(function (require, exports, module) {
             return;
         }
         initializeRefactoringSession(editor);
-        //Handle when there is no selected line
-        var funcExprNode = current.findSurroundASTNode(current.ast, {start: current.startIndex}, ["FunctionExpression"]);
+
+        var funcExprNode = RefactoringUtils.findSurroundASTNode(current.ast, {start: current.startIndex}, ["Function"]);
 
         if (!funcExprNode || funcExprNode.type !== "FunctionExpression" || funcExprNode.id) {
             current.editor.displayErrorMessageAtCursor(Strings.ERROR_ARROW_FUNCTION);
             return;
         }
+
+        if (funcExprNode === "FunctionDeclaration") {
+            current.editor.displayErrorMessageAtCursor(Strings.ERROR_ARROW_FUNCTION);
+            return;
+        }
+
+        if (!funcExprNode.body) {
+            return;
+        }
+
         var noOfStatements = funcExprNode.body.body.length,
-            param = [];
+            param = [],
+            dontChangeParam = false,
+            numberOfParams = funcExprNode.params.length,
+            treatAsManyParam = false;
 
         funcExprNode.params.forEach(function (item) {
-            param.push(item.name);
+            if (item.type === "Identifier") {
+                param.push(item.name);
+            } else if (item.type === "AssignmentPattern") {
+                dontChangeParam = true;
+            }
         });
+
+        //In case defaults params keep params as it is
+        if (dontChangeParam) {
+            if (numberOfParams >= 1) {
+                param.splice(0, param.length);
+                param.push(current.text.substr(funcExprNode.params[0].start, funcExprNode.params[numberOfParams - 1].end - funcExprNode.params[0].start));
+                // In case default param, treat them as many paramater because to use
+                // one parameter template, That param should be an identifier
+                if (numberOfParams === 1) {
+                    treatAsManyParam = true;
+                }
+            }
+            dontChangeParam = false;
+        }
 
         var loc = {
                 "fullFunctionScope": {
@@ -163,12 +191,19 @@ define(function (require, exports, module) {
                     "end": current.cm.posFromIndex(loc.functionsDeclOnly.end)
                 }
             },
-            isReturnStatement = funcExprNode.body.body[0].type === "ReturnStatement",
+            isReturnStatement = (noOfStatements >= 1 && funcExprNode.body.body[0].type === "ReturnStatement"),
             bodyStatements = funcExprNode.body.body[0],
-            params = {
-                "params": param.join(", "),
-                "statement": _.trimRight(current.text.substr(bodyStatements.start, bodyStatements.end - bodyStatements.start), ";")
-            };
+            params;
+
+        // If there is nothing in function body, then get the text b/w curly braces
+        // In this case, We will update params only as per Arrow function expression
+        if (!bodyStatements) {
+            bodyStatements = funcExprNode.body;
+        }
+        params = {
+            "params": param.join(", "),
+            "statement": _.trimRight(current.text.substr(bodyStatements.start, bodyStatements.end - bodyStatements.start), ";")
+        };
 
         if (isReturnStatement) {
             params.statement = params.statement.substr(7).trim();
@@ -176,14 +211,13 @@ define(function (require, exports, module) {
 
         if (noOfStatements === 1) {
             current.document.batchOperation(function () {
-                funcExprNode.params.length === 1
+                (numberOfParams === 1 && !treatAsManyParam)
                     ? current.replaceTextFromTemplate(ARROW_FUNCTION, params, locPos.fullFunctionScope, "oneParamOneStament")
                     : current.replaceTextFromTemplate(ARROW_FUNCTION, params, locPos.fullFunctionScope, "manyParamOneStament");
-
             });
         } else {
             current.document.batchOperation(function () {
-                funcExprNode.params.length === 1
+                (numberOfParams === 1 && !treatAsManyParam)
                     ? current.replaceTextFromTemplate(ARROW_FUNCTION, {params: param},
                         locPos.functionsDeclOnly, "oneParamManyStament")
                     : current.replaceTextFromTemplate(ARROW_FUNCTION, {params: param.join(", ")}, locPos.functionsDeclOnly, "manyParamManyStament");
@@ -206,7 +240,7 @@ define(function (require, exports, module) {
             selectedText = current.selectedText;
 
         if (selectedText.length >= 1) {
-            var selectionDetails = current.normalizeText(selectedText, startIndex, endIndex);
+            var selectionDetails = RefactoringUtils.normalizeText(selectedText, startIndex, endIndex);
             selectedText = selectionDetails.text;
             startIndex = selectionDetails.start;
             endIndex = selectionDetails.end;
@@ -259,29 +293,8 @@ define(function (require, exports, module) {
         });
     }
 
-
-    //Register commands and and menus in conext menu and main menus under 'Edit'
-    function addCommands() {
-        CommandManager.register(Strings.CMD_REFACTORING_TRY_CATCH, refactorWrapInTryCatch, wrapInTryCatch);
-        CommandManager.register(Strings.CMD_REFACTORING_CONDITION, refactorWrapInCondition, wrapInCondition);
-        CommandManager.register(Strings.CMD_REFACTORING_ARROW_FUNCTION, refactorConvertToArrowFn, convertToArrowFunction);
-        CommandManager.register(Strings.CMD_REFACTORING_GETTERS_SETTERS, refactorCreateGetSet, createGettersAndSetters);
-
-        var menuLocation = Menus.AppMenuBar.EDIT_MENU,
-            editorCmenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
-
-        if (editorCmenu) {
-            editorCmenu.addMenuItem(refactorWrapInTryCatch);
-            editorCmenu.addMenuItem(refactorWrapInCondition);
-            editorCmenu.addMenuItem(refactorConvertToArrowFn);
-            editorCmenu.addMenuItem(refactorCreateGetSet);
-        }
-
-        Menus.getMenu(menuLocation).addMenuItem(refactorWrapInTryCatch);
-        Menus.getMenu(menuLocation).addMenuItem(refactorWrapInCondition);
-        Menus.getMenu(menuLocation).addMenuItem(refactorConvertToArrowFn);
-        Menus.getMenu(menuLocation).addMenuItem(refactorCreateGetSet);
-    }
-
-    exports.addCommands = addCommands;
+    exports.wrapInCondition         = wrapInCondition;
+    exports.wrapInTryCatch          = wrapInTryCatch;
+    exports.convertToArrowFunction  = convertToArrowFunction;
+    exports.createGettersAndSetters = createGettersAndSetters;
 });

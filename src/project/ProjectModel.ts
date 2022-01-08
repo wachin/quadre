@@ -72,38 +72,46 @@ export const defaultIgnoreGlobs = [
 
 /**
  * @private
- * A string containing all invalid characters for a specific platform.
- * This will be used to construct a regular expression for checking invalid filenames.
- * When a filename with one of these invalid characters are detected, then it is
- * also used to substitute the place holder of the error message.
+ * RegEx to validate a file path.
  */
-export let _invalidChars;
+const invalidChars = /([?*|<>"]+|\/{2,}|\.{2,}|\.$)/i;
+
+export const _invalidChars           = "? * | : / < > \\ | \" ..";
 
 /**
  * @private
  * RegEx to validate if a filename is not allowed even if the system allows it.
  * This is done to prevent cross-platform issues.
  */
-
-const _illegalFilenamesRegEx = /^(\.+|com[1-9]|lpt[1-9]|nul|con|prn|aux|)$|\.+$/i;
+const _illegalFilenamesRegEx = /((\b(com[0-9]+|lpt[0-9]+|nul|con|prn|aux)\b)|\.+$|\/+|\\+|:)/i;
 
 /**
  * Returns true if this matches valid filename specifications.
+ * See http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
  *
  * TODO: This likely belongs in FileUtils.
  *
  * @param {string} filename to check
- * @param {string} invalidChars List of characters that are disallowed
  * @return {boolean} true if the filename is valid
  */
-export function isValidFilename(filename, invalidChars) {
-    // Validate file name
-    // Checks for valid Windows filenames:
-    // See http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
+export function isValidFilename(filename) {
+    // Fix issue adobe#13099
+    // See https://github.com/adobe/brackets/issues/13099
     return !(
-        new RegExp("[" + invalidChars + "]+").test(filename) ||
-        _illegalFilenamesRegEx.test(filename)
+        filename.match(invalidChars) || filename.match(_illegalFilenamesRegEx)
     );
+}
+
+/**
+ * Returns true if given path is valid.
+ *
+ * @param {string} path to check
+ * @return {boolean} true if the filename is valid
+ */
+export function isValidPath(path) {
+    // Fix issue adobe#13099
+    // See https://github.com/adobe/brackets/issues/13099
+    return !(path.match(invalidChars));
 }
 
 /**
@@ -186,9 +194,16 @@ function _getPathFromFSObject(fsobj) {
  */
 export function doCreate(path, isFolder): JQueryPromise<FileSystemEntry> {
     const d = $.Deferred<FileSystemEntry>();
+    const filename = FileUtils.getBaseName(path);
 
-    const name = FileUtils.getBaseName(path);
-    if (!isValidFilename(name, _invalidChars)) {
+    // Check if filename
+    if (!isValidFilename(filename)) {
+        return d.reject(ERROR_INVALID_FILENAME).promise();
+    }
+
+    // Check if fullpath with filename is valid
+    // This check is used to circumvent directory jumps (Like ../..)
+    if (!isValidPath(path)) {
         return d.reject(ERROR_INVALID_FILENAME).promise();
     }
 
@@ -237,7 +252,7 @@ function _renameItem(oldPath, newPath, newName, isFolder) {
 
     if (oldPath === newPath) {
         result.resolve();
-    } else if (!isValidFilename(newName, _invalidChars)) {
+    } else if (!isValidFilename(newName)) {
         result.reject(ERROR_INVALID_FILENAME);
     } else {
         const entry = isFolder ? FileSystem.getDirectoryForPath(oldPath) : FileSystem.getFileForPath(oldPath);
@@ -1351,13 +1366,4 @@ export function _isWelcomeProjectPath(path, welcomeProjectPath, welcomeProjects)
 
     const pathNoSlash = FileUtils.stripTrailingSlash(path);  // "welcomeProjects" pref has standardized on no trailing "/"
     return welcomeProjects.indexOf(pathNoSlash) !== -1;
-}
-
-// Init invalid characters string
-if (brackets.platform === "mac") {
-    _invalidChars = "?*|:/";
-} else if (brackets.platform === "linux") {
-    _invalidChars = "?*|/";
-} else {
-    _invalidChars = "/?*:<>\\|\"";  // invalid characters on Windows
 }

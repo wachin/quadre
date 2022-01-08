@@ -1785,28 +1785,31 @@ const handleReloadWithoutExts = _.partial(handleReload, true);
 /**
  * Attach a beforeunload handler to notify user about unsaved changes and URL redirection in CEF.
  * Prevents data loss in scenario reported under #13708
-**/
-window.onbeforeunload = function (e) {
-    if (window.location.pathname.indexOf("SpecRunner") > -1) {
-        return;
-    }
+ * Make sure we don't attach this handler if the current window is actually a test window
+ */
+/*
+// TODO: check if this is still necessary.
+const isTestWindow = (new window.URLSearchParams(window.location.search || "")).get("testEnvironment");
+if (!isTestWindow) {
+    window.onbeforeunload = function (e) {
+        let openDocs = DocumentManager.getAllOpenDocuments();
 
-    let openDocs = DocumentManager.getAllOpenDocuments();
+        // Detect any unsaved changes
+        openDocs = openDocs.filter(function (doc) {
+            return doc && doc.isDirty;
+        });
 
-    // Detect any unsaved changes
-    openDocs = openDocs.filter(function (doc) {
-        return doc && doc.isDirty;
-    });
+        // Ensure we are not in normal app-quit or reload workflow
+        if (!_isReloading && !appshell.windowGoingAway) {
+            if (openDocs.length > 0) {
+                return Strings.WINDOW_UNLOAD_WARNING_WITH_UNSAVED_CHANGES;
+            }
 
-    // Ensure we are not in normal app-quit or reload workflow
-    if (!_isReloading && !appshell.windowGoingAway) {
-        if (openDocs.length > 0) {
-            return Strings.WINDOW_UNLOAD_WARNING_WITH_UNSAVED_CHANGES;
+            return Strings.WINDOW_UNLOAD_WARNING;
         }
-
-        return Strings.WINDOW_UNLOAD_WARNING;
-    }
-};
+    };
+}
+*/
 
 /**
  * Do some initialization when the DOM is ready

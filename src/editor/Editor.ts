@@ -1399,6 +1399,10 @@ export class Editor {
         return this._codeMirror.indexFromPos(coords);
     }
 
+    public posFromIndex(index) {
+        return this._codeMirror.posFromIndex(index);
+    }
+
     /**
      * Returns true if pos is between start and end (INclusive at start; EXclusive at end by default,
      * but overridable via the endInclusive flag).

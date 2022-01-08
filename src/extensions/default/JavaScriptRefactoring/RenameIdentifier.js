@@ -29,13 +29,11 @@ define(function (require, exports, module) {
         ScopeManager         = brackets.getModule("JSUtils/ScopeManager"),
         Session              = brackets.getModule("JSUtils/Session"),
         MessageIds           = brackets.getModule("JSUtils/MessageIds"),
-        CommandManager       = brackets.getModule("command/CommandManager"),
-        Menus                = brackets.getModule("command/Menus"),
+        TokenUtils           = brackets.getModule("utils/TokenUtils"),
         Strings              = brackets.getModule("strings");
-        //Commands
-    var refactorRename          = "javascript.renamereference";
 
-    var session             = null;  // object that encapsulates the current session state
+    var session             = null,  // object that encapsulates the current session state
+        keywords = ["define", "alert", "exports", "require", "module", "arguments"];
 
     //Create new session
     function initializeSession(editor) {
@@ -73,7 +71,7 @@ define(function (require, exports, module) {
     //Do rename of identifier which is at cursor
     function handleRename() {
         var editor = EditorManager.getActiveEditor(),
-            offset;
+            offset, token;
 
         if (!editor) {
             return;
@@ -90,10 +88,18 @@ define(function (require, exports, module) {
             return;
         }
 
+        token = TokenUtils.getTokenAt(editor._codeMirror, editor._codeMirror.posFromIndex(session.getOffset()));
+
+        if (keywords.indexOf(token.string) >= 0) {
+            editor.displayErrorMessageAtCursor(Strings.ERROR_RENAME_GENERAL);
+            return;
+        }
+
         var result = new $.Deferred();
 
         function isInSameFile(obj, refsResp) {
-            return (obj && obj.file === refsResp.file);
+            // In case of unsaved files, After renameing once Tern is returning filename without forward slash
+            return (obj && (obj.file === refsResp.file || obj.file === refsResp.file.slice(1, refsResp.file.length)));
         }
 
         /**
@@ -101,14 +107,33 @@ define(function (require, exports, module) {
          * If yes then select all references
          */
         function handleFindRefs(refsResp) {
-            if (refsResp && refsResp.references && refsResp.references.refs) {
-                if (refsResp.references.type === "local") {
-                    EditorManager.getActiveEditor().setSelections(refsResp.references.refs);
-                } else {
-                    EditorManager.getActiveEditor().setSelections(refsResp.references.refs.filter(function (element) {
-                        return isInSameFile(element, refsResp);
-                    }));
+            if (!refsResp || !refsResp.references || !refsResp.references.refs) {
+                return;
+            }
+
+            var inlineWidget = EditorManager.getFocusedInlineWidget(),
+                editor = EditorManager.getActiveEditor(),
+                refs = refsResp.references.refs,
+                type = refsResp.references.type;
+
+            //In case of inline widget if some references are outside widget's text range then don't allow for rename
+            if (inlineWidget) {
+                var isInTextRange  = !refs.find(function (item) {
+                    return (item.start.line < inlineWidget._startLine || item.end.line > inlineWidget._endLine);
+                });
+
+                if (!isInTextRange) {
+                    editor.displayErrorMessageAtCursor(Strings.ERROR_RENAME_QUICKEDIT);
+                    return;
                 }
+            }
+
+            if (type === "local") {
+                editor.setSelections(refs);
+            } else {
+                editor.setSelections(refs.filter(function (element) {
+                    return isInSameFile(element, refsResp);
+                }));
             }
         }
 
@@ -133,26 +158,5 @@ define(function (require, exports, module) {
         return result.promise();
     }
 
-    //Register command, add menus and context menu, key binding- Ctrl+R
-    function addCommands() {
-
-        CommandManager.register(Strings.CMD_REFACTORING_RENAME, refactorRename, handleRename);
-
-        var keysRename = [
-                {key: "Ctrl-R", platform: "mac"}, // don't translate to Cmd-R on mac
-                {key: "Ctrl-R", platform: "win"},
-                {key: "Ctrl-R", platform: "linux"}
-            ],
-            menuLocation = Menus.AppMenuBar.EDIT_MENU,
-            editorCmenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
-
-        if (editorCmenu) {
-            editorCmenu.addMenuItem(refactorRename);
-        }
-
-        Menus.getMenu(menuLocation).addMenuDivider();
-        Menus.getMenu(menuLocation).addMenuItem(refactorRename, keysRename);
-    }
-
-    exports.addCommands = addCommands;
+    exports.handleRename = handleRename;
 });

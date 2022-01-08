@@ -130,7 +130,7 @@
  *     into the editor;
  *  2. match, a string that the manager may use to emphasize substrings of
  *     hints in the hint list (case-insensitive); and
- *  3. selectInitial, a boolean that indicates whether or not the the
+ *  3. selectInitial, a boolean that indicates whether or not the
  *     first hint in the list should be selected by default.
  *  4. handleWideResults, a boolean (or undefined) that indicates whether
  *     to allow result string to stretch width of display.
@@ -245,6 +245,7 @@ interface CodeHintProvider {
     getHints(implicitChar: string[1] | null): JQueryDeferred<HintObject<string | JQuery>> | HintObject<string | JQuery> | boolean | null;
     insertHint(hint: string): boolean;
     insertHintOnTab?: boolean;
+    onHighlight($hint: any): void;
 }
 
 interface HintProvider {
@@ -518,6 +519,12 @@ const _beginSession = function (editor) {
 
         sessionEditor = editor;
         hintList = new CodeHintList(sessionEditor, insertHintOnTab, maxCodeHints);
+        hintList.onHighlight(function ($hint) {
+            // If the current hint provider listening for hint item highlight change
+            if (sessionProvider && sessionProvider.onHighlight) {
+                sessionProvider.onHighlight($hint);
+            }
+        });
         hintList.onSelect(function (hint) {
             const restart = sessionProvider!.insertHint(hint);
             const previousEditor = sessionEditor;

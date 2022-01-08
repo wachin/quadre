@@ -759,7 +759,7 @@ export class Menu {
         // create MenuItem DOM
         if (_isHTMLMenu(this.id)) {
             // Create the HTML MenuItem
-            const $menuItem = $("<li><a href='#' id='" + menuItemID + "'>"   +
+            const $menuItem = $("<li><a href='#' id='" + menuItemID + "'> "   +
                                 "<span class='menu-name'>" + name + "</span>" +
                                 "<span style='float: right'>&rtrif;</span>"   +
                                 "</a></li>");

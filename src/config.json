@@ -20,7 +20,10 @@
         "extension_url": "https://s3.amazonaws.com/extend.brackets/{0}/{0}-{1}.zip",
         "linting.enabled_by_default": true,
         "build_timestamp": "",
-        "healthDataServerURLs": []
+        "healthDataServerURLs": [],
+        "analyticsDataServerURL": "https://cc-api-data.adobe.io/ingest",
+        "serviceKey": "brackets-service",
+        "environment": "production"
     },
     "name": "quadre",
     "productName": "Quadre",
@@ -29,7 +32,7 @@
     "license": "MIT",
     "homepage": "https://github.com/quadre-code/quadre",
     "version": "2.0.0-alpha.6",
-    "apiVersion": "1.12.0",
+    "apiVersion": "1.13.0",
     "issues": {
         "url": "https://github.com/quadre-code/quadre/issues"
     },

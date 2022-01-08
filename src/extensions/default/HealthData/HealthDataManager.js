@@ -26,6 +26,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var AppInit             = brackets.getModule("utils/AppInit"),
+        CommandManager      = brackets.getModule("command/CommandManager"),
         HealthLogger        = brackets.getModule("utils/HealthLogger"),
         PreferencesManager  = brackets.getModule("preferences/PreferencesManager"),
         UrlParams           = brackets.getModule("utils/UrlParams").UrlParams,
@@ -61,7 +62,6 @@ define(function (require, exports, module) {
         oneTimeHealthData.bracketsLanguage = brackets.getLocale();
         oneTimeHealthData.bracketsVersion = brackets.metadata.version;
         $.extend(oneTimeHealthData, HealthLogger.getAggregatedHealthData());
-
         HealthDataUtils.getUserInstalledExtensions()
             .done(function (userInstalledExtensions) {
                 oneTimeHealthData.installedExtensions = userInstalledExtensions;
@@ -128,8 +128,34 @@ define(function (require, exports, module) {
                     });
 
             });
-
         return result.promise();
+    }
+
+    // Get Analytics data
+    function getAnalyticsData() {
+        var userUuid = PreferencesManager.getViewState("UUID"),
+            olderUuid = PreferencesManager.getViewState("OlderUUID");
+
+        return {
+            project: brackets.config.serviceKey,
+            environment: brackets.config.environment,
+            time: new Date().toISOString(),
+            ingesttype: "dunamis",
+            data: {
+                "event.guid": uuid.v4(),
+                "event.user_guid": olderUuid || userUuid,
+                "event.dts_end": new Date().toISOString(),
+                "event.category": "pingData",
+                "event.subcategory": "",
+                "event.type": "",
+                "event.subtype": "",
+                "event.user_agent": window.navigator.userAgent || "",
+                "event.language": brackets.app.language,
+                "source.name": brackets.metadata.version,
+                "source.platform": brackets.platform,
+                "source.version": brackets.metadata.version
+            }
+        };
     }
 
     /**
@@ -169,13 +195,39 @@ define(function (require, exports, module) {
         return result.promise();
     }
 
+    // Send Analytics data to Server
+    function sendAnalyticsDataToServer() {
+        var result = new $.Deferred();
+
+        var analyticsData = getAnalyticsData();
+        $.ajax({
+            url: brackets.config.analyticsDataServerURL,
+            type: "POST",
+            data: JSON.stringify({events: [analyticsData]}),
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": brackets.config.serviceKey
+            }
+        })
+            .done(function () {
+                result.resolve();
+            })
+            .fail(function (jqXHR, status, errorThrown) {
+                console.error("Error in sending Adobe Analytics Data. Response : " + jqXHR.responseText + ". Status : " + status + ". Error : " + errorThrown);
+                result.reject();
+            });
+
+        return result.promise();
+    }
+
     /*
      * Check if the Health Data is to be sent to the server. If the user has enabled tracking, Health Data will be sent once every 24 hours.
      * Send Health Data to the server if the period is more than 24 hours.
      * We are sending the data as soon as the user launches brackets. The data will be sent to the server only after the notification dialog
      * for opt-out/in is closed.
+     @param forceSend Flag for sending analytics data for testing purpose
      */
-    function checkHealthDataSend() {
+    function checkHealthDataSend(forceSend) {
         var result         = new $.Deferred(),
             isHDTracking   = prefs.get("healthDataTracking"),
             nextTimeToSend,
@@ -195,8 +247,7 @@ define(function (require, exports, module) {
                 // don't return yet though - still want to set the timeout below
             }
 
-            if (currentTime >= nextTimeToSend) {
-
+            if (currentTime >= nextTimeToSend || forceSend) {
                 // Check if the app is not running in dev mode
                 var isDev = electron.remote.require("./utils").isDev;
                 if (isDev()) {
@@ -204,24 +255,23 @@ define(function (require, exports, module) {
                     return;
                 }
 
-                // Bump up nextHealthDataSendTime now to avoid any chance of sending data again before 24 hours, e.g. if the server request fails
-                // or the code below crashes
+                // Bump up nextHealthDataSendTime at the begining of chaining to avoid any chance of sending data again before 24 hours, // e.g. if the server request fails or the code below crashes
                 PreferencesManager.setViewState("nextHealthDataSendTime", currentTime + ONE_DAY);
-
-                sendHealthDataToServer()
-                    .done(function () {
-                        // We have already sent the health data, so can clear all health data
-                        // Logged till now
-                        HealthLogger.clearHealthData();
-                        result.resolve();
-                        timeoutVar = setTimeout(checkHealthDataSend, ONE_DAY + ONE_MINUTE);
-                    })
-                    .fail(function () {
-                        PreferencesManager.setViewState("nextHealthDataSendTime", currentTime + ONE_HOUR);
-                        result.reject();
-                        timeoutVar = setTimeout(checkHealthDataSend, ONE_HOUR + ONE_MINUTE);
-                    });
-
+                sendHealthDataToServer().always(function () {
+                    sendAnalyticsDataToServer()
+                        .done(function () {
+                            // We have already sent the health data, so can clear all health data
+                            // Logged till now
+                            HealthLogger.clearHealthData();
+                            result.resolve();
+                            timeoutVar = setTimeout(checkHealthDataSend, ONE_DAY + ONE_MINUTE);
+                        })
+                        .fail(function () {
+                            PreferencesManager.setViewState("nextHealthDataSendTime", currentTime + ONE_HOUR);
+                            result.reject();
+                            timeoutVar = setTimeout(checkHealthDataSend, ONE_HOUR + ONE_MINUTE);
+                        });
+                });
             } else {
                 timeoutVar = setTimeout(checkHealthDataSend, nextTimeToSend - currentTime + ONE_MINUTE);
                 result.reject();
@@ -232,6 +282,15 @@ define(function (require, exports, module) {
 
         return result.promise();
     }
+
+    // Expose a command to test data sending capability, but limit it to dev environment only
+    CommandManager.register("Sends health data and Analytics data for testing purpose", "sendHealthData", function () {
+        if (brackets.config.environment === "stage") {
+            return checkHealthDataSend(true);
+        }
+
+        return $.Deferred().reject().promise();
+    });
 
     prefs.on("change", "healthDataTracking", function () {
         checkHealthDataSend();
@@ -250,5 +309,6 @@ define(function (require, exports, module) {
     });
 
     exports.getHealthData = getHealthData;
+    exports.getAnalyticsData = getAnalyticsData;
     exports.checkHealthDataSend = checkHealthDataSend;
 });

@@ -122,6 +122,13 @@ export class CodeHintList {
     public handleSelect;
 
     /**
+     * The hint list highlight callback function
+     *
+     * @type {Function}
+     */
+    private handleHighlight: (item: any) => void;
+
+    /**
      * The hint list closure callback function
      *
      * @type {Function}
@@ -176,6 +183,10 @@ export class CodeHintList {
 
             $item.find("a").addClass("highlight");
             ViewUtils.scrollElementIntoView($view, $item, false);
+
+            if (this.handleHighlight) {
+                this.handleHighlight($item.find("a"));
+            }
         }
     }
 
@@ -574,6 +585,15 @@ export class CodeHintList {
      */
     public onSelect(callback) {
         this.handleSelect = callback;
+    }
+
+    /**
+     * Set the hint list highlight callback function
+     *
+     * @param {Function} callback
+     */
+    public onHighlight(callback): void {
+        this.handleHighlight = callback;
     }
 
     /**

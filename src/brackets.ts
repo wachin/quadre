@@ -132,6 +132,7 @@ import "view/ThemeManager";
 import "thirdparty/lodash";
 import "language/XMLUtils";
 import "language/JSONUtils";
+import "widgets/InlineMenu";
 import "electron";
 
 // DEPRECATED: In future we want to remove the global CodeMirror, but for now we
