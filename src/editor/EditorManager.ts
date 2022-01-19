@@ -66,9 +66,6 @@ import { InlineTextEditor } from "editor/InlineTextEditor";
 import * as Strings from "strings";
 import * as LanguageManager from "language/LanguageManager";
 import * as DeprecationWarning from "utils/DeprecationWarning";
-import * as CodeMirror from "codemirror";
-
-type Provider<T> = (editor: Editor, pos: CodeMirror.Position) => JQueryPromise<T> | null;
 
 /**
  * Currently focused Editor (full-size, inline, or otherwise)
@@ -92,15 +89,6 @@ const _inlineEditProviders = [];
  * @private
  */
 const _inlineDocsProviders = [];
-
-/**
- * Registered jump-to-definition providers.
- * @see {@link #registerJumpToDefProvider}.
- * @private
- * @type {Array.<function(...)>}
- */
-const _jumpToDefProviders: Array<Provider<any>> = [];
-
 
 /**
  * DOM element to house any hidden editors created soley for inline widgets
@@ -422,20 +410,6 @@ export function registerInlineDocsProvider(provider, priority) {
 }
 
 /**
- * Registers a new jump-to-definition provider. When jump-to-definition is invoked each
- * registered provider is asked if it wants to provide jump-to-definition results, given
- * the current editor and cursor location.
- *
- * @param {function(!Editor, !{line:number, ch:number}):?$.Promise} provider
- * The provider returns a promise that is resolved whenever it's done handling the operation,
- * or returns null to indicate the provider doesn't want to respond to this case. It is entirely
- * up to the provider to open the file containing the definition, select the appropriate text, etc.
- */
-export function registerJumpToDefProvider(provider) {
-    _jumpToDefProviders.push(provider);
-}
-
-/**
  * @private
  * Given a host editor, return a list of all Editors in all its open inline widgets. (Ignoring
  * any other inline widgets that might be open but don't contain Editors).
@@ -702,54 +676,6 @@ export function getActiveEditor(): Editor | null {
     return _lastFocusedEditor;
 }
 
-
-/**
- * Asynchronously asks providers to handle jump-to-definition.
- * @return {!Promise} Resolved when the provider signals that it's done; rejected if no
- *      provider responded or the provider that responded failed.
- */
-function _doJumpToDef() {
-    const providers = _jumpToDefProviders;
-    let promise;
-    const result = $.Deferred();
-
-    const editor = getActiveEditor();
-
-    if (editor) {
-        const pos = editor.getCursorPos();
-
-        PerfUtils.markStart((PerfUtils as any).JUMP_TO_DEFINITION);
-
-        // Run through providers until one responds
-        for (let i = 0; i < providers.length && !promise; i++) {
-            const provider = providers[i];
-            promise = provider(editor, pos);
-        }
-
-        // Will one of them will provide a result?
-        if (promise) {
-            promise.done(function () {
-                PerfUtils.addMeasurement((PerfUtils as any).JUMP_TO_DEFINITION);
-                result.resolve();
-            }).fail(function () {
-                // terminate timer that was started above
-                PerfUtils.finalizeMeasurement((PerfUtils as any).JUMP_TO_DEFINITION);
-                result.reject();
-            });
-        } else {
-            // terminate timer that was started above
-            PerfUtils.finalizeMeasurement((PerfUtils as any).JUMP_TO_DEFINITION);
-            result.reject();
-        }
-
-    } else {
-        result.reject();
-    }
-
-    return result.promise();
-}
-
-
 /**
  * file removed from pane handler.
  * @param {jQuery.Event} e
@@ -793,10 +719,6 @@ CommandManager.register(Strings.CMD_TOGGLE_QUICK_EDIT, Commands.TOGGLE_QUICK_EDI
 CommandManager.register(Strings.CMD_TOGGLE_QUICK_DOCS, Commands.TOGGLE_QUICK_DOCS, function () {
     return _toggleInlineWidget(_inlineDocsProviders, Strings.ERROR_QUICK_DOCS_PROVIDER_NOT_FOUND);
 });
-CommandManager.register(Strings.CMD_JUMPTO_DEFINITION, Commands.NAVIGATE_JUMPTO_DEFINITION, _doJumpToDef);
-
-// Create PerfUtils measurement
-PerfUtils.createPerfMeasurement("JUMP_TO_DEFINITION", "Jump-To-Definiiton");
 
 (MainViewManager as unknown as EventDispatcher.DispatcherEvents).on("currentFileChange", _handleCurrentFileChange);
 (MainViewManager as unknown as EventDispatcher.DispatcherEvents).on("workingSetRemove workingSetRemoveList", _handleRemoveFromPaneView);

@@ -325,10 +325,11 @@ function _gcDocuments() {
  * If all you need is the Document's getText() value, use the faster getDocumentText() instead.
  *
  * @param {!string} fullPath
+ * @param {!object} fileObj actual File|RemoteFile or some other protocol adapter handle
  * @return {$.Promise} A promise object that will be resolved with the Document, or rejected
  *      with a FileSystemError if the file is not yet open and can't be read from disk.
  */
-export function getDocumentForPath(fullPath) {
+export function getDocumentForPath(fullPath, fileObj?) {
     let doc = getOpenDocumentForPath(fullPath);
 
     if (doc) {
@@ -345,7 +346,7 @@ export function getDocumentForPath(fullPath) {
         return promise;
     }
 
-    const file            = FileSystem.getFileForPath(fullPath);
+    const file            = fileObj || FileSystem.getFileForPath(fullPath);
     const pendingPromise  = getDocumentForPath._pendingDocumentPromises[file.id];
 
     if (pendingPromise) {

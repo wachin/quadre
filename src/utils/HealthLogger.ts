@@ -26,15 +26,34 @@
  *  Utilities functions related to Health Data logging
  */
 
+/* globals Map */
+
 import * as PreferencesManager from "preferences/PreferencesManager";
 import * as LanguageManager from "language/LanguageManager";
 import * as FileUtils from "file/FileUtils";
 import * as PerfUtils from "utils/PerfUtils";
 import * as FindUtils from "search/FindUtils";
 import * as StringUtils from "utils/StringUtils";
+import * as EventDispatcher from "utils/EventDispatcher";
 
 const HEALTH_DATA_STATE_KEY       = "HealthData.Logs";
 let logHealthData                 = true;
+export const analyticsEventMap    = new Map();
+
+export const commonStrings = {
+    USAGE: "usage",
+    FILE_OPEN: "fileOpen",
+    FILE_NEW: "newfile",
+    FILE_SAVE: "fileSave",
+    FILE_CLOSE: "fileClose",
+    LANGUAGE_CHANGE: "languageChange",
+    LANGUAGE_SERVER_PROTOCOL: "languageServerProtocol",
+    CODE_HINTS: "codeHints",
+    PARAM_HINTS: "parameterHints",
+    JUMP_TO_DEF: "jumpToDefinition"
+};
+
+EventDispatcher.makeEventDispatcher(exports);
 
 /**
  * Init: creates the health log preference keys in the state.json file
@@ -161,6 +180,95 @@ export function fileOpened(filePath, addedToWorkingSet = false, encoding) {
         fileEncCountMap[encoding]++;
         setHealthData(healthData);
     }
+
+    sendAnalyticsData(
+        commonStrings.USAGE + commonStrings.FILE_OPEN + language._name,
+        commonStrings.USAGE,
+        commonStrings.FILE_OPEN,
+        language._name.toLowerCase()
+    );
+}
+
+/**
+ * Whenever a file is saved call this function.
+ * The function will send the analytics Data
+ * We only log the standard filetypes and fileSize
+ * @param {String} filePath The path of the file to be registered
+ */
+export function fileSaved(docToSave) {
+    if (!docToSave) {
+        return;
+    }
+
+    const fileType = docToSave.language ? docToSave.language._name : "";
+    sendAnalyticsData(
+        commonStrings.USAGE + commonStrings.FILE_SAVE + fileType,
+        commonStrings.USAGE,
+        commonStrings.FILE_SAVE,
+        fileType.toLowerCase()
+    );
+}
+
+/**
+ * Whenever a file is closed call this function.
+ * The function will send the analytics Data.
+ * We only log the standard filetypes and fileSize
+ * @param {String} filePath The path of the file to be registered
+ */
+export function fileClosed(file) {
+    if (!file) {
+        return;
+    }
+
+    const language = LanguageManager.getLanguageForPath(file._path);
+    let size = -1;
+
+    function _sendData(fileSize) {
+        let subType = "";
+
+        if (fileSize / 1024 <= 1) {
+
+            if (fileSize < 0) {
+                subType = "";
+            }
+            if (fileSize <= 10) {
+                subType = "Size_0_10KB";
+            } else if (fileSize <= 50) {
+                subType = "Size_10_50KB";
+            } else if (fileSize <= 100) {
+                subType = "Size_50_100KB";
+            } else if (fileSize <= 500) {
+                subType = "Size_100_500KB";
+            } else {
+                subType = "Size_500KB_1MB";
+            }
+
+        } else {
+            fileSize = fileSize / 1024;
+            if (fileSize <= 2) {
+                subType = "Size_1_2MB";
+            } else if (fileSize <= 5) {
+                subType = "Size_2_5MB";
+            } else {
+                subType = "Size_Above_5MB";
+            }
+        }
+
+        sendAnalyticsData(
+            commonStrings.USAGE + commonStrings.FILE_CLOSE + language._name + subType,
+            commonStrings.USAGE,
+            commonStrings.FILE_CLOSE,
+            language._name.toLowerCase(),
+            subType
+        );
+    }
+
+    file.stat(function (err, fileStat) {
+        if (!err) {
+            size = fileStat.size.valueOf() / 1024;
+        }
+        _sendData(size);
+    });
 }
 
 /**
@@ -199,6 +307,41 @@ export function searchDone(searchType) {
     setHealthDataLog("searchDetails", searchDetails);
 }
 
+/**
+ * Notifies the HealthData extension to send Analytics Data to server
+ * @param{Object} eventParams Event Data to be sent to Analytics Server
+ */
+function notifyHealthManagerToSendData(eventParams) {
+    exports.trigger("SendAnalyticsData", eventParams);
+}
+
+/**
+ * Send Analytics Data
+ * @param {string} eventCategory The kind of Event Category that
+ * needs to be logged- should be a js var compatible string
+ * @param {string} eventSubCategory The kind of Event Sub Category that
+ * needs to be logged- should be a js var compatible string
+ * @param {string} eventType The kind of Event Type that needs to be logged- should be a js var compatible string
+ * @param {string} eventSubType The kind of Event Sub Type that
+ * needs to be logged- should be a js var compatible string
+ */
+export function sendAnalyticsData(eventName, eventCategory, eventSubCategory, eventType, eventSubType?) {
+    const isEventDataAlreadySent = analyticsEventMap.get(eventName);
+    const isHDTracking   = PreferencesManager.getExtensionPrefs("healthData").get("healthDataTracking");
+    let eventParams = {};
+
+    if (isHDTracking && !isEventDataAlreadySent && eventName && eventCategory) {
+        eventParams =  {
+            eventName: eventName,
+            eventCategory: eventCategory,
+            eventSubCategory: eventSubCategory || "",
+            eventType: eventType || "",
+            eventSubType: eventSubType || ""
+        };
+        notifyHealthManagerToSendData(eventParams);
+    }
+}
+
 // searchType for searchDone()
 export const SEARCH_INSTANT            = "searchInstant";
 export const SEARCH_ON_RETURN_KEY      = "searchOnReturnKey";
@@ -209,5 +352,6 @@ export const SEARCH_LAST_PAGE          = "searchLastPage";
 export const SEARCH_FIRST_PAGE         = "searchFirstPage";
 export const SEARCH_REGEXP             = "searchRegExp";
 export const SEARCH_CASE_SENSITIVE     = "searchCaseSensitive";
+
 // A new search context on search bar up-Gives an idea of number of times user did a discrete search
 export const SEARCH_NEW                = "searchNew";

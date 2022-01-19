@@ -88,6 +88,13 @@ const _views: ViewMap = {};
 const _iconProviders: Array<IconProvider> = [];
 
 /**
+ * The file/folder object of the current context
+ * @type {FileSystemEntry}
+ * @private
+ */
+let _contextEntry;
+
+/**
  * Class Providers
  * @see {@link #addClassProvider}
  * @private
@@ -1147,7 +1154,6 @@ class WorkingSetView {
                     name: file.name,
                     isFile: file.isFile
                 };
-                $li.removeAttr("class");
                 _classProviders.forEach(function (provider) {
                     $li.addClass(provider(data));
                 });
@@ -1426,6 +1432,7 @@ class WorkingSetView {
         this.$openFilesContainer.css("overflow-x", "hidden");
 
         this.$openFilesContainer.on("contextmenu.workingSetView", function (e) {
+            _contextEntry = $(e.target).closest("li").data(_FILE_KEY);
             Menus.getContextMenu(Menus.ContextMenuIds.WORKING_SET_CONTEXT_MENU).open(e);
         });
 
@@ -1535,4 +1542,11 @@ export function useClassProviders(data, $element) {
     _classProviders.forEach(function (provider) {
         $element.addClass(provider(data));
     });
+}
+
+/**
+ * Gets the filesystem object for the current context in the working set.
+ */
+export function getContext() {
+    return _contextEntry;
 }

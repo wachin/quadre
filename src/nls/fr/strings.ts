@@ -67,6 +67,9 @@ export = {
     "ERROR_RENAMING_FILE_TITLE": "Erreur lors du changement de nom du {0}",
     "ERROR_RENAMING_FILE": "Une erreur s’est produite lors de la tentative de changement de nom du {2} <span class='dialog-filename'>{0}</span>. {1}",
     "ERROR_RENAMING_NOT_IN_PROJECT": "Le fichier ou le répertoire ne fait pas partie du projet actuellement ouvert. Or, seuls les fichiers appartenant au projet peuvent être renommés à ce stade.",
+    "ERROR_MOVING_FILE_TITLE": "Erreur lors du déplacement de l’élément {0}",
+    "ERROR_MOVING_FILE": "Une erreur s’est produite lors du déplacement de l’élément {2} <span class='dialog-filename'>{0}</span>. {1}",
+    "ERROR_MOVING_NOT_IN_PROJECT": "Impossible de déplacer le fichier/dossier, car ils ne font pas partie du projet en cours.",
     "ERROR_DELETING_FILE_TITLE": "Erreur lors de la suppression du {0}",
     "ERROR_DELETING_FILE": "Une erreur s’est produite lors de la tentative de suppression du {2} <span class='dialog-filename'>{0}</span>. {1}",
     "INVALID_FILENAME_TITLE": "{0} non valide",
@@ -417,6 +420,7 @@ export = {
     "CMD_QUICK_OPEN": "Ouverture rapide",
     "CMD_GOTO_LINE": "Atteindre la ligne",
     "CMD_GOTO_DEFINITION": "Accès rapide à la définition",
+    "CMD_GOTO_DEFINITION_PROJECT": "Accès rapide à la définition dans le projet",
     "CMD_GOTO_FIRST_PROBLEM": "Accéder au premier problème",
     "CMD_TOGGLE_QUICK_EDIT": "Édition rapide",
     "CMD_TOGGLE_QUICK_DOCS": "Documentation rapide",
@@ -455,6 +459,7 @@ export = {
     "EXPERIMENTAL_BUILD": "version expérimentale",
     "RELEASE_BUILD": "édition",
     "DEVELOPMENT_BUILD": "version de développement",
+    "PRERELEASE_BUILD": "version préliminaire",
     "RELOAD_FROM_DISK": "Recharger à partir du disque",
     "KEEP_CHANGES_IN_EDITOR": "Conserver les modifications dans l’éditeur",
     "CLOSE_DONT_SAVE": "Fermer (sans enregistrer)",
@@ -647,10 +652,10 @@ export = {
     // extensions/default/HealthData
     "HEALTH_DATA_NOTIFICATION": "Health Report Preferences",
     "HEALTH_FIRST_POPUP_TITLE": "Rapport d’intégrité de {APP_NAME}",
-    "HEALTH_DATA_DO_TRACK": "Partager des informations anonymes sur la façon dont j’utilise {APP_NAME}",
-    "HEALTH_DATA_NOTIFICATION_MESSAGE": "<p>Afin d’améliorer {APP_NAME}, nous transmettons régulièrement des statistiques limitées et <strong>anonymes</strong> à Adobe sur la manière dont vous utilisez {APP_NAME}. Ces données permettent de hiérarchiser les fonctionnalités à traiter, de détecter les bugs éventuels et d’identifier les problèmes d’utilisation.<br><br>Pour voir les renseignements collectés et choisir ceux que vous ne souhaitez pas partager, cliquez sur <strong>Aide > Rapport d’intégrité</strong>.<br><br><a href='https://github.com/adobe/brackets/wiki/Health-Data'>Lisez cet article pour en savoir plus concernant le rapport d’intégrité de {APP_NAME}</a>",
+    "HEALTH_DATA_DO_TRACK": "Partager des informations pseudonymes sur la façon dont j’utilise {APP_NAME}",
+    "HEALTH_DATA_NOTIFICATION_MESSAGE": "Afin d’améliorer {APP_NAME}, nous transmettons régulièrement des statistiques limitées et <strong>pseudonymes</strong> à Adobe sur la manière dont vous utilisez {APP_NAME}. Ces données permettent de hiérarchiser les fonctionnalités à traiter, de détecter les bugs éventuels et d’identifier les problèmes d’utilisation.<br><br>Pour voir les renseignements collectés et choisir ceux que vous ne souhaitez pas partager, cliquez sur <strong>Aide > Rapport d’intégrité</strong>.<br><br><a href='https://github.com/adobe/brackets/wiki/Project-Health-Data'>Lisez cet article pour en savoir plus concernant le rapport d’intégrité de {APP_NAME}</a>",
     "HEALTH_DATA_PREVIEW": "Rapport d’intégrité de {APP_NAME}",
-    "HEALTH_DATA_PREVIEW_INTRO": "<p>Afin d’améliorer {APP_NAME}, nous transmettons régulièrement des statistiques limitées et <strong>anonymes</strong> à Adobe sur la manière dont vous utilisez {APP_NAME}. Ces données permettent de hiérarchiser les fonctionnalités à traiter, de détecter les bugs éventuels et d’identifier les problèmes d’utilisation. <a href='https://github.com/adobe/brackets/wiki/Health-Data'>Lisez cet article concernant le rapport d’intégrité de {APP_NAME}</a> et découvrez en quoi il est utile à la communauté {APP_NAME} tout en préservant votre confidentialité.</p><p>Vous trouverez ci-dessous un résumé des données qui seront envoyées dans le cadre de votre prochain rapport d’intégrité <em>si</em> vous décidez d’activer cette option.</p>",
+    "HEALTH_DATA_PREVIEW_INTRO": "<p>Afin d’améliorer {APP_NAME}, nous transmettons régulièrement des statistiques limitées et <strong>pseudonymes</strong> à Adobe sur la manière dont vous utilisez {APP_NAME}. Ces données permettent de hiérarchiser les fonctionnalités à traiter, de détecter les bugs éventuels et d’identifier les problèmes d’utilisation. <a href='https://github.com/adobe/brackets/wiki/Project-Health-Data'>Lisez cet article concernant le rapport d’intégrité de {APP_NAME}</a> et découvrez en quoi il est utile à la communauté {APP_NAME} tout en préservant votre confidentialité.</p><p>Vous trouverez ci-dessous un résumé des données qui seront envoyées dans le cadre de votre prochain rapport d’intégrité <em>si</em> vous décidez d’activer cette option.</p>",
 
     // extensions/default/InlineTimingFunctionEditor
     "INLINE_TIMING_EDITOR_TIME": "Temps",
@@ -830,9 +835,49 @@ export = {
     "CHECKSUM_DID_NOT_MATCH": "La somme de contrôle ne correspond pas.",
     "INSTALLER_NOT_FOUND": "Programme d’installation non trouvé.",
     "DOWNLOAD_ERROR": "Erreur lors du téléchargement.",
+    "NETWORK_SLOW_OR_DISCONNECTED": "Le réseau est déconnecté ou trop lent.",
     "RESTART_BUTTON": "Recommencer",
     "LATER_BUTTON": "Plus tard",
+    "DESCRIPTION_AUTO_UPDATE": "Activer/désactiver la mise à jour automatique de Brackets",
+    "AUTOUPDATE_ERROR": "Erreur !",
+    "AUTOUPDATE_IN_PROGRESS": "Une mise à jour est déjà en cours.",
+
+    "NUMBER_WITH_PERCENTAGE": "{0} %",
 
     // Strings for Related Files
-    "CMD_FIND_RELATED_FILES": "Trouver les fichiers associés"
+    "CMD_FIND_RELATED_FILES": "Trouver les fichiers associés",
+
+    // String for Php Tooling Extensions
+    "PHP_VERSION_INVALID": "Erreur lors de l’analyse de la version de PHP. Veuillez vérifier la sortie de la commande « php –version ».",
+    "PHP_UNSUPPORTED_VERSION": "Installez le moteur d’exécution de PHP 7 pour activer les outils correspondants comme Conseils de code, Conseils de paramètres, Accéder à la définition, etc. Version trouvée : {0}",
+    "PHP_EXECUTABLE_NOT_FOUND": "Moteur d’exécution PHP introuvable. Installez le moteur d’exécution de PHP 7 et mettez à jour « executablePath » dans les préférences PHP. Cela permettra l’activation des outils liés à PHP comme Conseils de code, Conseils de paramètres ou encore Accéder à la définition.",
+    "PHP_PROCESS_SPAWN_ERROR": "Code d’erreur {0} rencontré lors du démarrage du processus PHP.",
+    "PHP_SERVER_ERROR_TITLE": "Erreur",
+    "PHP_SERVER_MEMORY_LIMIT_INVALID": "La limite de mémoire que vous avez fournie n’est pas valide. Veuillez corriger la valeur indiquée dans les préférences PHP.",
+    "DESCRIPTION_PHP_TOOLING_CONFIGURATION": "Paramètres de configuration par défaut des outils PHP",
+    "OPEN_PREFERENNCES": "Ouvrir les préférences",
+
+    // Strings for LanguageTools Preferences
+    "LANGUAGE_TOOLS_PREFERENCES": "Préférences pour les outils linguistiques",
+
+    "FIND_ALL_REFERENCES": "Rechercher toutes les références",
+    "REFERENCES_IN_FILES": "références",
+    "REFERENCE_IN_FILES": "référence",
+    "REFERENCES_NO_RESULTS": "Références non disponibles pour la position actuelle du curseur",
+
+    "CMD_FIND_DOCUMENT_SYMBOLS": "Rechercher des symboles de document",
+    "CMD_FIND_PROJECT_SYMBOLS": "Rechercher des symboles de projet",
+
+    // Remote debugging enabled
+    "REMOTE_DEBUGGING_ENABLED": "Débogage à distance activé sur localhost:",
+
+    // Remote debugging port argument is invalid
+    "REMOTE_DEBUGGING_PORT_INVALID": "Impossible d’activer le débogage à distance sur le port {0}. Les numéros de port doivent être compris entre {1} et {2}.",
+
+    // Associate File Type to External App
+    "DESCRIPTION_EXTERNAL_APPLICATION_ASSOCIATE": "Mappages d’extension de fichier avec des applications externes. Syntaxe : \"<type_fichier>\": \"<default|NomApplication|CheminApplication>\", Utiliser « default » pour ouvrir les fichiers dans l’application par défaut du système pour le type de fichier.",
+
+    "ASSOCIATE_GRAPHICS_FILE_TO_DEFAULT_APP_TITLE": "Ouvrez les fichiers graphiques dans des éditeurs externes.",
+    "ASSOCIATE_GRAPHICS_FILE_TO_DEFAULT_APP_MSG": "Votre dossier actuel comporte des types de fichier graphique non pris en charge par {APP_NAME}.<br/>Vous pouvez à présent associer des types de fichiers spécifiques avec des éditeurs externes. Une fois l’association établie, vous pouvez ouvrir des fichiers graphiques tels que .xd, .psd, .jpg, .png, .ai et .svg, dans leur application par défaut en double-cliquant sur ces fichiers dans l’arborescence de fichiers.<br/><br/>Cliquez sur le bouton OK pour associer les types de fichier graphique avec leur application par défaut respective.",
+    "ASSOCIATE_GRAPHICS_FILE_TO_DEFAULT_APP_CNF_MSG": "Les types de fichiers suivants ont été associés à des applications par défaut.<br/>{0} Vous pouvez modifier votre préférence concernant l’éventuel(le) suppression/ajout d’associations de type de fichier dans brackets.json via le menu Déboguer->Ouvrir le fichier des préférences."
 };

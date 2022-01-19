@@ -58,6 +58,11 @@ const MAX_FILE_SIZE_MB = 16;
  */
 export const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+/**
+ * @const {List} list of File Extensions which will be opened in external Application
+ */
+let extListToBeOpenedInExtApp: Array<string> = [];
+
 
 /**
  * Asynchronously reads a file as UTF-8 encoded text.
@@ -528,6 +533,27 @@ export function encodeFilePath(path) {
         return encodeURIComponent(subPath);
     });
     return pathArray.join("/");
+}
+
+/**
+ * @param {string} ext extension string a file
+ * @return {string} returns true If file to be opened in External Application.
+ *
+ */
+export function shouldOpenInExternalApplication(ext: string): boolean {
+    return extListToBeOpenedInExtApp.includes(ext);
+}
+
+/**
+ * @param {string} ext File Extensions to be added in External App List
+ *
+ */
+export function addExtensionToExternalAppList(ext: Array<string> | string): void {
+    if (Array.isArray(ext)) {
+        extListToBeOpenedInExtApp = ext;
+    } else if (typeof ext === "string") {
+        extListToBeOpenedInExtApp.push(ext);
+    }
 }
 
 // Asynchronously load DocumentCommandHandlers

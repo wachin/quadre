@@ -104,6 +104,18 @@ define(function (require, exports, module) {
     require("thirdparty/CodeMirror/addon/search/searchcursor");
     require("thirdparty/CodeMirror/keymap/sublime");
 
+    //load Language Tools Module
+    require("languageTools/PathConverters");
+    require("languageTools/LanguageTools");
+    require("languageTools/ClientLoader");
+    require("languageTools/BracketsToNodeInterface");
+    require("languageTools/DefaultProviders");
+    require("languageTools/DefaultEventHandlers");
+
+    //load language features
+    require("features/ParameterHintsManager");
+    require("features/JumpToDefManager");
+
     // Load custom CodeMirror add-ons
     require("thirdparty/codemirror-addon-toggle-comment/toggle-comment-simple");
 

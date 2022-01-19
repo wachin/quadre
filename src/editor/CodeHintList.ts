@@ -50,6 +50,7 @@ export interface HintObject<T> {
     selectInitial: boolean;
     hints: HintArray<T>;
     handleWideResults;
+    enableDescription: boolean;
 }
 
 interface ViewHints {
@@ -126,7 +127,7 @@ export class CodeHintList {
      *
      * @type {Function}
      */
-    private handleHighlight: (item: any) => void;
+    private handleHighlight: (item: any, codeHintDesc: any) => void;
 
     /**
      * The hint list closure callback function
@@ -141,6 +142,8 @@ export class CodeHintList {
      * @type {jQuery.Object}
      */
     public $hintMenu;
+
+    public enableDescription: boolean;
 
     constructor(editor, insertHintOnTab, maxResults) {
         this.maxResults = ValidationUtils.isIntegerInRange(maxResults, 1, 1000) ? maxResults : 50;
@@ -185,7 +188,7 @@ export class CodeHintList {
             ViewUtils.scrollElementIntoView($view, $item, false);
 
             if (this.handleHighlight) {
-                this.handleHighlight($item.find("a"));
+                this.handleHighlight($item.find("a"), this.$hintMenu.find("#codehint-desc"));
             }
         }
     }
@@ -224,6 +227,7 @@ export class CodeHintList {
 
         this.hints = hintObj.hints;
         this.hints.handleWideResults = hintObj.handleWideResults;
+        this.enableDescription = hintObj.enableDescription;
 
         // if there is no match, assume name is already a formatted jQuery
         // object; otherwise, use match to format name for display.
@@ -299,6 +303,13 @@ export class CodeHintList {
             // attach to DOM
             $parent.append($ul);
 
+            // If a a description field requested attach one
+            if (this.enableDescription) {
+                // Remove the desc element first to ensure DOM order
+                $parent.find("#codehint-desc").remove();
+                $parent.append("<div id='codehint-desc' class='dropdown-menu quiet-scrollbars'></div>");
+                $ul.addClass("withDesc");
+            }
             this._setSelectedIndex(selectInitial ? 0 : -1);
         }
     }
@@ -317,7 +328,9 @@ export class CodeHintList {
         const textHeight  = this.editor.getTextHeight();
         const $window     = $(window);
         const $menuWindow = this.$hintMenu.children("ul");
-        const menuHeight  = $menuWindow.outerHeight();
+        const $descElement = this.$hintMenu.find("#codehint-desc");
+        const descOverhang = $descElement.length === 1 ? $descElement.height() : 0;
+        const menuHeight  = $menuWindow.outerHeight() + descOverhang;
 
         // TODO Ty: factor out menu repositioning logic so code hints and Context menus share code
         // adjust positioning so menu is not clipped off bottom or right
@@ -337,6 +350,13 @@ export class CodeHintList {
             // Right overhang is negative
             availableWidth = menuWidth + Math.abs(rightOverhang);
         }
+
+        // Creating the offset element for hint description element
+        let descOffset = this.$hintMenu.find("ul.dropdown-menu")[0].getBoundingClientRect().height;
+        if (descOffset === 0) {
+            descOffset = menuHeight - descOverhang;
+        }
+        this.$hintMenu.find("#codehint-desc").css("margin-top", descOffset - 1);
 
         return {left: posLeft, top: posTop, width: availableWidth};
     }

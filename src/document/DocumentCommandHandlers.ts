@@ -29,6 +29,7 @@ import * as AppInit from "utils/AppInit";
 import * as CommandManager from "command/CommandManager";
 import * as Commands from "command/Commands";
 import * as DeprecationWarning from "utils/DeprecationWarning";
+import * as EventDispatcher from "utils/EventDispatcher";
 import * as ProjectManager from "project/ProjectManager";
 import * as DocumentManager from "document/DocumentManager";
 import * as MainViewManager from "view/MainViewManager";
@@ -56,8 +57,6 @@ import * as StatusBar from "widgets/StatusBar";
 import * as WorkspaceManager from "view/WorkspaceManager";
 import * as LanguageManager from "language/LanguageManager";
 import * as _ from "lodash";
-
-import { DispatcherEvents } from "utils/EventDispatcher";
 
 /**
  * Handlers for commands related to document handling (opening, saving, etc.)
@@ -141,6 +140,12 @@ const USER_CANCELED = { userCanceled: true };
 PreferencesManager.definePreference("defaultExtension", "string", "", {
     excludeFromHints: true
 });
+EventDispatcher.makeEventDispatcher(exports);
+
+/**
+ * Event triggered when File Save is cancelled, when prompted to save dirty files
+ */
+export const APP_QUIT_CANCELLED = "appQuitCancelled";
 
 /**
  * Updates the title bar with new file title or dirty indicator
@@ -149,7 +154,10 @@ PreferencesManager.definePreference("defaultExtension", "string", "", {
 function _updateTitle() {
     const currentDoc          = DocumentManager.getCurrentDocument();
     let windowTitle         = brackets.config.app_title;
-    const currentlyViewedPath = MainViewManager.getCurrentlyViewedPath(MainViewManager.ACTIVE_PANE);
+    const currentlyViewedFile = MainViewManager.getCurrentlyViewedFile(MainViewManager.ACTIVE_PANE);
+    const currentlyViewedPath = currentlyViewedFile && currentlyViewedFile.fullPath;
+    // @ts-ignore (The property "readOnly" should come from a RemoteFile)
+    const readOnlyString      = (currentlyViewedFile && currentlyViewedFile.readOnly) ? "[Read Only] - " : "";
 
     if (!brackets.nativeMenus) {
         if (currentlyViewedPath) {
@@ -197,7 +205,7 @@ function _updateTitle() {
         const projectName = projectRoot.name;
         // Construct shell/browser window title, e.g. "• index.html (myProject) — Brackets"
         if (currentlyViewedPath) {
-            windowTitle = StringUtils.format(WINDOW_TITLE_STRING_DOC, _currentTitlePath, projectName, brackets.config.app_title);
+            windowTitle = StringUtils.format(WINDOW_TITLE_STRING_DOC, readOnlyString + _currentTitlePath, projectName, brackets.config.app_title);
             // Display dirty dot when there are unsaved changes
             if (currentDoc && currentDoc.isDirty) {
                 if (brackets.platform === "mac") {
@@ -709,6 +717,15 @@ function handleFileNew() {
     const doc = DocumentManager.createUntitledDocument(_nextUntitledIndexToUse++, defaultExtension);
     MainViewManager._edit(MainViewManager.ACTIVE_PANE, doc);
 
+    HealthLogger.sendAnalyticsData(
+        HealthLogger.commonStrings.USAGE +
+        HealthLogger.commonStrings.FILE_OPEN +
+        HealthLogger.commonStrings.FILE_NEW,
+        HealthLogger.commonStrings.USAGE,
+        HealthLogger.commonStrings.FILE_OPEN,
+        HealthLogger.commonStrings.FILE_NEW
+    );
+
     return $.Deferred().resolve(doc).promise();
 }
 
@@ -808,6 +825,7 @@ function doSave(docToSave, force = false): JQueryPromise<File> {
             .done(function () {
                 docToSave.notifySaved();
                 result.resolve(file);
+                HealthLogger.fileSaved(docToSave);
             })
             .fail(function (err) {
                 if (err === FileSystemError.CONTENTS_MODIFIED) {
@@ -877,6 +895,14 @@ function _doRevert(doc, suppressError = false) {
 
     return result.promise();
 }
+
+/**
+ * Dispatches the app quit cancelled event
+ */
+function dispatchAppQuitCancelledEvent() {
+    (exports as EventDispatcher.DispatcherEvents).trigger(APP_QUIT_CANCELLED);
+}
+
 
 /**
  * Opens the native OS save as dialog and saves document.
@@ -977,6 +1003,7 @@ function _doSaveAs(doc, settings): JQueryPromise<File> {
                 } else {
                     openNewFile();
                 }
+                HealthLogger.fileSaved(doc);
             })
             .fail(function (error) {
                 _showSaveFileError(error, path)
@@ -1024,6 +1051,7 @@ function _doSaveAs(doc, settings): JQueryPromise<File> {
                 if (selectedPath) {
                     _doSaveAfterSaveDialog(selectedPath);
                 } else {
+                    dispatchAppQuitCancelledEvent();
                     result.reject(USER_CANCELED);
                 }
             } else {
@@ -1195,6 +1223,7 @@ function handleFileClose(commandData) {
     function doClose(file) {
         if (!promptOnly) {
             MainViewManager._close(paneId, file);
+            HealthLogger.fileClosed(file);
         }
     }
 
@@ -1246,6 +1275,7 @@ function handleFileClose(commandData) {
         )
             .done(function (id) {
                 if (id === Dialogs.DIALOG_BTN_CANCEL) {
+                    dispatchAppQuitCancelledEvent();
                     result.reject();
                 } else if (id === Dialogs.DIALOG_BTN_OK) {
                     // "Save" case: wait until we confirm save has succeeded before closing
@@ -1351,6 +1381,7 @@ function _closeList(list, promptOnly = false, _forceClose = false) {
         )
             .done(function (id) {
                 if (id === Dialogs.DIALOG_BTN_CANCEL) {
+                    dispatchAppQuitCancelledEvent();
                     result.reject();
                 } else if (id === Dialogs.DIALOG_BTN_OK) {
                     // Save all unsaved files, then if that succeeds, close all
@@ -1439,7 +1470,7 @@ function _handleWindowGoingAway(commandData, postCloseHandler, failHandler?) {
             // Give everyone a chance to save their state - but don't let any problems block
             // us from quitting
             try {
-                (ProjectManager as unknown as DispatcherEvents).trigger("beforeAppClose");
+                (ProjectManager as unknown as EventDispatcher.DispatcherEvents).trigger("beforeAppClose");
             } catch (ex) {
                 console.error(ex);
             }
@@ -1468,7 +1499,7 @@ function handleAbortQuit() {
  * Implementation for native APP_BEFORE_MENUPOPUP callback to trigger beforeMenuPopup event
  */
 function handleBeforeMenuPopup() {
-    (PopUpManager as unknown as DispatcherEvents).trigger("beforeMenuPopup");
+    (PopUpManager as unknown as EventDispatcher.DispatcherEvents).trigger("beforeMenuPopup");
 }
 
 /**
@@ -1668,28 +1699,33 @@ function _disableCache() {
     if (brackets.inBrowser || brackets.inElectron) {
         result.resolve();
     } else {
-        const port = brackets.app.getRemoteDebuggingPort ? brackets.app.getRemoteDebuggingPort() : 9234;
-        Inspector.getDebuggableWindows("127.0.0.1", port)
-            .fail(result.reject)
-            .done(function (response) {
-                const page = response[0];
-                if (!page || !page.webSocketDebuggerUrl) {
-                    result.reject();
-                    return;
-                }
-                const _socket = new WebSocket(page.webSocketDebuggerUrl);
-                // Disable the cache
-                _socket.onopen = function _onConnect() {
-                    _socket.send(JSON.stringify({ id: 1, method: "Network.setCacheDisabled", params: { "cacheDisabled": true } }));
-                };
-                // The first message will be the confirmation => disconnected to allow remote debugging of Brackets
-                _socket.onmessage = function _onMessage(e) {
-                    _socket.close();
-                    result.resolve();
-                };
-                // In case of an error
-                _socket.onerror = result.reject;
-            });
+        brackets.app.getRemoteDebuggingPort(function (err, port) {
+            if ((!err) && port && port > 0) {
+                Inspector.getDebuggableWindows("127.0.0.1", port)
+                    .fail(result.reject)
+                    .done(function (response) {
+                        const page = response[0];
+                        if (!page || !page.webSocketDebuggerUrl) {
+                            result.reject();
+                            return;
+                        }
+                        const _socket = new WebSocket(page.webSocketDebuggerUrl);
+                        // Disable the cache
+                        _socket.onopen = function _onConnect() {
+                            _socket.send(JSON.stringify({ id: 1, method: "Network.setCacheDisabled", params: { "cacheDisabled": true } }));
+                        };
+                        // The first message will be the confirmation => disconnected to allow remote debugging of Brackets
+                        _socket.onmessage = function _onMessage(e) {
+                            _socket.close();
+                            result.resolve();
+                        };
+                        // In case of an error
+                        _socket.onerror = result.reject;
+                    });
+            } else {
+                result.reject();
+            }
+        });
     }
 
     return result.promise();
@@ -1715,7 +1751,7 @@ function browserReload(href) {
         // Give everyone a chance to save their state - but don't let any problems block
         // us from quitting
         try {
-            (ProjectManager as unknown as DispatcherEvents).trigger("beforeAppClose");
+            (ProjectManager as unknown as EventDispatcher.DispatcherEvents).trigger("beforeAppClose");
         } catch (ex) {
             console.error(ex);
         }
@@ -1889,10 +1925,10 @@ CommandManager.registerInternal(Commands.APP_RELOAD,                handleReload
 CommandManager.registerInternal(Commands.APP_RELOAD_WITHOUT_EXTS,   handleReloadWithoutExts);
 
 // Listen for changes that require updating the editor titlebar
-(ProjectManager as unknown as DispatcherEvents).on("projectOpen", _updateTitle);
-(DocumentManager as unknown as DispatcherEvents).on("dirtyFlagChange", handleDirtyChange);
-(DocumentManager as unknown as DispatcherEvents).on("fileNameChange", handleCurrentFileChange);
-(MainViewManager as unknown as DispatcherEvents).on("currentFileChange", handleCurrentFileChange);
+(ProjectManager as unknown as EventDispatcher.DispatcherEvents).on("projectOpen", _updateTitle);
+(DocumentManager as unknown as EventDispatcher.DispatcherEvents).on("dirtyFlagChange", handleDirtyChange);
+(DocumentManager as unknown as EventDispatcher.DispatcherEvents).on("fileNameChange", handleCurrentFileChange);
+(MainViewManager as unknown as EventDispatcher.DispatcherEvents).on("currentFileChange", handleCurrentFileChange);
 
 // Reset the untitled document counter before changing projects
-(ProjectManager as unknown as DispatcherEvents).on("beforeProjectClose", function () { _nextUntitledIndexToUse = 1; });
+(ProjectManager as unknown as EventDispatcher.DispatcherEvents).on("beforeProjectClose", function () { _nextUntitledIndexToUse = 1; });

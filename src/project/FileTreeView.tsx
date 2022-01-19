@@ -34,7 +34,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Classnames = require("thirdparty/classnames");
 import Immutable = require("thirdparty/immutable");
-import _ = require("thirdparty/lodash");
+import * as _ from "lodash";
 import FileUtils = require("file/FileUtils");
 import LanguageManager = require("language/LanguageManager");
 import FileTreeViewModel = require("project/FileTreeViewModel");
@@ -98,9 +98,18 @@ interface IFileTreeNode {
     name: string;
     depth: number;
     handleMouseDown?: (ev: React.MouseEvent<HTMLLIElement>) => void;
+    handleDrag?: (ev: React.DragEvent) => void;
+    handleDrop?: (ev: React.DragEvent) => void;
+    handleDragEnd?: (ev: React.DragEvent) => void;
+    handleDragOver?: (ev: React.DragEvent) => void;
+    handleDragLeave?: (ev: React.DragEvent) => void;
 }
 
 interface IDirectoryNodeProps extends IFileTree, IFileTreeNode {
+}
+
+interface IDirectoryNodeState {
+    draggedOver: boolean;
 }
 
 interface IDirectoryRenameInputProps extends IEvents {
@@ -126,6 +135,14 @@ interface IWithRenameBehaviorProps extends IPath {
 interface IWithContextSettableProps extends IFileTree, IFileTreeNode {
 }
 
+interface IWithDragAndDropProps extends IWithContextSettableProps {
+    actions: any;
+}
+
+interface IWithDragAndDropState {
+    draggedOver: boolean;
+}
+
 /**
  * @private
  * @type {Immutable.Map}
@@ -134,6 +151,15 @@ interface IWithContextSettableProps extends IFileTree, IFileTreeNode {
  * are the "categories" of the extensions and values are vectors of the callback functions.
  */
 let _extensions = Immutable.Map();
+
+/**
+ * @private
+ * @type {string}
+ *
+ * Stores the path of the currently dragged item in the filetree.
+ */
+let _draggedItemPath;
+
 
 // Constants
 
@@ -281,7 +307,7 @@ function withRenameBehavior(RenameInputComponent) {
          */
         public handleInput(e) {
             if (this.textInput) {
-                this.props.actions.setRenameValue(this.textInput.value.trim());
+                this.props.actions.setRenameValue(this.props.parentPath + this.textInput.value.trim());
 
                 if (e.keyCode !== KeyEvent.DOM_VK_LEFT &&
                         e.keyCode !== KeyEvent.DOM_VK_RIGHT) {
@@ -313,6 +339,156 @@ function withRenameBehavior(RenameInputComponent) {
         }
     }
     return WithRenameBehavior;
+}
+
+/**
+ * This High Order Component provides drag and drop move function.
+ */
+function withDragAndDrop(ContextSettableComponent) {
+    class WithDragAndDrop extends React.Component<IWithDragAndDropProps, IWithDragAndDropState> {
+        private contextSettable: React.Component;
+        private dragOverTimeout;
+
+        constructor(props: IWithDragAndDropProps) {
+            super(props);
+
+            this.handleDrag = this.handleDrag.bind(this);
+            this.handleDrop = this.handleDrop.bind(this);
+            this.handleDragEnd = this.handleDragEnd.bind(this);
+            this.handleDragOver = this.handleDragOver.bind(this);
+            this.handleDragLeave = this.handleDragLeave.bind(this);
+        }
+
+        // TODO: verify if this is really necessary.
+        public shouldComponentUpdate(nextProps, nextState, nextContext) {
+            const component = this.contextSettable;
+            if (component) {
+                // Workaround for "Cannot invoke an object which is possibly 'undefined'"
+                const method = "should" + "Component" + "Update";
+                return component[method](nextProps, nextState, nextContext);
+            }
+            return true;
+        }
+
+        public setInner(innerComponent) {
+            this.contextSettable = innerComponent;
+        }
+
+        // @ts-ignore (Verify if returning a value in all cases is correct)
+        public handleDrag(e) {
+            // Disable drag when renaming
+            if (this.props.entry.get("rename")) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // In newer CEF versions, the drag and drop data from the event
+            // (i.e. e.dataTransfer.getData) cannot be used to read data in dragOver event,
+            // so store the drag and drop data in a global variable to read it in the dragOver
+            // event.
+            _draggedItemPath = fullPath(this.props);
+
+            // Pass the dragged item path.
+            e.dataTransfer.setData("text", JSON.stringify({
+                path: _draggedItemPath
+            }));
+
+            this.props.actions.dragItem(fullPath(this.props));
+
+            this.setDragImage(e);
+            e.stopPropagation();
+        }
+
+        public handleDrop(e) {
+            const data = JSON.parse(e.dataTransfer.getData("text"));
+
+            this.props.actions.moveItem(data.path, fullPath(this.props));
+            this.setDraggedOver(false);
+
+            this.clearDragTimeout();
+            e.stopPropagation();
+        }
+
+        public handleDragEnd(e) {
+            this.clearDragTimeout();
+        }
+
+        public handleDragOver(e) {
+            const data = e.dataTransfer.getData("text");
+            let path;
+
+            if (data) {
+                path = JSON.parse(data).path;
+            } else {
+                path = _draggedItemPath;
+            }
+
+            if (path === fullPath(this.props) || FileUtils.getParentPath(path) === fullPath(this.props)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            const self = this;
+            this.setDraggedOver(true);
+
+            // Open the directory tree when item is dragged over a directory
+            if (!this.dragOverTimeout) {
+                this.dragOverTimeout = window.setTimeout(function () {
+                    self.props.actions.setDirectoryOpen(fullPath(self.props), true);
+                    self.dragOverTimeout = null;
+                }, 800);
+            }
+
+            e.preventDefault(); // Allow the drop
+            e.stopPropagation();
+        }
+
+        public handleDragLeave(e) {
+            this.setDraggedOver(false);
+            this.clearDragTimeout();
+        }
+
+        private clearDragTimeout() {
+            if (this.dragOverTimeout) {
+                clearTimeout(this.dragOverTimeout);
+                this.dragOverTimeout = null;
+            }
+        }
+
+        private setDraggedOver(draggedOver) {
+            if (this.state.draggedOver !== draggedOver) {
+                this.setState({
+                    draggedOver: draggedOver
+                });
+            }
+        }
+
+        private setDragImage(e) {
+            const div = window.document.createElement("div");
+            div.textContent = this.props.name;
+            div.classList.add("jstree-dragImage");
+            window.document.body.appendChild(div);
+            e.dataTransfer.setDragImage(div, -10, -10);
+            setTimeout(function () {
+                window.document.body.removeChild(div);
+            }, 0);
+        }
+
+        public render() {
+            const dragAnDropProps = {
+                ...this.props,
+                handleDrag: this.handleDrag,
+                handleDrop: this.handleDrop,
+                handleDragEnd: this.handleDragEnd,
+                handleDragOver: this.handleDragOver,
+                handleDragLeave: this.handleDragLeave,
+                ref: this.setInner.bind(this)
+            };
+            return <ContextSettableComponent {...dragAnDropProps}></ContextSettableComponent>;
+        }
+    }
+    return WithDragAndDrop;
 }
 
 /**
@@ -414,7 +590,6 @@ function withContextSettable(NodeComponent) {
             if (this.props.entry.get("rename")) {
                 return;
             }
-            e.preventDefault();
         }
 
         public render() {
@@ -596,7 +771,16 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
                 });
             }
         } else {
-            this.props.actions.setSelected(fullPath(this.props));
+            const language = LanguageManager.getLanguageForPath(fullPath(this.props));
+            let doNotOpen = false;
+            if (language && language.isBinary() && "image" !== language.getId() &&
+                    FileUtils.shouldOpenInExternalApplication(
+                        FileUtils.getFileExtension(fullPath(this.props)).toLowerCase()
+                    )
+            ) {
+                doNotOpen = true;
+            }
+            this.props.actions.setSelected(fullPath(this.props), doNotOpen);
         }
         e.stopPropagation();
         e.preventDefault();
@@ -610,6 +794,12 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
         if (!this.props.entry.get("rename")) {
             if (this.state.clickTimer !== null) {
                 this.clearTimer();
+            }
+            if (FileUtils.shouldOpenInExternalApplication(
+                FileUtils.getFileExtension(fullPath(this.props)).toLowerCase())
+            ) {
+                this.props.actions.openWithExternalApplication(fullPath(this.props));
+                return;
             }
             this.props.actions.selectInWorkingSet(fullPath(this.props));
         }
@@ -649,7 +839,9 @@ class FileNode extends React.Component<IFileNodeProps, IFileNodeState> {
             className: getClasses("jstree-leaf", this.props.extensions, this.getDataForExtension),
             onClick: this.handleClick,
             onMouseDown: this.props.handleMouseDown,
-            onDoubleClick: this.handleDoubleClick
+            onDoubleClick: this.handleDoubleClick,
+            draggable: true,
+            onDragStart: this.props.handleDrag
         };
         const liChildren: [JSX.Element] = [
             <ins className="jstree-icon" key="ins"></ins>
@@ -778,7 +970,7 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
             onKeyDown={this.props.handleKeyDown}
             onInput={this.props.handleInput}
             onBlur={this.props.handleBlur}
-            style= {{
+            style={{
                 width
             }}
             onClick={this.props.handleClick}
@@ -803,9 +995,13 @@ class DirectoryRenameInput extends React.Component<IDirectoryRenameInputProps, {
  * * extensions: registered extensions for the file tree
  * * forceRender: causes the component to run render
  */
-class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
+class DirectoryNode extends React.Component<IDirectoryNodeProps, IDirectoryNodeState> {
     constructor(props: IDirectoryNodeProps) {
         super(props);
+
+        this.state = {
+            draggedOver: false
+        };
 
         this.handleClick = this.handleClick.bind(this);
         this.getDataForExtension = this.getDataForExtension.bind(this);
@@ -820,7 +1016,8 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
         return nextProps.forceRender ||
             this.props.entry !== nextProps.entry ||
             this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
-            this.props.extensions !== nextProps.extensions;
+            this.props.extensions !== nextProps.extensions ||
+            (nextState !== undefined && this.state.draggedOver !== nextState.draggedOver);
     }
 
     /**
@@ -908,10 +1105,21 @@ class DirectoryNode extends React.Component<IDirectoryNodeProps, {}> {
             "context-node": entry.get("context")
         });
 
+        let nodeClasses = "jstree-" + nodeClass;
+        if (this.state.draggedOver) {
+            nodeClasses += " jstree-draggedOver";
+        }
+
         const liProps = {
-            className: getClasses("jstree-" + nodeClass, this.props.extensions, this.getDataForExtension),
+            className: getClasses(nodeClasses, this.props.extensions, this.getDataForExtension),
             onClick: this.handleClick,
-            onMouseDown: this.props.handleMouseDown
+            onMouseDown: this.props.handleMouseDown,
+            draggable: true,
+            onDragStart: this.props.handleDrag,
+            onDrop: this.props.handleDrop,
+            onDragEnd: this.props.handleDragEnd,
+            onDragOver: this.props.handleDragOver,
+            onDragLeave: this.props.handleDragLeave
         };
         const liChildren: [JSX.Element] = [
             _createAlignedIns(this.props.depth)
@@ -995,8 +1203,8 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
             const entry = contents.get(name);
 
             if (FileTreeViewModel.isFile(entry)) {
-                const WithContextSettable = withContextSettable(FileNode);
-                return <WithContextSettable
+                const WithDragAndDrop = withDragAndDrop(withContextSettable(FileNode));
+                return <WithDragAndDrop
                     depth={self.props.depth}
                     parentPath={self.props.parentPath}
                     name={name}
@@ -1005,11 +1213,11 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                     extensions={self.props.extensions}
                     forceRender={self.props.forceRender}
                     platform={self.props.platform}
-                    key={name}></WithContextSettable>;
+                    key={name}></WithDragAndDrop>;
             }
 
-            const WithContextSettable = withContextSettable(DirectoryNode);
-            return <WithContextSettable
+            const WithDragAndDrop = withDragAndDrop(withContextSettable(DirectoryNode));
+            return <WithDragAndDrop
                 depth={self.props.depth}
                 parentPath={self.props.parentPath}
                 name={name}
@@ -1019,7 +1227,7 @@ class DirectoryContents extends React.Component<IDirectoryContentsProps, {}> {
                 sortDirectoriesFirst={self.props.sortDirectoriesFirst}
                 forceRender={self.props.forceRender}
                 platform={self.props.platform}
-                key={name}></WithContextSettable>;
+                key={name}></WithDragAndDrop>;
         }.bind(this)).toArray();
 
         return <ul {...ulProps}>{children}</ul>;
@@ -1171,6 +1379,9 @@ class SelectionExtension extends React.Component<ISelectionExtensionProps, {}> {
 class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
     constructor(props: IFileTreeViewProps) {
         super(props);
+
+        this.handleDrop = this.handleDrop.bind(this);
+        this.handleDragOver = this.handleDragOver.bind(this);
     }
 
     /**
@@ -1182,6 +1393,19 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             this.props.sortDirectoriesFirst !== nextProps.sortDirectoriesFirst ||
             this.props.extensions !== nextProps.extensions ||
             this.props.selectionViewInfo !== nextProps.selectionViewInfo;
+    }
+
+    public handleDrop(e) {
+        const data = JSON.parse(e.dataTransfer.getData("text"));
+        this.props.actions.moveItem(data.path, this.props.parentPath);
+        e.stopPropagation();
+    }
+
+    /**
+     * Allow the Drop
+     */
+    public handleDragOver(e) {
+        e.preventDefault();
     }
 
     public render() {
@@ -1221,13 +1445,19 @@ class FileTreeView extends React.Component<IFileTreeViewProps, {}> {
             actions={this.props.actions}
             forceRender={this.props.forceRender}
             platform={this.props.platform}></DirectoryContents>;
+        const props = {
+            ...this.props,
+            onDrop: this.handleDrop,
+            onDragOver: this.handleDragOver
+        };
 
-        return <div>
+        return <div {...props}>
+            {contents}
             {selectionBackground}
             {contextBackground}
             {extensionForSelection}
             {extensionForContext}
-            {contents}</div>;
+        </div>;
     }
 }
 
@@ -1301,12 +1531,12 @@ export function addClassesProvider(callback) {
 export const _fullPath = fullPath;
 export const _sortFormattedDirectory = _sortDirectoryContents;
 export const _fileNode = function (props) {
-    const WithContextSettable = withContextSettable(FileNode);
-    return <WithContextSettable {...props}></WithContextSettable>;
+    const WithDragAndDrop = withDragAndDrop(withContextSettable(FileNode));
+    return <WithDragAndDrop {...props}></WithDragAndDrop>;
 };
 export const _directoryNode = function (props) {
-    const WithContextSettable = withContextSettable(DirectoryNode);
-    return <WithContextSettable {...props}></WithContextSettable>;
+    const WithDragAndDrop = withDragAndDrop(withContextSettable(DirectoryNode));
+    return <WithDragAndDrop {...props}></WithDragAndDrop>;
 };
 export const _directoryContents = React.createFactory(DirectoryContents);
 export const _fileTreeView = React.createFactory(FileTreeView);

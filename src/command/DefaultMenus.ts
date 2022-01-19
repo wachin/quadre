@@ -151,6 +151,7 @@ AppInit.htmlReady(function () {
     menu.addMenuItem(Commands.CMD_SKIP_CURRENT_MATCH);
     menu.addMenuDivider();
     menu.addMenuItem(Commands.CMD_FIND_IN_FILES);
+    menu.addMenuItem(Commands.CMD_FIND_ALL_REFERENCES);
     menu.addMenuDivider();
     menu.addMenuItem(Commands.CMD_REPLACE);
     menu.addMenuItem(Commands.CMD_REPLACE_IN_FILES);
@@ -187,6 +188,7 @@ AppInit.htmlReady(function () {
     menu.addMenuItem(Commands.NAVIGATE_QUICK_OPEN);
     menu.addMenuItem(Commands.NAVIGATE_GOTO_LINE);
     menu.addMenuItem(Commands.NAVIGATE_GOTO_DEFINITION);
+    menu.addMenuItem(Commands.NAVIGATE_GOTO_DEFINITION_PROJECT);
     menu.addMenuItem(Commands.NAVIGATE_JUMPTO_DEFINITION);
     menu.addMenuItem(Commands.NAVIGATE_GOTO_FIRST_PROBLEM);
     menu.addMenuDivider();
@@ -297,6 +299,7 @@ AppInit.htmlReady(function () {
     // editorContextMenu.addMenuItem(Commands.NAVIGATE_JUMPTO_DEFINITION);
     editorContextMenu.addMenuItem(Commands.TOGGLE_QUICK_EDIT);
     editorContextMenu.addMenuItem(Commands.TOGGLE_QUICK_DOCS);
+    editorContextMenu.addMenuItem(Commands.CMD_FIND_ALL_REFERENCES);
     editorContextMenu.addMenuDivider();
     editorContextMenu.addMenuItem(Commands.EDIT_CUT);
     editorContextMenu.addMenuItem(Commands.EDIT_COPY);

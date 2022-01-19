@@ -229,6 +229,13 @@ export function openFileAndAddToWorkingSet(fullPath, paneId?): JQueryPromise<Fil
 }
 
 /**
+ * Opens the specified document with its associated external editor,
+ */
+export function openWithExternalApplication(fullPath): void {
+    exports.trigger("openWithExternalApplication", fullPath);
+}
+
+/**
  * Opens the specified document if it's not already open, adds it to the working set,
  * and selects it in the WorkingSetView
  * @deprecated use FileViewController.openFileAndAddToWorkingSet() instead

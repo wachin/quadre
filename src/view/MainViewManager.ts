@@ -358,9 +358,7 @@ function _makeFileMostRecent(paneId: string, file: File): void {
     if (!_traversingFileList) {
         pane.makeViewMostRecent(file);
 
-        const index = _.findIndex(_mruList, function (record) {
-            return (record.file === file && record.paneId === pane.id);
-        });
+        const index = findInGlobalMRUList(pane.id, file);
 
         const entry = _makeMRUListEntry(file, pane.id);
 
@@ -1287,7 +1285,7 @@ export function _open(paneId: string, file, optionsIn?) {
             }
         });
     } else {
-        DocumentManager.getDocumentForPath(file.fullPath)
+        DocumentManager.getDocumentForPath(file.fullPath, file)
             .done(function (doc) {
                 if (doc) {
                     _edit(paneId, doc, $.extend({}, options, {

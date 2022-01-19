@@ -845,29 +845,51 @@ export class FileTreeViewModel {
     }
 
     /**
-     * Changes the name of the item at the `currentPath` to `newName`.
+     * Changes the path of the item at the `currentPath` to `newPath`.
      *
      * @param {string} currentPath project relative file path to the current item
-     * @param {string} newName Name to give the item
+     * @param {string} newPath project relative new path to give the item
      */
-    public renameItem(currentPath, newName) {
+    public renameItem(oldPath, newPath) {
         let treeData = this._treeData;
-        const objectPath = _filePathToObjectPath(treeData, currentPath);
+        const oldObjectPath = _filePathToObjectPath(treeData, oldPath);
+        const newDirectoryPath = FileUtils.getParentPath(newPath);
+        const newObjectPath = _filePathToObjectPath(treeData, newDirectoryPath);
 
-        if (!objectPath) {
+        if (!oldObjectPath || !newObjectPath) {
             return;
         }
 
-        const originalName = _.last(objectPath);
-        const currentObject = treeData.getIn(objectPath);
+        const originalName = _.last(oldObjectPath);
+        const newName = FileUtils.getBaseName(newPath);
+        let currentObject;
 
         // Back up to the parent directory
-        objectPath.pop();
+        oldObjectPath.pop();
 
-        treeData = treeData.updateIn(objectPath, function (directory) {
+        // Remove the oldPath
+        treeData = treeData.updateIn(oldObjectPath, function (directory) {
+            currentObject = directory.get(originalName);
             directory = directory.delete(originalName);
-            directory = directory.set(newName, currentObject);
             return directory;
+        });
+
+        // Add the newPath
+
+        // If the new directory is not loaded, create a not fully loaded directory there,
+        // so that we can add the new item as a child of new directory
+        if (!this.isPathLoaded(newDirectoryPath)) {
+            treeData = treeData.updateIn(newObjectPath, _createNotFullyLoadedDirectory);
+        }
+
+        // If item moved to root directory, objectPath should not have "children",
+        // otherwise the objectPath should have "children"
+        if (newObjectPath.length > 0) {
+            newObjectPath.push("children");
+        }
+
+        treeData = treeData.updateIn(newObjectPath, function (children) {
+            return children.set(newName, currentObject);
         });
 
         this._commit(treeData);

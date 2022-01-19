@@ -71,18 +71,8 @@ const RESULTS_PER_PAGE = 100;
  */
 const UPDATE_TIMEOUT   = 400;
 
-/**
- * @constructor
- * Handles the search results panel.
- * Dispatches the following events:
- *      replaceBatch - when the "Replace" button is clicked.
- *      close - when the panel is closed.
- *
- * @param {SearchModel} model The model that this view is showing.
- * @param {string} panelID The CSS ID to use for the panel.
- * @param {string} panelName The name to use for the panel, as passed to WorkspaceManager.createBottomPanel().
- */
 export class SearchResultsView {
+
     /** @type {SearchModel} The search results model we're viewing. */
     private _model;
 
@@ -116,13 +106,29 @@ export class SearchResultsView {
     /** @type {number} The ID we use for timeouts when handling model changes. */
     private _timeoutID;
 
-    constructor(model, panelID, panelName) {
+    /** @type {string} The Id we use to check if it is reference search or match search */
+    private _searchResultsType = null;
+
+    /**
+     * @constructor
+     * Handles the search results panel.
+     * Dispatches the following events:
+     *      replaceBatch - when the "Replace" button is clicked.
+     *      close - when the panel is closed.
+     *
+     * @param {SearchModel} model The model that this view is showing.
+     * @param {string} panelID The CSS ID to use for the panel.
+     * @param {string} panelName The name to use for the panel, as passed to WorkspaceManager.createBottomPanel().
+     * @param {string} type type to identify if it is reference search or string match serach
+     */
+    constructor(model, panelID, panelName, type?) {
         const panelHtml  = Mustache.render(searchPanelTemplate, {panelID: panelID});
 
         this._panel    = WorkspaceManager.createBottomPanel(panelName, $(panelHtml), 100);
         this._$summary = this._panel.$panel.find(".title");
         this._$table   = this._panel.$panel.find(".table-container");
         this._model    = model;
+        this._searchResultsType = type;
     }
 
     /**
@@ -354,6 +360,11 @@ export class SearchResultsView {
     private _showSummary() {
         const count     = this._model.countFilesMatches();
         const lastIndex = this._getLastIndex(count.matches);
+        let typeStr = (count.matches > 1) ? Strings.FIND_IN_FILES_MATCHES : Strings.FIND_IN_FILES_MATCH;
+
+        if (this._searchResultsType === "reference") {
+            typeStr = (count.matches > 1) ? Strings.REFERENCES_IN_FILES : Strings.REFERENCE_IN_FILES;
+        }
 
         const filesStr = StringUtils.format(
             Strings.FIND_NUM_FILES,
@@ -366,7 +377,7 @@ export class SearchResultsView {
             Strings.FIND_TITLE_SUMMARY,
             this._model.exceedsMaximum ? Strings.FIND_IN_FILES_MORE_THAN : "",
             String(count.matches),
-            (count.matches > 1) ? Strings.FIND_IN_FILES_MATCHES : Strings.FIND_IN_FILES_MATCH,
+            typeStr,
             filesStr
         );
 

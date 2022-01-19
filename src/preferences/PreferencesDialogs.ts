@@ -34,6 +34,7 @@ import * as Strings from "strings";
 import * as SettingsDialogTemplate from "text!htmlContent/project-settings-dialog.html";
 import * as Mustache from "thirdparty/mustache/mustache";
 import * as PathUtils from "thirdparty/path-utils/path-utils";
+import * as HealthLogger from "utils/HealthLogger";
 
 /**
  * Validate that text string is a valid base url which should map to a server folder
@@ -96,6 +97,13 @@ export function showProjectPreferencesDialog(baseUrl, errorMessage?) {
             const baseUrlValue = $baseUrlControl.val();
             const result = _validateBaseUrl(baseUrlValue);
             if (result === "") {
+                // Send analytics data when url is set in project settings
+                HealthLogger.sendAnalyticsData(
+                    "projectSettingsLivepreview",
+                    "usage",
+                    "projectSettings",
+                    "use"
+                );
                 ProjectManager.setBaseUrl(baseUrlValue);
             } else {
                 // Re-invoke dialog with result (error message)

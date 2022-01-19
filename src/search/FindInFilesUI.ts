@@ -450,6 +450,15 @@ function _searchIfRequired() {
     }
 }
 
+/**
+ * @public
+ * Closes the search results panel
+ */
+export function closeResultsPanel() {
+    _resultsView.close();
+    _closeFindBar();
+}
+
 // Initialize items dependent on HTML DOM
 AppInit.htmlReady(function () {
     const model = FindInFiles.searchModel;

@@ -245,7 +245,8 @@ interface CodeHintProvider {
     getHints(implicitChar: string[1] | null): JQueryDeferred<HintObject<string | JQuery>> | HintObject<string | JQuery> | boolean | null;
     insertHint(hint: string): boolean;
     insertHintOnTab?: boolean;
-    onHighlight($hint: any): void;
+    onHighlight($hint: any, $hintDescContainer?: any): void;
+    updateHintDescription($hint: any, $hintDescContainer: any): void;
 }
 
 interface HintProvider {
@@ -519,10 +520,25 @@ const _beginSession = function (editor) {
 
         sessionEditor = editor;
         hintList = new CodeHintList(sessionEditor, insertHintOnTab, maxCodeHints);
-        hintList.onHighlight(function ($hint) {
-            // If the current hint provider listening for hint item highlight change
-            if (sessionProvider && sessionProvider.onHighlight) {
-                sessionProvider.onHighlight($hint);
+        hintList.onHighlight(function ($hint, $hintDescContainer) {
+            if (!sessionProvider) {
+                return;
+            }
+
+            if (hintList && hintList.enableDescription && $hintDescContainer && $hintDescContainer.length) {
+                // If the current hint provider listening for hint item highlight change
+                if (sessionProvider.onHighlight) {
+                    sessionProvider.onHighlight($hint, $hintDescContainer);
+                }
+
+                // Update the hint description
+                if (sessionProvider.updateHintDescription) {
+                    sessionProvider.updateHintDescription($hint, $hintDescContainer);
+                }
+            } else {
+                if (sessionProvider.onHighlight) {
+                    sessionProvider.onHighlight($hint);
+                }
             }
         });
         hintList.onSelect(function (hint) {

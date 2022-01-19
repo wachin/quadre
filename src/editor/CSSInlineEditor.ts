@@ -37,6 +37,7 @@ import * as HTMLUtils from "language/HTMLUtils";
 import { MultiRangeInlineEditor, getFocusedMultiRangeInlineEditor } from "editor/MultiRangeInlineEditor";
 import * as Strings from "strings";
 import * as ViewUtils from "utils/ViewUtils";
+import * as HealthLogger from "utils/HealthLogger";
 import * as _ from "lodash";
 import File = require("filesystem/File");
 
@@ -175,6 +176,14 @@ function htmlToCSSProvider(hostEditor, pos) {
     if (hostEditor.getLanguageForSelection().getId() !== "html") {
         return null;
     }
+
+    // Send analytics data for QuickEdit open
+    HealthLogger.sendAnalyticsData(
+        "QuickEditOpen",
+        "usage",
+        "quickEdit",
+        "open"
+    );
 
     // Only provide CSS editor if the selection is within a single line
     const sel = hostEditor.getSelection();

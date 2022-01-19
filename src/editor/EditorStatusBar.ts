@@ -47,6 +47,7 @@ import * as CommandManager from "command/CommandManager";
 import * as Commands from "command/Commands";
 import * as DocumentManager from "document/DocumentManager";
 import * as StringUtils from "utils/StringUtils";
+import * as HealthLogger from "utils/HealthLogger";
 import { DispatcherEvents } from "utils/EventDispatcher";
 
 import * as SupportedEncodingsText from "text!supported-encodings.json";
@@ -171,6 +172,13 @@ function _updateCursorInfo(event?, editor?) {
     let selStr = "";
 
     if (sels.length > 1) {
+        // Send analytics data for multicursor use
+        HealthLogger.sendAnalyticsData(
+            "multiCursor",
+            "usage",
+            "multiCursor",
+            "use"
+        );
         selStr = StringUtils.format(Strings.STATUSBAR_SELECTION_MULTIPLE, sels.length);
     } else if (editor.hasSelection()) {
         const sel = sels[0];
@@ -453,6 +461,18 @@ function _init() {
     languageSelect.on("select", function (e, lang) {
         const document = EditorManager.getActiveEditor()!.document;
         const fullPath = document.file.fullPath;
+
+        const fileType = (document.file instanceof InMemoryFile) ? "newFile" : "existingFile";
+        const filelanguageName = lang ? lang._name : "";
+
+        HealthLogger.sendAnalyticsData(
+            HealthLogger.commonStrings.USAGE + HealthLogger.commonStrings.LANGUAGE_CHANGE +
+                filelanguageName + fileType,
+            HealthLogger.commonStrings.USAGE,
+            HealthLogger.commonStrings.LANGUAGE_CHANGE,
+            filelanguageName.toLowerCase(),
+            fileType
+        );
 
         if (lang === LANGUAGE_SET_AS_DEFAULT) {
             // Set file's current language in preferences as a file extension override (only enabled if not default already)

@@ -441,7 +441,7 @@ export class Editor {
     constructor(document, makeMasterEditor, container, range?, options?) {
         const self = this;
 
-        const isReadOnly = options && options.isReadOnly;
+        const isReadOnly = (options && options.isReadOnly) || !document.editable;
 
         _instances.push(this);
 

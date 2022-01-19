@@ -42,23 +42,50 @@ import * as LanguageManager from "language/LanguageManager";
 import { ModalBar } from "widgets/ModalBar";
 import { QuickSearchField } from "search/QuickSearchField";
 import * as StringMatch from "utils/StringMatch";
+import { ProviderRegistrationHandler } from "features/PriorityBasedRegistration";
 import { DispatcherEvents } from "utils/EventDispatcher";
 
 interface StringMatcherMap {
     [key: string]: StringMatch.StringMatcher;
 }
 
+const _providerRegistrationHandler = new ProviderRegistrationHandler();
+const _registerQuickOpenProvider = _providerRegistrationHandler.registerProvider.bind(_providerRegistrationHandler);
+
+export const SymbolKind = {
+    "1": "File",
+    "2": "Module",
+    "3": "Namespace",
+    "4": "Package",
+    "5": "Class",
+    "6": "Method",
+    "7": "Property",
+    "8": "Field",
+    "9": "Constructor",
+    "10": "Enum",
+    "11": "Interface",
+    "12": "Function",
+    "13": "Variable",
+    "14": "Constant",
+    "15": "String",
+    "16": "Number",
+    "17": "Boolean",
+    "18": "Array",
+    "19": "Object",
+    "20": "Key",
+    "21": "Null",
+    "22": "EnumMember",
+    "23": "Struct",
+    "24": "Event",
+    "25": "Operator",
+    "26": "TypeParameter"
+};
+
 /**
  * The regular expression to check the cursor position
  * @const {RegExp}
  */
 const CURSOR_POS_EXP = new RegExp(":([^,]+)?(,(.+)?)?");
-
-/**
- * List of plugins
- * @type {Array.<QuickOpenPlugin>}
- */
-const plugins: Array<QuickOpenPlugin> = [];
 
 /**
  * Current plugin
@@ -77,6 +104,22 @@ let fileListPromise;
  * @type {?QuickNavigateDialog}
  */
 let _curDialog;
+
+/**
+ * Helper function to get the plugins based on the type of the current document.
+ * @private
+ * @returns {Array} Returns the plugings based on the languageId of the current document.
+ */
+function _getPluginsForCurrentContext() {
+    const curDoc = DocumentManager.getCurrentDocument();
+
+    if (curDoc) {
+        const languageId = curDoc.getLanguage().getId();
+        return _providerRegistrationHandler.getProvidersForLanguageId(languageId);
+    }
+
+    return _providerRegistrationHandler.getProvidersForLanguageId(); // plugins registered for all
+}
 
 /**
  * Defines API for new QuickOpen plug-ins
@@ -146,7 +189,7 @@ class QuickOpenPlugin {
  * cancels Quick Open (via Esc), those changes are automatically reverted.
  */
 export function addQuickOpenPlugin(pluginDef) {
-    plugins.push(new QuickOpenPlugin(
+    const quickOpenProvider = new QuickOpenPlugin(
         pluginDef.name,
         pluginDef.languageIds,
         pluginDef.done,
@@ -157,7 +200,11 @@ export function addQuickOpenPlugin(pluginDef) {
         pluginDef.resultsFormatter,
         pluginDef.matcherOptions,
         pluginDef.label
-    ));
+    );
+    const providerLanguageIds = pluginDef.languageIds.length ? pluginDef.languageIds : ["all"];
+    const providerPriority = pluginDef.priority || 0;
+
+    _registerQuickOpenProvider(quickOpenProvider, providerLanguageIds, providerPriority);
 }
 
 function _filenameFromPath(path, includeExtension) {
@@ -488,7 +535,9 @@ class QuickNavigateDialog {
         this.closePromise = modalBarClosePromise;
         this.isOpen = false;
 
-        for (const plugin of plugins) {
+        const pluginProviders = _getPluginsForCurrentContext();
+        for (const pluginProvider of pluginProviders) {
+            const plugin = pluginProvider.provider;
             if (plugin.done) {
                 plugin.done();
             }
@@ -503,10 +552,10 @@ class QuickNavigateDialog {
             // completes) since ModalBar has already resized the editor and done its own scroll adjustment before
             // this event fired - so anything we set here will override the pos that was (re)set by ModalBar.
             const editor = EditorManager.getCurrentFullEditor();
-            if (this._origSelections) {
+            if (editor && this._origSelections) {
                 editor.setSelections(this._origSelections);
             }
-            if (this._origScrollPos) {
+            if (editor && this._origScrollPos) {
                 editor.setScrollPos(this._origScrollPos.x, this._origScrollPos.y);
             }
         }
@@ -544,23 +593,17 @@ class QuickNavigateDialog {
             return { error: null };
         }
 
-        // Try to invoke a search plugin
-        const curDoc = DocumentManager.getCurrentDocument();
-        let languageId;
-        if (curDoc) {
-            languageId = curDoc.getLanguage().getId();
-        }
-
-        for (const plugin of plugins) {
-            const languageIdMatch = plugin.languageIds.length === 0 || plugin.languageIds.indexOf(languageId) !== -1;
-            if (languageIdMatch && plugin.match(query)) {
+        const pluginProviders = _getPluginsForCurrentContext();
+        for (const pluginProvider of pluginProviders) {
+            const plugin = pluginProvider.provider;
+            if (plugin.match(query)) {
                 currentPlugin = plugin;
 
                 // Look up the StringMatcher for this plugin.
-                let matcher = this._matchers[currentPlugin.name];
+                let matcher = this._matchers[currentPlugin!.name];
                 if (!matcher) {
                     matcher = new StringMatch.StringMatcher(plugin.matcherOptions);
-                    this._matchers[currentPlugin.name] = matcher;
+                    this._matchers[currentPlugin!.name] = matcher;
                 }
                 this._updateDialogLabel(plugin, query);
                 return plugin.search(query, matcher);
@@ -629,6 +672,9 @@ class QuickNavigateDialog {
                     break;
                 case "@":
                     dialogLabel = Strings.CMD_GOTO_DEFINITION + "\u2026";
+                    break;
+                case "#":
+                    dialogLabel = Strings.CMD_GOTO_DEFINITION_PROJECT + "\u2026";
                     break;
                 default:
                     dialogLabel = "";
@@ -751,13 +797,85 @@ function doDefinitionSearch() {
     }
 }
 
+function doDefinitionSearchInProject() {
+    if (DocumentManager.getCurrentDocument()) {
+        beginSearch("#", getCurrentEditorSelectedText());
+    }
+}
+
+function _canHandleTrigger(trigger, plugins) {
+    let retval = false;
+
+    plugins.some(function (plugin, index) {
+        const provider = plugin.provider;
+        if (provider.match(trigger)) {
+            retval = true;
+            return true;
+        }
+
+        return false;
+    });
+
+    return retval;
+}
+
+function _setMenuItemStateForLanguage(languageId) {
+    const plugins = _providerRegistrationHandler.getProvidersForLanguageId(languageId);
+    if (_canHandleTrigger("@", plugins)) {
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION).setEnabled(true);
+    } else {
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION).setEnabled(false);
+    }
+
+    if (_canHandleTrigger("#", plugins)) {
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION_PROJECT).setEnabled(true);
+    } else {
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION_PROJECT).setEnabled(false);
+    }
+}
+
 // Listen for a change of project to invalidate our file list
 (ProjectManager as unknown as DispatcherEvents).on("projectOpen", function () {
     fileList = null;
 });
 
+(MainViewManager as unknown as DispatcherEvents).on("currentFileChange", function (event, newFile, newPaneId, oldFile, oldPaneId) {
+    if (!newFile) {
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION).setEnabled(false);
+        CommandManager.get(Commands.NAVIGATE_GOTO_DEFINITION_PROJECT).setEnabled(false);
+        return;
+    }
+
+    const newFilePath = newFile.fullPath;
+    const newLanguageId = LanguageManager.getLanguageForPath(newFilePath).getId();
+    _setMenuItemStateForLanguage(newLanguageId);
+
+    DocumentManager.getDocumentForPath(newFilePath)
+        .done(function (newDoc) {
+            newDoc.on("languageChanged.quickFindDefinition", function () {
+                const changedLanguageId = LanguageManager.getLanguageForPath(newDoc.file.fullPath).getId();
+                _setMenuItemStateForLanguage(changedLanguageId);
+            });
+        }).fail(function (err) {
+            console.error(err);
+        });
+
+    if (!oldFile) {
+        return;
+    }
+
+    const oldFilePath = oldFile.fullPath;
+    DocumentManager.getDocumentForPath(oldFilePath)
+        .done(function (oldDoc) {
+            oldDoc.off("languageChanged.quickFindDefinition");
+        }).fail(function (err) {
+            console.error(err);
+        });
+});
+
 CommandManager.register(Strings.CMD_QUICK_OPEN,         Commands.NAVIGATE_QUICK_OPEN,       doFileSearch);
 CommandManager.register(Strings.CMD_GOTO_DEFINITION,    Commands.NAVIGATE_GOTO_DEFINITION,  doDefinitionSearch);
+CommandManager.register(Strings.CMD_GOTO_DEFINITION_PROJECT,    Commands.NAVIGATE_GOTO_DEFINITION_PROJECT,  doDefinitionSearchInProject);
 CommandManager.register(Strings.CMD_GOTO_LINE,          Commands.NAVIGATE_GOTO_LINE,        doGotoLine);
 
 // Convenience exports for functions that most QuickOpen plugins would need.

@@ -32,7 +32,7 @@ gulp.task("build", gulp.series(
 ));
 
 // task: optimize - optimize contents of dist folder
-gulp.task("optimize", gulp.series(
+gulp.task("optimize-common", gulp.series(
     // "eslint:src",
     // "clean",
     // "less",
@@ -47,6 +47,19 @@ gulp.task("optimize", gulp.series(
     // "cleanempty",
     // "usemin",
     "build-config"
+    // "clean:node_modules_test_dir"
+));
+
+// task: optimize
+gulp.task("optimize", gulp.series(
+    // "write-config:dist",
+    "optimize-common"
+));
+
+// task: optimize-prerelease
+gulp.task("optimize-prerelease", gulp.series(
+    // "write-config:prerelease",
+    "optimize-common"
 ));
 
 gulp.task("test", gulp.parallel("eslint", "nls-check"));

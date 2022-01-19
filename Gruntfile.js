@@ -51,6 +51,16 @@ module.exports = function (grunt) {
                         "src/styles/brackets.css"
                     ]
                 }]
+            },
+            node_modules_test_dir : {
+                files: [{
+                    dot: true,
+                    src: [
+                        "dist/node_modules/npm/test/fixtures",
+                        "dist/node_modules/npm/node_modules/tar/test",
+                        "dist/node_modules/npm/node_modules/npm-registry-client/test"
+                    ]
+                }]
             }
         },
         copy: {
@@ -82,6 +92,9 @@ module.exports = function (grunt) {
                         src: [
                             "extensibility/node/**",
                             "JSUtils/node/**",
+                            "languageTools/node/**",
+                            "languageTools/styles/**",
+                            "languageTools/LanguageClient/**",
                             "!extensibility/node/spec/**",
                             "!extensibility/node/node_modules/**/{test,tst}/**/*",
                             "!extensibility/node/node_modules/**/examples/**/*",

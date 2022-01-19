@@ -97,6 +97,8 @@ export class Document {
      */
     public file;
 
+    public editable: boolean;
+
     /**
      * Whether this document has unsaved changes or not.
      * When this changes on any Document, DocumentManager dispatches a "dirtyFlagChange" event.
@@ -162,6 +164,7 @@ export class Document {
 
     constructor(file, initialTimestamp, rawText) {
         this.file = file;
+        this.editable = !file.readOnly;
         this._updateLanguage();
         this.refreshText(rawText, initialTimestamp, true);
         // List of full editors which are initialized as master editors for this doc.

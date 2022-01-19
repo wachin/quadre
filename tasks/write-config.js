@@ -68,10 +68,21 @@ writeConfigDist.displayName = "write-config:dist";
 gulp.task(writeConfigDist);
 
 
+function writeConfigPrerelease(cb) {
+    doWriteConfig("prerelease", cb);
+}
+writeConfigPrerelease.description = "Merge package.json and src/brackets.config.json into src/config.json";
+writeConfigPrerelease.displayName = "write-config:prerelease";
+
+gulp.task(writeConfigPrerelease);
+
+
 function buildConfig(cb) {
     const distConfig = file.readJSON("src/config.json");
 
     gitInfo.getGitInfo(process.cwd()).then(function (info) {
+        distConfig.buildnumber = info.commits;
+        // distConfig.version = distConfig.version.substr(0, distConfig.version.lastIndexOf("-") + 1) + info.commits;
         distConfig.repository.SHA = info.sha;
         distConfig.repository.branch = info.branch;
         distConfig.config.build_timestamp = new Date().toString().split("(")[0].trim();

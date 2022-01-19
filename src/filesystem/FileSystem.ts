@@ -95,6 +95,65 @@ import FileSystemEntry = require("filesystem/FileSystemEntry");
 import FileSystemError = require("filesystem/FileSystemError");
 import WatchedRoot     = require("filesystem/WatchedRoot");
 import * as EventDispatcher from "utils/EventDispatcher";
+import * as PathUtils from "thirdparty/path-utils/path-utils";
+import * as _ from "lodash";
+
+
+// Collection of registered protocol adapters
+const _fileProtocolPlugins = {};
+
+/**
+ * Typical signature of a file protocol adapter.
+ * @typedef {Object} FileProtocol~Adapter
+ * @property {Number} priority - Indicates the priority.
+ * @property {Object} fileImpl - Handle for the custom file implementation prototype.
+ * @property {function} canRead - To check if this impl can read a file for a given path.
+ */
+
+/**
+ * FileSystem hook to register file protocol adapter
+ * @param {string} protocol ex: "https:"|"http:"|"ftp:"|"file:"
+ * @param {...FileProtocol~Adapter} adapter wrapper over file implementation
+ */
+export function registerProtocolAdapter(protocol, adapter) {
+    let adapters;
+    if (protocol) {
+        adapters = _fileProtocolPlugins[protocol] || [];
+        adapters.push(adapter);
+
+        // We will keep a sorted adapter list on 'priority'
+        // If priority is not provided a default of '0' is assumed
+        adapters.sort(function (a, b) {
+            return (b.priority || 0) - (a.priority || 0);
+        });
+
+        _fileProtocolPlugins[protocol] = adapters;
+    }
+}
+
+/**
+ * @param {string} protocol ex: "https:"|"http:"|"ftp:"|"file:"
+ * @param {string} filePath fullPath of the file
+ * @return adapter adapter wrapper over file implementation
+ */
+function _getProtocolAdapter(protocol, filePath) {
+    const protocolAdapters = _fileProtocolPlugins[protocol] || [];
+    let selectedAdapter;
+
+    // Find the fisrt compatible adapter having highest priority
+    _.forEach(protocolAdapters, function (adapter) {
+        if (adapter.canRead && adapter.canRead(filePath)) {
+            selectedAdapter = adapter;
+            // Break at first compatible adapter
+            return false;
+        }
+
+        return undefined;
+    });
+
+    return selectedAdapter;
+}
+
 
 function _ensureTrailingSlash(path) {
     if (path[path.length - 1] !== "/") {
@@ -571,6 +630,14 @@ class FileSystem {
      * @return {File} The File object. This file may not yet exist on disk.
      */
     public getFileForPath(path): File {
+        const protocol = PathUtils.parseUrl(path).protocol;
+        const protocolAdapter = _getProtocolAdapter(protocol, path);
+
+        if (protocolAdapter && protocolAdapter.fileImpl) {
+            // eslint-disable-next-line new-cap
+            return new protocolAdapter.fileImpl(protocol, path, this);
+        }
+
         return this._getEntryForPath(File, path) as File;
     }
 

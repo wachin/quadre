@@ -28,6 +28,8 @@
  * This module is *only* used by FileSystem, and should not be called directly.
  */
 
+import * as FileUtils from "file/FileUtils";
+
 /**
  * @constructor
  */
@@ -108,6 +110,8 @@ class FileIndex {
      */
     public entryRenamed(oldPath, newPath, isDirectory) {
         const renameMap = {};
+        const oldParentPath = FileUtils.getParentPath(oldPath);
+        const newParentPath = FileUtils.getParentPath(newPath);
 
         // Find all entries affected by the rename and put into a separate map.
         for (const path in this._index) {
@@ -133,6 +137,30 @@ class FileIndex {
                 delete this._index[path];
                 this._index[renameMap[path]] = item;
                 item._setPath(renameMap[path]);
+            }
+        }
+
+
+        // If file path is changed, i.e the file is moved
+        // Remove the moved entry from old Directory and add it to new Directory
+        if (oldParentPath !== newParentPath) {
+            const oldDirectory = this._index[oldParentPath];
+            const newDirectory = this._index[newParentPath];
+            let renamedEntry;
+
+            if (oldDirectory && oldDirectory._contents) {
+                oldDirectory._contents = oldDirectory._contents.filter(function (entry) {
+                    if (entry.fullPath === newPath) {
+                        renamedEntry = entry;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            if (newDirectory && newDirectory._contents && renamedEntry) {
+                renamedEntry._setPath(newPath);
+                newDirectory._contents.push(renamedEntry);
             }
         }
     }

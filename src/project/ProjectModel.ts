@@ -860,9 +860,10 @@ export class ProjectModel {
      * The Promise returned is resolved with an object with a `newPath` property with the renamed path. If the user cancels the operation, the promise is resolved with the value RENAME_CANCELLED.
      *
      * @param {string=} path optional path to start renaming
+     * @param {boolean=} isMoved optional flag which indicates whether the entry is being moved instead of renamed
      * @return {$.Promise} resolved when the operation is complete.
      */
-    public startRename(path) {
+    public startRename(path, isMoved?) {
         const d = $.Deferred();
         path = _getPathFromFSObject(path);
         if (!path) {
@@ -873,7 +874,7 @@ export class ProjectModel {
         }
 
         if (this._selections.rename && this._selections.rename.path === path) {
-            return;
+            return d.resolve().promise();
         }
 
         if (!this.isWithinProject(path)) {
@@ -890,19 +891,21 @@ export class ProjectModel {
             this.showInTree(path);
         }
 
-        if (path !== this._selections.context) {
-            this.setContext(path);
-        } else {
-            this.performRename();
-        }
+        if (!isMoved) {
+            if (path !== this._selections.context) {
+                this.setContext(path);
+            } else {
+                this.performRename();
+            }
 
-        this._viewModel.moveMarker("rename", null,
-            projectRelativePath);
+            this._viewModel.moveMarker("rename", null,
+                projectRelativePath);
+        }
         this._selections.rename = {
             deferred: d,
             type: FILE_RENAMING,
             path: path,
-            newName: FileUtils.getBaseName(path)
+            newPath: path
         };
         return d.promise();
     }
@@ -911,13 +914,13 @@ export class ProjectModel {
      * Sets the new value for the rename operation that is in progress (started previously with a call
      * to `startRename`).
      *
-     * @param {string} name new name for the file or directory being renamed
+     * @param {string} newPath new path for the file or directory being renamed
      */
-    public setRenameValue(name) {
+    public setRenameValue(newPath) {
         if (!this._selections.rename) {
             return;
         }
-        this._selections.rename.newName = name;
+        this._selections.rename.newPath = newPath;
     }
 
     /**
@@ -968,19 +971,19 @@ export class ProjectModel {
         const oldProjectPath  = this.makeProjectRelativeIfPossible(oldPath);
 
         // To get the parent directory, we need to strip off the trailing slash on a directory name
-        const parentDirectory = FileUtils.getDirectoryPath(isFolder ? FileUtils.stripTrailingSlash(oldPath) : oldPath);
-        const oldName         = FileUtils.getBaseName(oldPath);
-        const newName         = renameInfo.newName;
-        let newPath           = parentDirectory + newName;
+        // const parentDirectory = FileUtils.getDirectoryPath(isFolder ? FileUtils.stripTrailingSlash(oldPath) : oldPath);
+        // const oldName         = FileUtils.getBaseName(oldPath);
+        let newPath         = renameInfo.newPath;
+        const newName         = FileUtils.getBaseName(newPath);
         const viewModel       = this._viewModel;
         const self            = this;
 
-        if (renameInfo.type !== FILE_CREATING && oldName === newName) {
+        if (renameInfo.type !== FILE_CREATING && oldPath === newPath) {
             this.cancelRename();
             return;
         }
 
-        if (isFolder) {
+        if (isFolder && _.last(newPath) !== "/") {
             newPath += "/";
         }
 
@@ -992,9 +995,10 @@ export class ProjectModel {
         viewModel.moveMarker("creating", oldProjectPath, null);
 
         function finalizeRename() {
-            viewModel.renameItem(oldProjectPath, newName);
+            viewModel.renameItem(oldProjectPath, self.makeProjectRelativeIfPossible(newPath));
             if (self._selections.selected && self._selections.selected.indexOf(oldPath) === 0) {
                 self._selections.selected = newPath + self._selections.selected.slice(oldPath.length);
+                self.setCurrentFile(newPath);
             }
         }
 

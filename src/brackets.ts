@@ -171,6 +171,10 @@ Object.defineProperty(window, "PathUtils", {
     }
 });
 
+// load language features
+import "features/ParameterHintsManager";
+import "features/JumpToDefManager";
+
 // Load modules that self-register and just need to get included in the main project
 import "command/DefaultMenus";
 import "document/ChangedDocumentTracker";
@@ -182,9 +186,20 @@ import "extensibility/ExtensionManagerDialog";
 import "help/HelpCommandHandlers";
 import "search/FindReplace";
 
+// Load find References Feature Manager
+import "features/FindReferencesManager";
+
 // Load common JS module
 import "JSUtils/Session";
 import "JSUtils/ScopeManager";
+
+// load Language Tools Module
+import "languageTools/PathConverters";
+import "languageTools/LanguageTools";
+import "languageTools/ClientLoader";
+import "languageTools/BracketsToNodeInterface";
+import "languageTools/DefaultProviders";
+import "languageTools/DefaultEventHandlers";
 
 PerfUtils.addMeasurement("brackets module dependencies resolved");
 
@@ -271,6 +286,24 @@ function _onReady() {
             Strings.ERROR_IN_BROWSER
         );
     }
+
+    brackets.app.getRemoteDebuggingPort(function (err, remoteDebuggingPort) {
+        const InfoBar = (require as unknown as Require)("widgets/infobar");
+        const StringUtils = (require as unknown as Require)("utils/StringUtils");
+        if ((!err) && remoteDebuggingPort && remoteDebuggingPort > 0) {
+            InfoBar.showInfoBar({
+                type: "warning",
+                title: `${Strings.REMOTE_DEBUGGING_ENABLED}${remoteDebuggingPort}`,
+                description: ""
+            });
+        } else if (err) {
+            InfoBar.showInfoBar({
+                type: "error",
+                title: StringUtils.format(Strings.REMOTE_DEBUGGING_PORT_INVALID, err, 1024, 65534),
+                description: ""
+            });
+        }
+    });
 
     // Use quiet scrollbars if we aren't on Lion. If we're on Lion, only
     // use native scroll bars when the mouse is not plugged in or when
