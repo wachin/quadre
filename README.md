@@ -23,6 +23,10 @@ Quadre will probably make many breaking changes along the road.
 
 run `npm run dev` in one terminal, `npm start` in the other, be sure to do the usual updates (git pull, git submodule update, npm install, etc) before.
 
+## Dependences
+
+quadre need node 16 to be build
+
 ## How to build from master
 
 ```
